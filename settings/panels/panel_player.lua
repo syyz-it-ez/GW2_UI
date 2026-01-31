@@ -77,6 +77,7 @@ local function LoadPlayerPanel(sWindow)
     p_player:AddOptionDropdown(COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT, nil, { getterSetter = "PLAYER_UNIT_HEALTH", callback = function() if GW2_PlayerFrame then GW2_PlayerFrame:ToggleSettings() end; if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, optionsList = {"NONE", "PREC", "VALUE", "BOTH"}, optionNames = {NONE, STATUS_TEXT_PERCENT, STATUS_TEXT_VALUE, STATUS_TEXT_BOTH}, dependence = {["HEALTHGLOBE_ENABLED"] = true}})
     p_player:AddOptionDropdown(L["Show Shield Value"], nil, { getterSetter = "PLAYER_UNIT_ABSORB", callback = function() if GW2_PlayerFrame then GW2_PlayerFrame:ToggleSettings() end; if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, optionsList = {"NONE", "PREC", "VALUE", "BOTH"}, optionNames = {NONE, STATUS_TEXT_PERCENT, STATUS_TEXT_VALUE, STATUS_TEXT_BOTH}, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = false}, hidden = GW.Classic or GW.TBC or GW.Retail})
 
+    p_player:AddOption(L["Dodge Bar"], L["Enable the dodge bar which tracks movement abilities."], {getterSetter = "DODGEBAR_ENABLED", callback = function() GW.ShowRlPopup = true end, dependence = {["HEALTHGLOBE_ENABLED"] = true}})
     p_player:AddOptionText(L["Dodge Bar Ability"], L["Enter the spell ID which should be tracked by the dodge bar.\nIf no ID is entered, the default abilities based on your specialization and talents are tracked."], { getterSetter = "PLAYER_TRACKED_DODGEBAR_SPELL", callback = function(self)
             local spellId = self:GetNumber()
             local name = ""
@@ -91,7 +92,7 @@ local function LoadPlayerPanel(sWindow)
                 GwDodgeBar:InitBar()
                 GwDodgeBar:SetupBar()
             end
-        end, dependence = {["HEALTHGLOBE_ENABLED"] = true}, isPrivateSetting = true})
+        end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["DODGEBAR_ENABLED"] = true}, isPrivateSetting = true})
 
     -- BUFF
     p_player_aura:AddOptionDropdown(L["Player Buff Growth Direction"], nil, { getterSetter = "PlayerBuffs.GrowDirection", callback = function() GW.UpdateAuraHeader(GW2UIPlayerBuffs) end, optionsList = {"UP", "DOWN", "UPR", "DOWNR"}, optionNames = {StrUpper(L["Up"], 1, 1), StrUpper(L["Down"], 1, 1), L["Up and right"], L["Down and right"]}, dependence = {["PLAYER_BUFFS_ENABLED"] = true}})

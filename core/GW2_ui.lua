@@ -706,10 +706,14 @@ local function evPlayerLogin(self)
     --Create player hud
     if GW.settings.HEALTHGLOBE_ENABLED and not GW.settings.PLAYER_AS_TARGET_FRAME then
         local hg = GW.LoadHealthGlobe()
-        GW.LoadDodgeBar(hg, false)
+        if GW.settings.DODGEBAR_ENABLED then
+            GW.LoadDodgeBar(hg, false)
+        end
     elseif GW.settings.HEALTHGLOBE_ENABLED and GW.settings.PLAYER_AS_TARGET_FRAME then
         local hg = GW.LoadPlayerFrame()
-        GW.LoadDodgeBar(hg, true)
+        if GW.settings.DODGEBAR_ENABLED then
+            GW.LoadDodgeBar(hg, true)
+        end
         if (GW.Classic or GW.TBC) and GW.settings.PLAYER_ENERGY_MANA_TICK then
             GW.Load5SR(hg)
         end

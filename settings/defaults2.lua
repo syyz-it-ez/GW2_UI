@@ -93,6 +93,7 @@ GW.globalDefault = {
         CHATFRAME_ENABLED = true,
         QUESTVIEW_ENABLED = true,
         HEALTHGLOBE_ENABLED = true,
+        DODGEBAR_ENABLED = true,
         PLAYER_BUFFS_ENABLED = true,
         ACTIONBARS_ENABLED = true,
         BAR_LAYOUT_ENABLED = true,
