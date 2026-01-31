@@ -225,16 +225,17 @@ local function utf8replace(s, mapping)
 	local pos = 1
 	local bytes = strlen(s)
 	local charbytes
-	local newstr = ""
+	local _newstr_parts = {}
 
 	while pos <= bytes do
 		charbytes = utf8charbytes(s, pos)
 		local c = strsub(s, pos, pos + charbytes - 1)
 
-		newstr = newstr .. (mapping[c] or c)
+		_newstr_parts[#_newstr_parts+1] = (mapping[c] or c)
 
 		pos = pos + charbytes
 	end
+	local newstr = table.concat(_newstr_parts)
 
 	return newstr
 end
@@ -269,7 +270,7 @@ local function utf8reverse(s)
 	local bytes = strlen(s)
 	local pos = bytes
 	local charbytes
-	local newstr = ""
+	local _newstr_parts = {}
 	local c
 
 	while pos > 0 do
@@ -281,10 +282,11 @@ local function utf8reverse(s)
 
 		charbytes = utf8charbytes(s, pos)
 
-		newstr = newstr .. strsub(s, pos, pos + charbytes - 1)
+		_newstr_parts[#_newstr_parts+1] = strsub(s, pos, pos + charbytes - 1)
 
 		pos = pos - 1
 	end
+	local newstr = table.concat(_newstr_parts)
 
 	return newstr
 end

@@ -1333,13 +1333,14 @@ local functionFactory = {
                     GW.FrameFlash(self.runningTip, 1, 0.3, 1, true)
                 elseif #waiting > 0 then
                     if #done > 0 then
-                        local netsText = ""
+                        local _netsText_parts = {}
                         for i = 1, #done do
-                            netsText = netsText .. "#" .. done[i]
+                            _netsText_parts[#_netsText_parts+1] = "#" .. done[i]
                             if i ~= #done then
-                                netsText = netsText .. ", "
+                                _netsText_parts[#_netsText_parts+1] = ", "
                             end
                         end
+                        local netsText = table.concat(_netsText_parts)
                         tip = StringByTemplate(format(L["Net %s can be collected"], netsText), "success")
                     else
                         tip = QUEUED_STATUS_WAITING
@@ -1369,13 +1370,14 @@ local functionFactory = {
                     self.statusBar:SetMinMaxValues(0, 1)
 
                     if #done > 0 then
-                        local netsText = ""
+                        local _netsText_parts = {}
                         for i = 1, #done do
-                            netsText = netsText .. "#" .. done[i]
+                            _netsText_parts[#_netsText_parts+1] = "#" .. done[i]
                             if i ~= #done then
-                                netsText = netsText .. ", "
+                                _netsText_parts[#_netsText_parts+1] = ", "
                             end
                         end
+                        local netsText = table.concat(_netsText_parts)
                         tip = StringByTemplate(format(L["Net %s can be collected"], netsText), "success")
                         self.statusBar:SetValue(1)
                     else

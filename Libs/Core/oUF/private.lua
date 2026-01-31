@@ -16,7 +16,7 @@ function Private.argcheck(value, num, ...)
 end
 
 function Private.print(...)
-	print('|cff33ff99oUF:|r', ...)
+	-- print('|cff33ff99oUF:|r', ...)
 end
 
 function Private.nierror(...)

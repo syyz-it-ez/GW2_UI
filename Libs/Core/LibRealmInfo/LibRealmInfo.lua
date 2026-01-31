@@ -20,7 +20,7 @@ local unpackInProgress = false
 
 local function debug(...)
     if standalone then
-        print("|cffff7f7f["..MAJOR.."]|r", ...)
+        -- print("|cffff7f7f["..MAJOR.."]|r", ...)
     end
 end
 

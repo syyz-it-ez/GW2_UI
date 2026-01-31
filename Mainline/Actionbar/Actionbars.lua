@@ -70,7 +70,7 @@ local function hideBlizzardsActionbars()
                 v:UnregisterAllEvents()
             end
         else
-            print("missing blizzard frame to hide: " .. tostring(v))
+            -- print("missing blizzard frame to hide: " .. tostring(v))
         end
     end
     for _, object in pairs(GW_BLIZZARD_FORCE_HIDE) do

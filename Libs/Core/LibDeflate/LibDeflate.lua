@@ -3403,7 +3403,7 @@ if io and os and debug and _G.arg then
 					.."  --zlib  use zlib format instead of raw deflate.\n")
 				os.exit(0)
 			elseif a == "-v" then
-				print(LibDeflate._COPYRIGHT)
+				-- print(LibDeflate._COPYRIGHT)
 				os.exit(0)
 			elseif a:find("^%-[0-9]$") then
 				level = tonumber(a:sub(2, 2))
