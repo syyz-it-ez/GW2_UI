@@ -62,6 +62,7 @@ local function displaySort(a, b)
 end
 
 local function FpsOnEnter(self, slow)
+    local ipairs_ = ipairs
     if GW.settings.MINIMAP_FPS_TOOLTIP_DISABLED then return end
     enteredInfo = true
     GameTooltip:ClearLines()
@@ -91,7 +92,7 @@ local function FpsOnEnter(self, slow)
     local totalMEM, totalCPU = 0, 0
     local showByCPU = cpuProfiling and not IsShiftKeyDown()
 
-    for _, data in ipairs(infoTable) do
+    for _, data in ipairs_(infoTable) do
         if C_AddOns.IsAddOnLoaded(data.index) then
             local mem = GetAddOnMemoryUsage(data.index)
             local cpu = cpuProfiling and GetAddOnCPUUsage(data.index) or nil
@@ -146,7 +147,7 @@ local function FpsOnEnter(self, slow)
     end
 
     local found = false
-    for _, data in ipairs(infoDisplay) do
+    for _, data in ipairs_(infoDisplay) do
         if GW.StripString(data.title) == GW2Name or data.name == GW2Name then
             found = true
             break
@@ -154,7 +155,7 @@ local function FpsOnEnter(self, slow)
     end
 
     if not found then
-        for _, data in ipairs(infoTable) do
+        for _, data in ipairs_(infoTable) do
             if (data.name == GW2Name or GW.StripString(data.title) == GW2Name) then
                 local mem = GetAddOnMemoryUsage(data.index)
                 local cpu = cpuProfiling and GetAddOnCPUUsage(data.index) or nil
@@ -170,7 +171,7 @@ local function FpsOnEnter(self, slow)
     end
 
     local finalDisplay = {}
-    for i, data in ipairs(infoDisplay) do
+    for i, data in ipairs_(infoDisplay) do
         if not usedKeys[i] then
             tinsert(finalDisplay, data)
         elseif usedKeys[i] == true and data.name then

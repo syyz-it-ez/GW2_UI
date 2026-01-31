@@ -111,6 +111,7 @@ local function changeVertexColorActionbars(btn)
 end
 
 local function updateActionbarBorders(btn)
+    local tonum = tonumber
     local texture = GetActionTexture(btn.action)
     if texture then
         btn.gwBackdrop.border1:SetAlpha(1)
@@ -118,10 +119,10 @@ local function updateActionbarBorders(btn)
         btn.gwBackdrop.border3:SetAlpha(1)
         btn.gwBackdrop.border4:SetAlpha(1)
     else
-        btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
     end
 end
 
@@ -421,6 +422,7 @@ end
 GW.FixHotKeyPosition = FixHotKeyPosition
 
 local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPet)
+    local tonum = tonumber
     local btn = _G[buttonName]
     local btnWidth = btn:GetWidth()
 
@@ -591,11 +593,11 @@ local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPe
         btn.gwBackdrop:SetFrameLevel(btn:GetFrameLevel() - 1)
 
         if not isStanceButton and not isPet then
-            btn.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         end
     end
 end
@@ -984,6 +986,7 @@ end
 GW.AddForProfiling("Actionbars2", "updateMultiBar", updateMultiBar)
 
 local function UpdateMultibarButtons()
+    local tonum = tonumber
     local fmActionbar = MainActionBar
     local fmMultiBar
 
@@ -1035,11 +1038,11 @@ local function UpdateMultibarButtons()
                     used_height = used_height + settings.size + GW.settings.MULTIBAR_MARGIIN
                 end
 
-                btn.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
                 btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
                 updateMacroName(btn)
@@ -1218,6 +1221,7 @@ end
 GW.AddForProfiling("Actionbars2", "actionBar_OnUpdate", actionBar_OnUpdate)
 
 local function UpdateMainBarHot()
+    local tonum = tonumber
     local fmActionbar = MainActionBar
     local used_height = MAIN_MENU_BAR_BUTTON_SIZE
     local btn_padding = GW.settings.MAINBAR_MARGIIN
@@ -1233,11 +1237,11 @@ local function UpdateMainBarHot()
             btn_padding = btn_padding + 108
         end
 
-        btn.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-        btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+        btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
         btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
         btn.rangeIndicatorSetting = GW.settings.MAINBAR_RANGEINDICATOR

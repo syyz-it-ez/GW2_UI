@@ -240,6 +240,7 @@ local function _GetBlessingOfWisdomModifier()
 end
 
 local function _GetAuraModifier()
+    local mceil = math.ceil
     local mod = 0
     local bonus = 0
 
@@ -269,28 +270,28 @@ local function _GetAuraModifier()
             bonus = bonus + 25 -- 10 mana pe 2 sec Mana spring Totem Rank 4
         elseif spellId == 25894 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(30 * blessingMod) -- Greater Blessing of Wisdom Rank 1
+         	bonus = bonus + mceil(30 * blessingMod) -- Greater Blessing of Wisdom Rank 1
         elseif spellId == 25918 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(33 * blessingMod) -- Greater Blessing of Wisdom Rank 2
+         	bonus = bonus + mceil(33 * blessingMod) -- Greater Blessing of Wisdom Rank 2
         elseif spellId == 19742 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-            bonus = bonus + math.ceil(10 * blessingMod) -- Blessing of Wisdom Rank 1
+            bonus = bonus + mceil(10 * blessingMod) -- Blessing of Wisdom Rank 1
         elseif spellId == 19850 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(15 * blessingMod) -- Blessing of Wisdom Rank 2
+         	bonus = bonus + mceil(15 * blessingMod) -- Blessing of Wisdom Rank 2
         elseif spellId == 19852 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-            bonus = bonus + math.ceil(20 * blessingMod) -- Blessing of Wisdom Rank 3
+            bonus = bonus + mceil(20 * blessingMod) -- Blessing of Wisdom Rank 3
         elseif spellId == 19853 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(25 * blessingMod) -- Blessing of Wisdom Rank 4
+         	bonus = bonus + mceil(25 * blessingMod) -- Blessing of Wisdom Rank 4
         elseif spellId == 19854 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(30 * blessingMod) -- Blessing of Wisdom Rank 5
+         	bonus = bonus + mceil(30 * blessingMod) -- Blessing of Wisdom Rank 5
         elseif spellId == 25290 then
             local blessingMod = _GetBlessingOfWisdomModifier() + 1
-         	bonus = bonus + math.ceil(33 * blessingMod) -- Blessing of Wisdom Rank 6
+         	bonus = bonus + mceil(33 * blessingMod) -- Blessing of Wisdom Rank 6
         elseif spellId == 17252 then
             bonus = bonus + 22 -- 22 MP5 from Mark of the Dragon Lord
         end

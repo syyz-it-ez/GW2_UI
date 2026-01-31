@@ -1,6 +1,7 @@
 local _, GW = ...
 
 local function LoadMacroOptionsSkin()
+    local pairs_ = pairs
     MacroFrame_LoadUI()
 
     if not GW.settings.MACRO_SKIN_ENABLED then return end
@@ -8,7 +9,7 @@ local function LoadMacroOptionsSkin()
 
     local r = {MacroFrame:GetRegions()}
     local i = 1
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             c:Hide()
         elseif c:GetObjectType() == "FontString" then
@@ -32,7 +33,7 @@ local function LoadMacroOptionsSkin()
     MacroFrameTextBackground:GwStripTextures()
     MacroFrameTextBackground:GwCreateBackdrop(GW.BackdropTemplates.Default)
 
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             c:Hide()
         end
@@ -65,7 +66,7 @@ local function LoadMacroOptionsSkin()
 
     local r = {_G.MacroFrameSelectedMacroButton:GetRegions()}
     local ii = 1
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             if ii == 1 then
                 c:Hide()
@@ -100,7 +101,7 @@ local function LoadMacroOptionsSkin()
             b:SetCheckedTexture("Interface/AddOns/GW2_UI/textures/uistuff/ui-quickslot-depress.png")
             local r = {b:GetRegions()}
             local ii = 1
-            for _,c in pairs(r) do
+            for _,c in pairs_(r) do
                 if c:GetObjectType() == "Texture" then
                     if ii == 1 then
                         c:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/spelliconempty.png")
@@ -131,7 +132,7 @@ local function LoadMacroOptionsSkin()
     GW.SkinTextBox(MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameMiddle, MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameLeft, MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameRight, nil, nil, 4, 4)
 
     local r = {MacroPopupFrame.BorderBox:GetRegions()}
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             c:Hide()
         end

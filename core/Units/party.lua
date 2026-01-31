@@ -363,6 +363,7 @@ end
 GW.UpdatePlayerInPartySetting = UpdatePlayerInPartySetting
 
 local function CreatePartyFrame(i, isPlayer)
+    local ipairs_ = ipairs
     local registerUnit = isPlayer and "player" or "party" .. (i - (GW.settings.PARTY_PLAYER_FRAME and 1 or 0))
     local frame = CreateFrame("Button", "GwPartyFrame" .. i, UIParent, GW.Retail and "GwPartyFrameRetailTemplate" or "GwPartyFrameTemplate")
 
@@ -411,7 +412,7 @@ local function CreatePartyFrame(i, isPlayer)
         frame.healPrediction = hg.healPrediction
         frame.healthString = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.healthString
 
-        for _, bar in ipairs({ frame.absorbOverlay, frame.antiHeal, frame.health, frame.absorbbg, frame.healPrediction, frame.powerbar }) do
+        for _, bar in ipairs_({ frame.absorbOverlay, frame.antiHeal, frame.health, frame.absorbbg, frame.healPrediction, frame.powerbar }) do
             GW.AddStatusbarAnimation(bar, true)
         end
         GW.AddStatusbarAnimation(frame.healPrediction, false)
@@ -481,12 +482,12 @@ local function CreatePartyFrame(i, isPlayer)
         petFrame.healPrediction = phg.healPrediction
         petFrame.healthString = phg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.healthString
 
-        for _, bar in ipairs({ frame.absorbOverlay, frame.antiHeal, frame.health, frame.absorbbg, frame.healPrediction, frame.powerbar }) do
+        for _, bar in ipairs_({ frame.absorbOverlay, frame.antiHeal, frame.health, frame.absorbbg, frame.healPrediction, frame.powerbar }) do
             GW.AddStatusbarAnimation(bar, true)
         end
         GW.AddStatusbarAnimation(frame.healPrediction, false)
 
-        for _, bar in ipairs({ petFrame.absorbOverlay, petFrame.antiHeal, petFrame.health, petFrame.absorbbg, petFrame.healPrediction, petFrame.powerbar }) do
+        for _, bar in ipairs_({ petFrame.absorbOverlay, petFrame.antiHeal, petFrame.health, petFrame.absorbbg, petFrame.healPrediction, petFrame.powerbar }) do
             GW.AddStatusbarAnimation(bar, true)
         end
         GW.AddStatusbarAnimation(petFrame.healPrediction, false)
@@ -526,11 +527,11 @@ local function CreatePartyFrame(i, isPlayer)
     petFrame.health:SetStatusBarColor(COLOR_FRIENDLY[1].r, COLOR_FRIENDLY[1].g, COLOR_FRIENDLY[1].b)
     petFrame:SetScript("OnEvent", petFrame.OnEvent)
     -- Registriere Events für Pet-Frame
-    for _, ev in ipairs({ "GROUP_ROSTER_UPDATE", "PARTY_MEMBER_DISABLE", "PARTY_MEMBER_ENABLE", "PORTRAITS_UPDATED", "PLAYER_TARGET_CHANGED" }) do
+    for _, ev in ipairs_({ "GROUP_ROSTER_UPDATE", "PARTY_MEMBER_DISABLE", "PARTY_MEMBER_ENABLE", "PORTRAITS_UPDATED", "PLAYER_TARGET_CHANGED" }) do
         petFrame:RegisterEvent(ev)
     end
     petFrame:RegisterUnitEvent("UNIT_PET", registerUnit)
-    for _, ev in ipairs({ "UNIT_AURA", "UNIT_LEVEL", "UNIT_PHASE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_POWER_UPDATE", "UNIT_MAXPOWER", "UNIT_NAME_UPDATE", "UNIT_HEAL_PREDICTION" }) do
+    for _, ev in ipairs_({ "UNIT_AURA", "UNIT_LEVEL", "UNIT_PHASE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_POWER_UPDATE", "UNIT_MAXPOWER", "UNIT_NAME_UPDATE", "UNIT_HEAL_PREDICTION" }) do
         petFrame:RegisterUnitEvent(ev, petUnit)
     end
     petFrame:OnEvent("load")
@@ -573,10 +574,10 @@ local function CreatePartyFrame(i, isPlayer)
     end)
     GW.AddToClique(frame)
     frame.health:SetStatusBarColor(COLOR_FRIENDLY[1].r, COLOR_FRIENDLY[1].g, COLOR_FRIENDLY[1].b)
-    for _, ev in ipairs({ "GROUP_ROSTER_UPDATE", "PARTY_MEMBER_DISABLE", "PARTY_MEMBER_ENABLE", "READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED", "PLAYER_TARGET_CHANGED", "INCOMING_RESURRECT_CHANGED", "PORTRAITS_UPDATED" }) do
+    for _, ev in ipairs_({ "GROUP_ROSTER_UPDATE", "PARTY_MEMBER_DISABLE", "PARTY_MEMBER_ENABLE", "READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED", "PLAYER_TARGET_CHANGED", "INCOMING_RESURRECT_CHANGED", "PORTRAITS_UPDATED" }) do
         frame:RegisterEvent(ev)
     end
-    for _, ev in ipairs({ "UNIT_AURA", "UNIT_LEVEL", "UNIT_PHASE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_NAME_UPDATE", "UNIT_MODEL_CHANGED", "UNIT_HEAL_PREDICTION", "UNIT_THREAT_SITUATION_UPDATE", "UNIT_PORTRAIT_UPDATE" }) do
+    for _, ev in ipairs_({ "UNIT_AURA", "UNIT_LEVEL", "UNIT_PHASE", "UNIT_HEALTH", "UNIT_MAXHEALTH", "UNIT_POWER_FREQUENT", "UNIT_MAXPOWER", "UNIT_NAME_UPDATE", "UNIT_MODEL_CHANGED", "UNIT_HEAL_PREDICTION", "UNIT_THREAT_SITUATION_UPDATE", "UNIT_PORTRAIT_UPDATE" }) do
         frame:RegisterUnitEvent(ev, registerUnit)
     end
     frame:SetScript("OnEvent", frame.OnEvent)

@@ -106,7 +106,7 @@ local function worldMapSkin()
         if WorldMapFrame:IsShown() then WorldMapFrame:Hide() else WorldMapFrame:Show() end
     end
 
-    table.insert(UISpecialFrames, "WorldMapFrame")
+    UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
     WorldMapFrame:EnableKeyboard(false)
     WorldMapFrame:EnableMouse(true)
     WorldMapFrame:SetFrameStrata("HIGH")

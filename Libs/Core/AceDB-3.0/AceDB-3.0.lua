@@ -86,11 +86,12 @@ end
 -- and set in the host table.  These tables must be cleaned up by removeDefaults
 -- in order to ensure we don't write empty default tables.
 local function copyDefaults(dest, src)
+	local type_ = type
 	-- this happens if some value in the SV overwrites our default value with a non-table
 	--if type(dest) ~= "table" then return end
 	for k, v in pairs(src) do
 		if k == "*" or k == "**" then
-			if type(v) == "table" then
+			if type_(v) == "table" then
 				-- This is a metatable used for table defaults
 				local mt = {
 					-- This handles the lookup and creation of new subtables
@@ -105,7 +106,7 @@ local function copyDefaults(dest, src)
 				setmetatable(dest, mt)
 				-- handle already existing tables in the SV
 				for dk, dv in pairs(dest) do
-					if not rawget(src, dk) and type(dv) == "table" then
+					if not rawget(src, dk) and type_(dv) == "table" then
 						copyDefaults(dv, v)
 					end
 				end
@@ -114,9 +115,9 @@ local function copyDefaults(dest, src)
 				local mt = {__index = function(t,k2) return k2~=nil and v or nil end}
 				setmetatable(dest, mt)
 			end
-		elseif type(v) == "table" then
+		elseif type_(v) == "table" then
 			if not rawget(dest, k) then rawset(dest, k, {}) end
-			if type(dest[k]) == "table" then
+			if type_(dest[k]) == "table" then
 				copyDefaults(dest[k], v)
 				if src['**'] then
 					copyDefaults(dest[k], src['**'])
@@ -132,15 +133,16 @@ end
 
 -- Called to remove all defaults in the default table from the database
 local function removeDefaults(db, defaults, blocker)
+	local type_ = type
 	-- remove all metatables from the db, so we don't accidentally create new sub-tables through them
 	setmetatable(db, nil)
 	-- loop through the defaults and remove their content
 	for k,v in pairs(defaults) do
 		if k == "*" or k == "**" then
-			if type(v) == "table" then
+			if type_(v) == "table" then
 				-- Loop through all the actual k,v pairs and remove
 				for key, value in pairs(db) do
-					if type(value) == "table" then
+					if type_(value) == "table" then
 						-- if the key was not explicitly specified in the defaults table, just strip everything from * and ** tables
 						if defaults[key] == nil and (not blocker or blocker[key] == nil) then
 							removeDefaults(value, v)
@@ -162,7 +164,7 @@ local function removeDefaults(db, defaults, blocker)
 					end
 				end
 			end
-		elseif type(v) == "table" and type(db[k]) == "table" then
+		elseif type_(v) == "table" and type_(db[k]) == "table" then
 			-- if a blocker was set, dive into it, to allow multi-level defaults
 			removeDefaults(db[k], v, blocker and blocker[k])
 			if next(db[k]) == nil then
@@ -640,11 +642,12 @@ end
 -- @param name The name of the new namespace
 -- @param defaults A table of values to use as defaults
 function DBObjectLib:RegisterNamespace(name, defaults)
-	if type(name) ~= "string" then
-		error(("Usage: AceDBObject:RegisterNamespace(name, defaults): 'name' - string expected, got %q."):format(type(name)), 2)
+	local type_ = type
+	if type_(name) ~= "string" then
+		error(("Usage: AceDBObject:RegisterNamespace(name, defaults): 'name' - string expected, got %q."):format(type_(name)), 2)
 	end
-	if defaults and type(defaults) ~= "table" then
-		error(("Usage: AceDBObject:RegisterNamespace(name, defaults): 'defaults' - table or nil expected, got %q."):format(type(defaults)), 2)
+	if defaults and type_(defaults) ~= "table" then
+		error(("Usage: AceDBObject:RegisterNamespace(name, defaults): 'defaults' - table or nil expected, got %q."):format(type_(defaults)), 2)
 	end
 	if self.children and self.children[name] then
 		error(("Usage: AceDBObject:RegisterNamespace(name, defaults): 'name' - a namespace called %q already exists."):format(name), 2)
@@ -703,7 +706,8 @@ end
 -- -- Create a DB using defaults and using a shared default profile
 -- self.db = LibStub("AceDB-3.0"):New("MyAddonDB", defaults, true)
 function AceDB:New(tbl, defaults, defaultProfile)
-	if type(tbl) == "string" then
+	local type_ = type
+	if type_(tbl) == "string" then
 		local name = tbl
 		tbl = _G[name]
 		if not tbl then
@@ -712,16 +716,16 @@ function AceDB:New(tbl, defaults, defaultProfile)
 		end
 	end
 
-	if type(tbl) ~= "table" then
-		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'tbl' - table expected, got %q."):format(type(tbl)), 2)
+	if type_(tbl) ~= "table" then
+		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'tbl' - table expected, got %q."):format(type_(tbl)), 2)
 	end
 
-	if defaults and type(defaults) ~= "table" then
-		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'defaults' - table expected, got %q."):format(type(defaults)), 2)
+	if defaults and type_(defaults) ~= "table" then
+		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'defaults' - table expected, got %q."):format(type_(defaults)), 2)
 	end
 
-	if defaultProfile and type(defaultProfile) ~= "string" and defaultProfile ~= true then
-		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'defaultProfile' - string or true expected, got %q."):format(type(defaultProfile)), 2)
+	if defaultProfile and type_(defaultProfile) ~= "string" and defaultProfile ~= true then
+		error(("Usage: AceDB:New(tbl, defaults, defaultProfile): 'defaultProfile' - string or true expected, got %q."):format(type_(defaultProfile)), 2)
 	end
 
 	return initdb(tbl, defaults, defaultProfile)

@@ -118,6 +118,7 @@ local function ShowCredits(frame)
 end
 
 local function InitButton(button, elementData)
+    local ssub = string.sub
     if not button.isSkinned then
         button.title.text:SetFont(DAMAGE_TEXT_FONT, 14)
         button.title.text:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
@@ -129,15 +130,15 @@ local function InitButton(button, elementData)
         button.isSkinned = true
     end
 
-    if string.sub(elementData.name, 1, 2) == "H-" then
+    if ssub(elementData.name, 1, 2) == "H-" then
         button.content:Hide()
-        button.title.text:SetText(string.sub(elementData.name, 3))
+        button.title.text:SetText(ssub(elementData.name, 3))
         button.title:Show()
         elementData.isHeader = true
     else
         if elementData.type == "changelog" then
-            button.content.text:SetText(string.sub(elementData.name, 2))
-            getChangeLogIcon(button.content.icon, string.sub(elementData.name, 1, 1))
+            button.content.text:SetText(ssub(elementData.name, 2))
+            getChangeLogIcon(button.content.icon, ssub(elementData.name, 1, 1))
         elseif elementData.type == "credits" then
             button.content.text:SetText(elementData.name)
             getCreditsIcon(button.content.icon, elementData.category)

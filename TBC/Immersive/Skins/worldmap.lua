@@ -100,7 +100,7 @@ local function LoadWorldMapSkin()
 
     --HideUIPanel(WorldMapFrame)
 
-    table.insert(UISpecialFrames, "WorldMapFrame")
+    UISpecialFrames[#UISpecialFrames+1] = "WorldMapFrame"
     WorldMapFrame:SetScale(GW.settings.WORLDMAP_POSITION_scale)
     WorldMapFrame:EnableKeyboard(false)
     WorldMapFrame:EnableMouse(true)

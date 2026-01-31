@@ -348,10 +348,11 @@ registerActionHudAura(
 
 
 local function updateDebugPosition()
-    local x = tonumber(GwHudFXDebug.x:GetText())
-    local y = tonumber(GwHudFXDebug.y:GetText())
-    local z = tonumber(GwHudFXDebug.z:GetText())
-    local rotation = tonumber(GwHudFXDebug.rotation:GetText())
+    local tonum = tonumber
+    local x = tonum(GwHudFXDebug.x:GetText())
+    local y = tonum(GwHudFXDebug.y:GetText())
+    local z = tonum(GwHudFXDebug.z:GetText())
+    local rotation = tonum(GwHudFXDebug.rotation:GetText())
     if x ~= nil and y ~= nil and z ~= nil and rotation ~= nil then
         Gw2_HudBackgroud.actionBarHudFX:SetPosition(x, y, z)
         Gw2_HudBackgroud.actionBarHudFX:SetFacing(rotation)

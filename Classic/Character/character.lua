@@ -254,16 +254,17 @@ local function setPetStatFrame(stat, index, statText, tooltip, tooltip2, grid, x
 end
 
 local function PaperDollUpdateStats()
+    local mfloor = math.floor
     local avgItemLevel, avgItemLevelEquipped = GW.GetAverageItemLevel()
     local r, g,b = GW.GetItemLevelColor(avgItemLevel)
     local statText, tooltip1, tooltip2
 
     avgItemLevelEquipped = avgItemLevelEquipped and avgItemLevelEquipped or 0
     avgItemLevel = avgItemLevel and avgItemLevel or 0
-    avgItemLevelEquipped = math.floor(avgItemLevelEquipped)
-    avgItemLevel = math.floor(avgItemLevel)
+    avgItemLevelEquipped = mfloor(avgItemLevelEquipped)
+    avgItemLevel = mfloor(avgItemLevel)
     if avgItemLevelEquipped < avgItemLevel then
-        avgItemLevelEquipped = math.floor(avgItemLevel) .. " (" .. math.floor(avgItemLevelEquipped) .. ")"
+        avgItemLevelEquipped = mfloor(avgItemLevel) .. " (" .. mfloor(avgItemLevelEquipped) .. ")"
     end
     avgItemLevelEquipped = avgItemLevelEquipped == 0 and "" or avgItemLevelEquipped
     GwDressingRoom.itemLevel:SetText(avgItemLevelEquipped)

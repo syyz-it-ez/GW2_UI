@@ -277,6 +277,7 @@ local function ToggleDetails(self)
 end
 
 local function setReputationDetails(frame, data)
+    local mfloor = math.floor
     frame.factionIndex = data.factionIndex
     frame.factionID = data.factionID
 
@@ -354,7 +355,7 @@ local function setReputationDetails(frame, data)
         frame.currentValue:SetText(GW.GetLocalizedNumber(value))
         frame.nextValue:SetText(GW.GetLocalizedNumber(threshold))
 
-        local percent = math.floor(RoundDec(((value - 0) / (threshold - 0)) * 100))
+        local percent = mfloor(RoundDec(((value - 0) / (threshold - 0)) * 100))
         frame.percentage:SetText(percent .. "%")
 
         frame.StatusBar:SetMinMaxValues(0, 1)
@@ -375,7 +376,7 @@ local function setReputationDetails(frame, data)
             frame.nextValue:SetText(GW.GetLocalizedNumber(friendInfo.nextThreshold - friendInfo.reactionThreshold))
 
             local percent =
-                math.floor(RoundDec(((friendInfo.standing - friendInfo.reactionThreshold) / (friendInfo.nextThreshold - friendInfo.reactionThreshold)) * 100))
+                mfloor(RoundDec(((friendInfo.standing - friendInfo.reactionThreshold) / (friendInfo.nextThreshold - friendInfo.reactionThreshold)) * 100))
             if percent == -1 then
                 frame.percentage:SetText("0%")
             else
@@ -414,7 +415,7 @@ local function setReputationDetails(frame, data)
 
                 frame.currentValue:SetText(GW.GetLocalizedNumber(majorFactionData.renownReputationEarned or 0))
                 frame.nextValue:SetText(GW.GetLocalizedNumber(majorFactionData.renownLevelThreshold))
-                frame.percentage:SetText((math.floor((majorFactionData.renownReputationEarned or 0) / majorFactionData.renownLevelThreshold * 100) .. "%"))
+                frame.percentage:SetText((mfloor((majorFactionData.renownReputationEarned or 0) / majorFactionData.renownLevelThreshold * 100) .. "%"))
 
                 frame.StatusBar:SetValue((majorFactionData.renownReputationEarned or 0) / majorFactionData.renownLevelThreshold)
             end
@@ -427,7 +428,7 @@ local function setReputationDetails(frame, data)
         if ldiff == 0 then
             ldiff = 1
         end
-        local percent = math.floor(RoundDec(((data.currentStanding - data.currentReactionThreshold) / ldiff) * 100))
+        local percent = mfloor(RoundDec(((data.currentStanding - data.currentReactionThreshold) / ldiff) * 100))
         if percent == -1 then
             frame.percentage:SetText("0%")
         else

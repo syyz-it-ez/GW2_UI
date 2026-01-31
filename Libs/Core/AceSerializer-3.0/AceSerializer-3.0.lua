@@ -170,6 +170,7 @@ end
 -- Callers are expected to pcall(DeserializeValue) to trap errors
 
 local function DeserializeValue(iter,single,ctl,data)
+	local tostr = tostring
 
     if not single then
         ctl,data = iter()
@@ -191,17 +192,17 @@ local function DeserializeValue(iter,single,ctl,data)
     elseif ctl=="^N" then
         res = DeserializeNumberHelper(data)
         if not res then
-            error("Invalid serialized number: '"..tostring(data).."'")
+            error("Invalid serialized number: '"..tostr(data).."'")
         end
     elseif ctl=="^F" then     -- ^F<mantissa>^f<exponent>
         local ctl2,e = iter()
         if ctl2~="^f" then
-            error("Invalid serialized floating-point number, expected '^f', not '"..tostring(ctl2).."'")
+            error("Invalid serialized floating-point number, expected '^f', not '"..tostr(ctl2).."'")
         end
         local m=tonumber(data)
         e=tonumber(e)
         if not (m and e) then
-            error("Invalid serialized floating-point number, expected mantissa and exponent, got '"..tostring(m).."' and '"..tostring(e).."'")
+            error("Invalid serialized floating-point number, expected mantissa and exponent, got '"..tostr(m).."' and '"..tostr(e).."'")
         end
         res = m*(2^e)
     elseif ctl=="^B" then	-- yeah yeah ignore data portion

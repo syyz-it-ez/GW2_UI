@@ -156,7 +156,7 @@ end
 local function splitQuest(inputstr)
     local t = {}
     local i = 1
-    local length = string.len(inputstr)
+    local length = #inputstr
     if length < 150 then
         t[i] = inputstr
         return t

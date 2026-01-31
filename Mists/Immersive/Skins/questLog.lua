@@ -111,6 +111,7 @@ end
 
 
 local function LoadQuestLogFrameSkin()
+    local pairs_ = pairs
     if not GW.settings.QUESTLOG_SKIN_ENABLED then return end
 
     local QuestStrip = {
@@ -132,7 +133,7 @@ local function LoadQuestLogFrameSkin()
 		QuestRewardScrollChildFrame,
 		QuestRewardScrollFrame
 	}
-	for _, object in pairs(QuestStrip) do
+	for _, object in pairs_(QuestStrip) do
 		object:GwStripTextures(true)
 	end
 
@@ -149,7 +150,7 @@ local function LoadQuestLogFrameSkin()
 		QuestLogFrameTrackButton,
 		QuestLogFrameCancelButton
 	}
-	for _, button in pairs(QuestButtons) do
+	for _, button in pairs_(QuestButtons) do
 		button:GwStripTextures()
 		button:GwSkinButton(false, true)
 	end
@@ -161,7 +162,7 @@ local function LoadQuestLogFrameSkin()
 		QuestLogListScrollFrameScrollBar,
 		QuestRewardScrollFrameScrollBar
 	}
-	for _, object in pairs(ScrollBars) do
+	for _, object in pairs_(ScrollBars) do
 		object:GwSkinScrollBar()
 	end
 
@@ -172,11 +173,11 @@ local function LoadQuestLogFrameSkin()
 		QuestLogListScrollFrame,
 		QuestRewardScrollFrame
 	}
-	for _, object in pairs(ScrollBars) do
+	for _, object in pairs_(ScrollBars) do
 		object:GwSkinScrollFrame()
 	end
 
-    for frame, numItems in pairs({ QuestLogItem = MAX_NUM_ITEMS, QuestProgressItem = MAX_REQUIRED_ITEMS }) do
+    for frame, numItems in pairs_({ QuestLogItem = MAX_NUM_ITEMS, QuestProgressItem = MAX_REQUIRED_ITEMS }) do
 		for i = 1, numItems do
 			handleItemButton(_G[frame..i])
 		end

@@ -111,7 +111,7 @@ function frame_metatable.__index:RegisterEvent(event, func, unitless)
 				if(infunc == func) then return end
 			end
 
-			table.insert(curev, func)
+			curev[#curev+1] = func
 		end
 
 		if(unitless or self.__eventless) then

@@ -153,6 +153,7 @@ function GwDodgeBarMixin:AnimateSkyridingBar(current, fraction, max)
 end
 
 function GwDodgeBarMixin:InitBar(pew)
+    local tonum = tonumber
     -- do everything required to make the dodge bar a secure clickable button
     local overrideSpellID = GW.private.PLAYER_TRACKED_DODGEBAR_SPELL_ID
     self.gwMaxCharges = nil
@@ -172,13 +173,13 @@ function GwDodgeBarMixin:InitBar(pew)
         if not v then return end
         if string.find(v, ",") then
             for _, spell in pairs(GW.splitString(v, ",", true)) do
-                if GW.IsSpellKnown(tonumber(spell)) then
-                    self.spellId = tonumber(spell)
+                if GW.IsSpellKnown(tonum(spell)) then
+                    self.spellId = tonum(spell)
                     break
                 end
             end
         else
-            self.spellId = GW.IsSpellKnown(tonumber(v)) and tonumber(v) or (DODGEBAR_SPELLS_ATTR[GW.myclass] and tonumber(v)) or nil
+            self.spellId = GW.IsSpellKnown(tonum(v)) and tonum(v) or (DODGEBAR_SPELLS_ATTR[GW.myclass] and tonum(v)) or nil
         end
     end
     Debug("Dodgebar spell for Tooltip: ", self.spellId)
@@ -189,15 +190,15 @@ function GwDodgeBarMixin:InitBar(pew)
             if string.find(v, ",") then
                 local found = false
                 for _, spell in pairs(GW.splitString(v, ",", true)) do
-                    if GW.IsSpellKnown(tonumber(spell)) then
-                        self:SetAttribute("spell", tonumber(spell))
+                    if GW.IsSpellKnown(tonum(spell)) then
+                        self:SetAttribute("spell", tonum(spell))
                         found = true
                         break
                     end
                 end
                 if not found then return end
             else
-                self:SetAttribute("spell", tonumber(v))
+                self:SetAttribute("spell", tonum(v))
             end
             Debug("Dodgebar spell for Click: ", self:GetAttribute("spell"))
         else

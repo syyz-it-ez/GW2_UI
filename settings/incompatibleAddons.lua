@@ -25,7 +25,7 @@ local function GetIncompatibleAddonInfo(incompatibleAddonCategory)
             if C_AddOns.IsAddOnLoaded(addon) then
                 incompatibleAddonLoaded = true
                 local addonName = select(2, C_AddOns.GetAddOnInfo(addon))
-                table.insert(loadedAddonNames, addonName)
+                loadedAddonNames[#loadedAddonNames+1] = addonName
             end
         end
     end

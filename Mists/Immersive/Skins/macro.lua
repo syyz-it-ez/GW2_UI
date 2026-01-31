@@ -1,11 +1,12 @@
 local _, GW = ...
 
 local function ApplyMacroOptionsSkin()
+    local pairs_ = pairs
     if not GW.settings.MACRO_SKIN_ENABLED then return end
     local macroHeaderText
 
     local r = {MacroFrame:GetRegions()}
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "FontString" then
             macroHeaderText = c
             break
@@ -34,7 +35,7 @@ local function ApplyMacroOptionsSkin()
     MacroFrameTextBackground.NineSlice:SetBackdrop(GW.BackdropTemplates.DefaultWithColorableBorder)
     MacroFrameTextBackground.NineSlice:SetBackdropBorderColor(0, 0, 0)
 
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             c:Hide()
         end
@@ -75,7 +76,7 @@ local function ApplyMacroOptionsSkin()
 
     local r = {_G.MacroFrameSelectedMacroButton:GetRegions()}
     local ii = 1
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             if ii == 1 then
                 c:Hide()
@@ -110,7 +111,7 @@ local function ApplyMacroOptionsSkin()
             b:SetCheckedTexture("Interface/AddOns/GW2_UI/textures/uistuff/ui-quickslot-depress.png")
             local r = {b:GetRegions()}
             local ii = 1
-            for _,c in pairs(r) do
+            for _,c in pairs_(r) do
                 if c:GetObjectType() == "Texture" then
                     if ii == 1 then
                         c:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/spelliconempty.png")
@@ -141,7 +142,7 @@ local function ApplyMacroOptionsSkin()
     GW.SkinTextBox(MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameMiddle, MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameLeft, MacroPopupFrame.BorderBox.IconSelectorEditBox.IconSelectorPopupNameRight, nil, nil, 4, 4)
 
     local r = {MacroPopupFrame.BorderBox:GetRegions()}
-    for _,c in pairs(r) do
+    for _,c in pairs_(r) do
         if c:GetObjectType() == "Texture" then
             c:Hide()
         end

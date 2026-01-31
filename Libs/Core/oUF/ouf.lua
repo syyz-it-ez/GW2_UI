@@ -101,7 +101,7 @@ for k, v in next, {
 			activeElements[self][name] = true
 
 			if(element.update) then
-				table.insert(self.__elements, element.update)
+				self.__elements[#self.__elements+1] = element.update
 			end
 		end
 	end,
@@ -275,7 +275,7 @@ local function initObject(unit, style, styleFunc, header, ...)
 		object = setmetatable(object, frame_metatable)
 
 		-- Expose the frame through oUF.objects.
-		table.insert(objects, object)
+		objects[#objects+1] = object
 
 		-- We have to force update the frames when PEW fires.
 		-- It's also important to evaluate units before running an update
@@ -380,7 +380,7 @@ Used to add a function to a table to be executed upon unit frame/header initiali
 * func - function to be added
 --]]
 function oUF:RegisterInitCallback(func)
-	table.insert(callback, func)
+	callback[#callback+1] = func
 end
 
 --[[ oUF:RegisterMetaFunction(name, func)
@@ -678,7 +678,7 @@ do
 		header.styleFunction = styleProxy
 
 		-- Expose the header through oUF.headers.
-		table.insert(headers, header)
+		headers[#headers+1] = header
 
 		-- We set it here so layouts can't directly override it.
 		header:SetAttribute('initialConfigFunction', initialConfigFunction)

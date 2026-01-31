@@ -33,13 +33,14 @@ local whitespace = {
 -- @usage LibBase64.Encode("Hello, how are you doing today?") == "SGVsbG8sIGhvdyBhcmUgeW91IGRvaW5nIHRvZGF5Pw=="
 -- @return a Base64-encoded string
 function LibBase64:Encode(text, maxLineLength, lineEnding)
-    if type(text) ~= "string" then
-        error(format("Bad argument #1 to `Encode'. Expected string, got %q", type(text)), 2)
+    local type_ = type
+    if type_(text) ~= "string" then
+        error(format("Bad argument #1 to `Encode'. Expected string, got %q", type_(text)), 2)
     end
 
     if maxLineLength then
-        if type(maxLineLength) ~= "number" then
-            error(format("Bad argument #2 to `Encode'. Expected number or nil, got %q", type(maxLineLength)), 2)
+        if type_(maxLineLength) ~= "number" then
+            error(format("Bad argument #2 to `Encode'. Expected number or nil, got %q", type_(maxLineLength)), 2)
         elseif (maxLineLength % 4) ~= 0 then
             error(format("Bad argument #2 to `Encode'. Expected a multiple of 4, got %s", maxLineLength), 2)
         elseif maxLineLength <= 0 then
@@ -49,8 +50,8 @@ function LibBase64:Encode(text, maxLineLength, lineEnding)
 
     if lineEnding == nil then
         lineEnding = "\r\n"
-    elseif type(lineEnding) ~= "string" then
-        error(format("Bad argument #3 to `Encode'. Expected string, got %q", type(lineEnding)), 2)
+    elseif type_(lineEnding) ~= "string" then
+        error(format("Bad argument #3 to `Encode'. Expected string, got %q", type_(lineEnding)), 2)
     end
 
     local currentLength = 0

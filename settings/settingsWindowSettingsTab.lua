@@ -151,8 +151,8 @@ local function RegisterOptionWidget(widget, meta)
     }
 
     widget.__gwRegEntry = entry
-    table.insert(GW.SettingsWidgetRegistry.list, entry)
-    table.insert(bucket.entries, entry)
+    GW.SettingsWidgetRegistry.list[#GW.SettingsWidgetRegistry.list+1] = entry
+    bucket.entries[#bucket.entries+1] = entry
     entry.widgetIndex = #bucket.entries
 
     if entry.optionName then
@@ -161,13 +161,14 @@ local function RegisterOptionWidget(widget, meta)
             idx = {}
             GW.SettingsWidgetRegistry.byOptionName[entry.optionName] = idx
         end
-        table.insert(idx, entry)
+        idx[#idx+1] = entry
     end
 
     return entry
 end
 
 local function SearchWidgetsByText(query)
+   local ipairs_ = ipairs
    local q = Norm(query)
     if q == "" then return {}, {} end
 
@@ -175,9 +176,9 @@ local function SearchWidgetsByText(query)
     local buckets = GetOrderedPanelBuckets()
     local searchNew = q == NEW:lower() or q == "!"
 
-    for _, bucket in ipairs(buckets) do
+    for _, bucket in ipairs_(buckets) do
         local hits = {}
-        for _, e in ipairs(bucket.entries) do
+        for _, e in ipairs_(bucket.entries) do
             if searchNew then
                 if e.isNew then
                     hits[#hits+1] = e
@@ -192,8 +193,8 @@ local function SearchWidgetsByText(query)
     end
 
     local flat = {}
-    for _, g in ipairs(groups) do
-        for i, e in ipairs(g.entries) do
+    for _, g in ipairs_(groups) do
+        for i, e in ipairs_(g.entries) do
             e.groupHeader = (i == 1) and g.header or nil
             flat[#flat+1] = e
         end

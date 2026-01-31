@@ -354,9 +354,10 @@ do
     end
 
     function Initialize()
+        local ipairs_ = ipairs
         model, counts, itemStacks, itemClasses, itemSortKeys = {}, {}, {}, {}, {}
 
-        for _, container in ipairs(CONTAINERS) do
+        for _, container in ipairs_(CONTAINERS) do
             local class = ContainerClass(container)
             for position = 1, C_Container.GetContainerNumSlots(container) do
                 local slot = {container=container, position=position, class=class}
@@ -380,18 +381,18 @@ do
         end
         sort(items, function(a, b) return LT(itemSortKeys[a], itemSortKeys[b]) end)
 
-        for _, slot in ipairs(model) do
+        for _, slot in ipairs_(model) do
             if slot.class then
-                for _, item in ipairs(items) do
+                for _, item in ipairs_(items) do
                     if itemClasses[item][slot.class] and assign(slot, item) then
                         break
                     end
                 end
             end
         end
-        for _, slot in ipairs(model) do
+        for _, slot in ipairs_(model) do
             if not slot.class then
-                for _, item in ipairs(items) do
+                for _, item in ipairs_(items) do
                     if assign(slot, item) then
                         break
                     end

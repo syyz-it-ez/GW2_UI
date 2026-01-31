@@ -351,7 +351,7 @@ function lib.PixelGlow_Stop(r,key)
     end
 end
 
-table.insert(lib.glowList, "Pixel Glow")
+lib.glowList[#lib.glowList+1] = "Pixel Glow"
 lib.startList["Pixel Glow"] = lib.PixelGlow_Start
 lib.stopList["Pixel Glow"] = lib.PixelGlow_Stop
 
@@ -447,7 +447,7 @@ function lib.AutoCastGlow_Stop(r,key)
     end
 end
 
-table.insert(lib.glowList, "Autocast Shine")
+lib.glowList[#lib.glowList+1] = "Autocast Shine"
 lib.startList["Autocast Shine"] = lib.AutoCastGlow_Start
 lib.stopList["Autocast Shine"] = lib.AutoCastGlow_Stop
 
@@ -487,9 +487,9 @@ local function CreateAlphaAnim(group, target, order, duration, fromAlpha, toAlph
         alpha:SetStartDelay(delay)
     end
     if appear then
-        table.insert(group.appear, alpha)
+        group.appear[#group.appear+1] = alpha
     else
-        table.insert(group.fade, alpha)
+        group.fade[#group.fade+1] = alpha
     end
 end
 
@@ -623,16 +623,17 @@ local function configureButtonGlow(f,alpha)
 end
 
 local function updateAlphaAnim(f,alpha)
-    for _,anim in pairs(f.animIn.appear) do
+    local pairs_ = pairs
+    for _,anim in pairs_(f.animIn.appear) do
         anim:SetToAlpha(alpha)
     end
-    for _,anim in pairs(f.animIn.fade) do
+    for _,anim in pairs_(f.animIn.fade) do
         anim:SetFromAlpha(alpha)
     end
-    for _,anim in pairs(f.animOut.appear) do
+    for _,anim in pairs_(f.animOut.appear) do
         anim:SetToAlpha(alpha)
     end
-    for _,anim in pairs(f.animOut.fade) do
+    for _,anim in pairs_(f.animOut.fade) do
         anim:SetFromAlpha(alpha)
     end
 end
@@ -648,6 +649,7 @@ local function noZero(num)
 end
 
 function lib.ButtonGlow_Start(r,color,frequency,frameLevel)
+    local pairs_ = pairs
     if not r then
         return
     end
@@ -673,7 +675,7 @@ function lib.ButtonGlow_Start(r,color,frequency,frameLevel)
         end
 
         if not(color) then
-            for texture in pairs(ButtonGlowTextures) do
+            for texture in pairs_(ButtonGlowTextures) do
                 f[texture]:SetDesaturated(nil)
                 f[texture]:SetVertexColor(1,1,1)
                 local alpha = math.min(f[texture]:GetAlpha()/noZero(f.color and f.color[4] or 1), 1)
@@ -682,7 +684,7 @@ function lib.ButtonGlow_Start(r,color,frequency,frameLevel)
             end
             f.color = false
         else
-            for texture in pairs(ButtonGlowTextures) do
+            for texture in pairs_(ButtonGlowTextures) do
                 f[texture]:SetDesaturated(1)
                 f[texture]:SetVertexColor(color[1],color[2],color[3])
                 local alpha = math.min(f[texture]:GetAlpha()/noZero(f.color and f.color[4] or 1)*color[4], 1)
@@ -708,13 +710,13 @@ function lib.ButtonGlow_Start(r,color,frequency,frameLevel)
         f:SetPoint("BOTTOMRIGHT", r, "BOTTOMRIGHT", width * 0.2, -height * 0.2)
         if not(color) then
             f.color = false
-            for texture in pairs(ButtonGlowTextures) do
+            for texture in pairs_(ButtonGlowTextures) do
                 f[texture]:SetDesaturated(nil)
                 f[texture]:SetVertexColor(1,1,1)
             end
         else
             f.color = color
-            for texture in pairs(ButtonGlowTextures) do
+            for texture in pairs_(ButtonGlowTextures) do
                 f[texture]:SetDesaturated(1)
                 f[texture]:SetVertexColor(color[1],color[2],color[3])
             end
@@ -746,7 +748,7 @@ function lib.ButtonGlow_Stop(r)
     end
 end
 
-table.insert(lib.glowList, "Action Button Glow")
+lib.glowList[#lib.glowList+1] = "Action Button Glow"
 lib.startList["Action Button Glow"] = lib.ButtonGlow_Start
 lib.stopList["Action Button Glow"] = lib.ButtonGlow_Stop
 
@@ -934,6 +936,6 @@ function lib.ProcGlow_Stop(r, key)
     end
 end
 
-table.insert(lib.glowList, "Proc Glow")
+lib.glowList[#lib.glowList+1] = "Proc Glow"
 lib.startList["Proc Glow"] = lib.ProcGlow_Start
 lib.stopList["Proc Glow"] = lib.ProcGlow_Stop

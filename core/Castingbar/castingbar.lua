@@ -326,6 +326,7 @@ function GwCastingBarMixin:OnUpdate(elapsed)
 end
 
 function GwCastingBarMixin:OnEvent(event, unitID, ...)
+    local sel = select
     local spell, icon, startTime, endTime, isTradeSkill, castID, spellID, numStages, isEmpowered
     local barTexture = CASTINGBAR_TEXTURES.YELLOW.NORMAL
     local barHighlightTexture = CASTINGBAR_TEXTURES.YELLOW.HIGHLIGHT
@@ -438,7 +439,7 @@ function GwCastingBarMixin:OnEvent(event, unitID, ...)
                         end
                     end
                 end
-                local lagWorld = select(4, GetNetStats()) / 1000
+                local lagWorld = sel(4, GetNetStats()) / 1000
                 local sqw = settings.showSpellQueueWindow and (tonumber(GetCVar("SpellQueueWindow")) or 0) / 1000 or 0
                 self.latency:SetWidth(math.max(0.0001, math.min(1, ((sqw + lagWorld) / (self.endTime - self.startTime)))) * 176)
             end,
@@ -451,7 +452,7 @@ function GwCastingBarMixin:OnEvent(event, unitID, ...)
             UIFrameFadeIn(self, 0.1, 0, 1)
         end
     elseif IsIn(event, "UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_CHANNEL_STOP", "UNIT_SPELLCAST_EMPOWER_STOP") then
-        if (event == "UNIT_SPELLCAST_STOP" and self.castID == select(1, ...)) or
+        if (event == "UNIT_SPELLCAST_STOP" and self.castID == sel(1, ...)) or
            ((event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_EMPOWER_STOP") and (self.isChanneling or self.isEmpowered)) then
             if not self.animating then
                 self:AddFinishAnimation(false, true)
@@ -462,7 +463,7 @@ function GwCastingBarMixin:OnEvent(event, unitID, ...)
             self.isEmpowered = false
         end
     elseif IsIn(event, "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED") then
-        if self:IsShown() and self.isCasting and select(1, ...) == self.castID then
+        if self:IsShown() and self.isCasting and sel(1, ...) == self.castID then
             if self.showDetails then
                 self.name:SetText(event == "UNIT_SPELLCAST_FAILED" and FAILED or INTERRUPTED)
             end
@@ -471,7 +472,7 @@ function GwCastingBarMixin:OnEvent(event, unitID, ...)
             self.isChanneling = false
             self.isEmpowered = false
         end
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" and self.spellID == select(2, ...) and not self.isChanneling then
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" and self.spellID == sel(2, ...) and not self.isChanneling then
         self:AddFinishAnimation(false)
     end
 end

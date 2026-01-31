@@ -322,7 +322,7 @@ function LibCompress:CompressHuffman(uncompressed)
     -- make histogram
     local hist = {}
     -- don't have to use all data to make the histogram
-    local uncompressed_size = string_len(uncompressed)
+    local uncompressed_size = #uncompressed
     local c
     for i = 1, uncompressed_size do
         c = string_byte(uncompressed, i)
@@ -336,7 +336,7 @@ function LibCompress:CompressHuffman(uncompressed)
     for symbol, weight in pairs(hist) do
         leaf = { symbol=string_char(symbol), weight=weight }
         symbols[symbol] = leaf
-        table_insert(leafs, leaf)
+        leafs[#leafs+1] = leaf
     end
 
     -- Enqueue all leaf nodes into the first queue (by probability in increasing order,
@@ -404,12 +404,12 @@ function LibCompress:CompressHuffman(uncompressed)
             c2 = leaf2,
             weight = leaf1.weight + leaf2.weight
         }
-        table_insert(huff,newNode)
+        huff[#huff+1] = newNode
     end
 
     if #leafs > 0 then
         li, length = next(leafs)
-        table_insert(huff, length)
+        huff[#huff+1] = length
         table_remove(leafs, li)
     end
     huff = huff[1]
@@ -454,7 +454,7 @@ function LibCompress:CompressHuffman(uncompressed)
 
     -- Header: byte 0 = #leafs, bytes 1-3 = size of uncompressed data
     -- max 2^24 bytes
-    length = string_len(uncompressed)
+    length = #uncompressed
     compressed[2] = string_char(bit_band(nLeafs -1, 255))	-- number of leafs
     compressed[3] = string_char(bit_band(length, 255))			-- bit 0-7
     compressed[4] = string_char(bit_band(bit_rshift(length, 8), 255))	-- bit 8-15
@@ -893,7 +893,7 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
 
     -- build list of bytes not available as a suffix to a prefix byte
     local taken = {}
-    for i = 1, string_len(encodeBytes) do
+    for i = 1, #encodeBytes do
         taken[string_sub(encodeBytes, i, i)] = true
     end
 
@@ -918,13 +918,13 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
             from = string_sub(reservedChars, i, i)
             to = string_sub(mapChars, i, i)
             encode_translate[from] = to
-            table_insert(encode_search, from)
+            encode_search[#encode_search+1] = from
             decode_translate[to] = from
-            table_insert(decode_search, to)
+            decode_search[#decode_search+1] = to
         end
         codecTable["decode_search"..tostring(escapeCharIndex)] = "([".. escape_for_gsub(table_concat(decode_search)).."])"
         codecTable["decode_translate"..tostring(escapeCharIndex)] = decode_translate
-        table_insert(decode_func_string, "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");")
+        decode_func_string[#decode_func_string+1] = "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");"
 
     end
 
@@ -934,7 +934,7 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
     r = 0 -- suffix char value to the escapeChar
     decode_search = {}
     decode_translate = {}
-    for i = 1, string_len(encodeBytes) do
+    for i = 1, #encodeBytes do
         c = string_sub(encodeBytes, i, i)
         if not encode_translate[c] then
             -- this loop will update escapeChar and r
@@ -943,7 +943,7 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
                 if r > 255 then -- switch to next escapeChar
                     codecTable["decode_search"..tostring(escapeCharIndex)] = escape_for_gsub(escapeChar).."([".. escape_for_gsub(table_concat(decode_search)).."])"
                     codecTable["decode_translate"..tostring(escapeCharIndex)] = decode_translate
-                    table_insert(decode_func_string, "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");")
+                    decode_func_string[#decode_func_string+1] = "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");"
 
                     escapeCharIndex  = escapeCharIndex + 1
                     escapeChar = string_sub(escapeChars, escapeCharIndex, escapeCharIndex)
@@ -958,9 +958,9 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
                 end
             end
             encode_translate[c] = escapeChar..string_char(r)
-            table_insert(encode_search, c)
+            encode_search[#encode_search+1] = c
             decode_translate[string_char(r)] = c
-            table_insert(decode_search, string_char(r))
+            decode_search[#decode_search+1] = string_char(r)
             r = r + 1
         end
     end
@@ -968,7 +968,7 @@ function LibCompress:GetEncodeTable(reservedChars, escapeChars, mapChars)
     if r > 0 then
         codecTable["decode_search"..tostring(escapeCharIndex)] = escape_for_gsub(escapeChar).."([".. escape_for_gsub(table_concat(decode_search)).."])"
         codecTable["decode_translate"..tostring(escapeCharIndex)] = decode_translate
-        table_insert(decode_func_string, "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");")
+        decode_func_string[#decode_func_string+1] = "str = str:gsub(self.decode_search"..tostring(escapeCharIndex)..", self.decode_translate"..tostring(escapeCharIndex)..");"
     end
 
     -- change last line from "str = ...;" to "return ...;";
@@ -1025,7 +1025,7 @@ function LibCompress:GetChatEncodeTable(reservedChars, escapeChars, mapChars)
     local r = {}
 
     for i = 128, 255 do
-        table_insert(r, string_char(i))
+        r[#r+1] = string_char(i)
     end
 
     reservedChars = "sS\000\010\013\124%"..table_concat(r)..(reservedChars or "")
@@ -1175,7 +1175,7 @@ function LibCompress:fcs16init()
 end
 
 function LibCompress:fcs16update(uFcs16, pBuffer)
-    local length = string_len(pBuffer)
+    local length = #pBuffer
     for i = 1, length do
         uFcs16 = bit_bxor(bit_rshift(uFcs16,8), fcs16tab[bit_band(bit_bxor(uFcs16, string_byte(pBuffer, i)), 255)])
     end
@@ -1243,7 +1243,7 @@ function LibCompress:fcs32init()
 end
 
 function LibCompress:fcs32update(uFcs32, pBuffer)
-    local length = string_len(pBuffer)
+    local length = #pBuffer
     for i = 1, length do
         uFcs32 = bit_bxor(bit_rshift(uFcs32, 8), fcs32tab[bit_band(bit_bxor(uFcs32, string_byte(pBuffer, i)), 255)])
     end

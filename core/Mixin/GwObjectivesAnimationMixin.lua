@@ -28,6 +28,7 @@ function GwObjectivesAnimationMixin:NewQuestAnimation()
 end
 
 function GwObjectivesAnimationMixin:WiggleAnimation()
+    local msin = math.sin
     if self.animation == nil then
         self.animation = 0
     end
@@ -41,14 +42,14 @@ function GwObjectivesAnimationMixin:WiggleAnimation()
             self.flare:SetRotation(GW.lerp(0, 1, prog))
 
             if prog < 0.25 then
-                self.texture:SetRotation(GW.lerp(0, -0.5, math.sin((prog / 0.25) * math.pi * 0.5)))
-                self.flare:SetAlpha(GW.lerp(0, 1, math.sin((prog / 0.25) * math.pi * 0.5)))
+                self.texture:SetRotation(GW.lerp(0, -0.5, msin((prog / 0.25) * math.pi * 0.5)))
+                self.flare:SetAlpha(GW.lerp(0, 1, msin((prog / 0.25) * math.pi * 0.5)))
             end
             if prog > 0.25 and prog < 0.75 then
-                self.texture:SetRotation(GW.lerp(-0.5, 0.5, math.sin(((prog - 0.25) / 0.5) * math.pi * 0.5)))
+                self.texture:SetRotation(GW.lerp(-0.5, 0.5, msin(((prog - 0.25) / 0.5) * math.pi * 0.5)))
             end
             if prog > 0.75 then
-                self.texture:SetRotation(GW.lerp(0.5, 0, math.sin(((prog - 0.75) / 0.25) * math.pi * 0.5)))
+                self.texture:SetRotation(GW.lerp(0.5, 0, msin(((prog - 0.75) / 0.25) * math.pi * 0.5)))
             end
 
             if prog > 0.25 then

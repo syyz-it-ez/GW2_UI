@@ -135,6 +135,7 @@ GW.stats.getArmor = getArmor
 
 
 local function getDefense(unit)
+    local sel = select
     local numSkills = GetNumSkillLines()
     local skillIndex = 0
     local stat
@@ -142,8 +143,8 @@ local function getDefense(unit)
     local tooltip2
 
     for i = 1, numSkills do
-        local skillName = select(1, GetSkillLineInfo(i))
-        local isHeader = select(2, GetSkillLineInfo(i))
+        local skillName = sel(1, GetSkillLineInfo(i))
+        local isHeader = sel(2, GetSkillLineInfo(i))
 
         if (isHeader == nil or (not isHeader)) and (skillName == DEFENSE) then
             skillIndex = i
@@ -154,8 +155,8 @@ local function getDefense(unit)
     local skillRank = 0
     local skillModifier = 0
     if (skillIndex > 0) then
-        skillRank = select(4, GetSkillLineInfo(skillIndex))
-        skillModifier = select(6, GetSkillLineInfo(skillIndex))
+        skillRank = sel(4, GetSkillLineInfo(skillIndex))
+        skillModifier = sel(6, GetSkillLineInfo(skillIndex))
     end
     
     skillModifier = skillModifier + GW.stats._GetTalentModifierDefense()

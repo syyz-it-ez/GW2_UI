@@ -746,7 +746,7 @@ local function getTagFunc(tagstr)
 				end
 			end
 
-			table.insert(funcs, tagFunc)
+			funcs[#funcs+1] = tagFunc
 		end
 
 		func = function(self)
@@ -842,7 +842,7 @@ local function Tag(self, fs, ts, ...)
 
 	if(not self.__tags) then
 		self.__tags = {}
-		table.insert(self.__elements, Update)
+		self.__elements[#self.__elements+1] = Update
 	elseif(self.__tags[fs]) then
 		-- We don't need to remove it from the __tags table as Untag handles that for us.
 		self:Untag(fs)

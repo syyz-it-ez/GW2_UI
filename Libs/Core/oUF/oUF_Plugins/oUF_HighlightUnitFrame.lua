@@ -54,7 +54,7 @@ local function Enable(self)
         CheckHighlightFrame:SetScript('OnUpdate', CheckHighlightFrameUpdate)
     end
 
-    table.insert(_FRAMES, self)
+    _FRAMES[#_FRAMES+1] = self
     CheckHighlightFrame:Show()
 
     return true

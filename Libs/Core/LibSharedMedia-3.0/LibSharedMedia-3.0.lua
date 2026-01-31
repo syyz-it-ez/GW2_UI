@@ -218,18 +218,19 @@ local function rebuildMediaList(mediatype)
 end
 
 function lib:Register(mediatype, key, data, langmask)
-    if type(mediatype) ~= "string" then
-        error(MAJOR..":Register(mediatype, key, data, langmask) - mediatype must be string, got "..type(mediatype))
+    local type_ = type
+    if type_(mediatype) ~= "string" then
+        error(MAJOR..":Register(mediatype, key, data, langmask) - mediatype must be string, got "..type_(mediatype))
     end
-    if type(key) ~= "string" then
-        error(MAJOR..":Register(mediatype, key, data, langmask) - key must be string, got "..type(key))
+    if type_(key) ~= "string" then
+        error(MAJOR..":Register(mediatype, key, data, langmask) - key must be string, got "..type_(key))
     end
     mediatype = mediatype:lower()
     if mediatype == lib.MediaType.FONT and ((langmask and band(langmask, LOCALE_MASK) == 0) or not (langmask or locale_is_western)) then
         -- ignore fonts that aren't flagged as supporting local glyphs on non-western clients
         return false
     end
-    if type(data) == "string" and (mediatype == lib.MediaType.BACKGROUND or mediatype == lib.MediaType.BORDER or mediatype == lib.MediaType.STATUSBAR or mediatype == lib.MediaType.SOUND) then
+    if type_(data) == "string" and (mediatype == lib.MediaType.BACKGROUND or mediatype == lib.MediaType.BORDER or mediatype == lib.MediaType.STATUSBAR or mediatype == lib.MediaType.SOUND) then
         local path = data:lower()
         if RESTRICTED_FILE_ACCESS and not path:find("^interface") then
             -- files accessed via path only allowed from interface folder

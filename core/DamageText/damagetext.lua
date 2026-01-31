@@ -283,21 +283,22 @@ AFP("animateTextNormalForDefaultFormat", animateTextNormalForDefaultFormat)
 
 --CLASSIC
 local function animateTextCriticalForClassicFormat(frame, gridIndex, x, y)
+    local mmax = math.max
     NUM_ACTIVE_FRAMES = NUM_ACTIVE_FRAMES + 1
     GW.AddToAnimation(frame:GetDebugName(), 0, 1, GetTime(),
-        math.min(CRITICAL_ANIMATION_DURATION * 2, (CRITICAL_ANIMATION_DURATION * (frame.dynamicScaleAdd + math.max(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER)))) / getDurationModifier()),
+        math.min(CRITICAL_ANIMATION_DURATION * 2, (CRITICAL_ANIMATION_DURATION * (frame.dynamicScaleAdd + mmax(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER)))) / getDurationModifier()),
         function(p)
             if not frame.anchorFrame or not frame.anchorFrame:IsShown() then
                 frame.anchorFrame = ClassicDummyFrame
                 classicPositionGrid(frame.anchorFrame)
             end
             if p < 0.05 and not frame.periodic then
-                frame:SetScale(math.max(0.1, GW.lerp(2 * frame.dynamicScale * frame.textScaleModifier * math.max(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER)), frame.dynamicScaleAdd, p / 0.05)))
+                frame:SetScale(mmax(0.1, GW.lerp(2 * frame.dynamicScale * frame.textScaleModifier * mmax(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER)), frame.dynamicScaleAdd, p / 0.05)))
             else
-                frame:SetScale(math.max(0.1, frame.dynamicScale * frame.textScaleModifier * math.max(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER))))
+                frame:SetScale(mmax(0.1, frame.dynamicScale * frame.textScaleModifier * mmax(0.1, tonumber(GW.settings.GW_COMBAT_TEXT_FONT_SIZE_CRIT_MODIFIER))))
             end
             frame:SetPoint("CENTER", frame.anchorFrame, "CENTER", 50 * x, 50 * y)
-            frame:SetAlpha(p > 0.9 and math.min(1, math.max(0, GW.lerp(1, 0, (p - 0.9) / 0.1))) or 1)
+            frame:SetAlpha(p > 0.9 and math.min(1, mmax(0, GW.lerp(1, 0, (p - 0.9) / 0.1))) or 1)
         end,
         nil,
         function()
@@ -350,7 +351,7 @@ local function createNewFontElement(self)
     f.string:SetJustifyV("MIDDLE")
     f.string:SetJustifyH("Left")
     f.id = createdFramesIndex
-    table.insert(fontStringList, f)
+    fontStringList[#fontStringList+1] = f
     createdFramesIndex = createdFramesIndex + 1
     return f
 end

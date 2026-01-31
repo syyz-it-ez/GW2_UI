@@ -434,7 +434,7 @@ local function loadBaseFrame()
 
     FriendsFrame.Show = FriendsFrame.Hide
 
-    table.insert(UISpecialFrames, fmGSW:GetName())
+    UISpecialFrames[#UISpecialFrames+1] = fmGSW:GetName()
     fmGSW.WindowHeader:GwSetFontTemplate(DAMAGE_TEXT_FONT, GW.TextSizeType.BIG_HEADER, nil, 2)
     fmGSW.WindowHeader:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
     fmGSW:SetAttribute("windowpanelopen", nil)

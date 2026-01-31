@@ -253,7 +253,7 @@ function lib:GetEditableLayoutNames()
   local names = {}
   for _, layout in ipairs(layoutInfo.layouts) do
     if layout.layoutType ~= Enum.EditModeLayoutType.Preset then
-      table.insert(names, layout.layoutName)
+      names[#names+1] = layout.layoutName
     end
   end
 
@@ -265,7 +265,7 @@ function lib:GetPresetLayoutNames()
   local names = {}
   for _, layout in ipairs(layoutInfo.layouts) do
     if layout.layoutType == Enum.EditModeLayoutType.Preset then
-      table.insert(names, layout.layoutName)
+      names[#names+1] = layout.layoutName
     end
   end
 

@@ -138,22 +138,23 @@ end
 GW.AddForProfiling("bag", "updateMoney", updateMoney)
 
 local function watchCurrency(self)
+    local tostr = tostring
     local watchSlot = 1
     local currencyCount = GetCurrencyListSize()
     for i = 1, currencyCount do
         local _, isHeader, _, _, isWatched, count, icon = GetCurrencyListInfo(i)
         if not isHeader and isWatched and watchSlot < 4 then
-            self["currency" .. tostring(watchSlot)]:SetText(CommaValue(count))
-            self["currency" .. tostring(watchSlot) .. "Texture"]:SetTexture(icon)
-            self["currency" .. tostring(watchSlot) .. "Frame"].CurrencyIdx = i
+            self["currency" .. tostr(watchSlot)]:SetText(CommaValue(count))
+            self["currency" .. tostr(watchSlot) .. "Texture"]:SetTexture(icon)
+            self["currency" .. tostr(watchSlot) .. "Frame"].CurrencyIdx = i
             watchSlot = watchSlot + 1
         end
     end
 
     for i = watchSlot, 3 do
-        self["currency" .. tostring(i)]:SetText("")
-        self["currency" .. tostring(i) .. "Texture"]:SetTexture(nil)
-        self["currency" .. tostring(watchSlot) .. "Frame"].CurrencyIdx = nil
+        self["currency" .. tostr(i)]:SetText("")
+        self["currency" .. tostr(i) .. "Texture"]:SetTexture(nil)
+        self["currency" .. tostr(watchSlot) .. "Frame"].CurrencyIdx = nil
     end
 end
 GW.AddForProfiling("bag", "watchCurrency", watchCurrency)
@@ -529,7 +530,7 @@ local function bagHeader_OnClick(self, btn)
             end,
             inputText = (function()
                 local customName = GW.settings["BAG_HEADER_NAME" .. bag_id]
-                if string.len(customName) == 0 then
+                if #customName == 0 then
                     customName = nil
                 end
                 if bag_id > 0 then

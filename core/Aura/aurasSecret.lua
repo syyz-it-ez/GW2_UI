@@ -176,7 +176,7 @@ local function updateAura(element, unit, data, position, isBuff)
     if not button then
         button = CreateAuraFrame(element:GetDebugName() .. 'Button' .. position, element)
 
-        table.insert(element, button)
+        element[#element+1] = button
         element.createdButtons = element.createdButtons + 1
     end
 
@@ -382,7 +382,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
             auras.sortedBuffs = table.wipe(auras.sortedBuffs or {})
 
             for auraInstanceID in next, auras.activeBuffs do
-                table.insert(auras.sortedBuffs, auras.allBuffs[auraInstanceID])
+                auras.sortedBuffs[#auras.sortedBuffs+1] = auras.allBuffs[auraInstanceID]
             end
 
             auras.sortedBuffs = sortAuraList(auras.sortedBuffs, self.frameInvert)
@@ -401,7 +401,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
             auras.sortedDebuffs = table.wipe(auras.sortedDebuffs or {})
 
             for auraInstanceID in next, auras.activeDebuffs do
-                table.insert(auras.sortedDebuffs, auras.allDebuffs[auraInstanceID])
+                auras.sortedDebuffs[#auras.sortedDebuffs+1] = auras.allDebuffs[auraInstanceID]
             end
 
             auras.sortedDebuffs = sortAuraList(auras.sortedDebuffs, self.frameInvert)

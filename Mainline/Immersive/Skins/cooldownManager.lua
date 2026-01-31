@@ -95,6 +95,7 @@ function CooldownManagerFunctions:RefreshIconBorder()
 end
 
 function CooldownManagerFunctions:SkinIcon(container, icon)
+    local tonum = tonumber
     CooldownManagerFunctions:UpdateTextContainer(container)
     icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 
@@ -108,11 +109,11 @@ function CooldownManagerFunctions:SkinIcon(container, icon)
         container.gwBackdrop = backDrop
     end
 
-    container.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-    container.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-    container.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-    container.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-    container.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+    container.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+    container.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+    container.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+    container.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+    container.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
     for _, region in next, { container:GetRegions() } do
         if region:IsObjectType("Texture") then

@@ -162,7 +162,7 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
         local reverseElements = { f.absorbOverlay, f.antiHeal, f.health, f.absorbbg, f.healPrediction, f.powerbar, f.powerbar.decay }
         if castbarInvert ~= false then
             -- Include castbar in inversion (default behavior when setting is true or nil)
-            table.insert(reverseElements, f.castingbarNormal)
+            reverseElements[#reverseElements+1] = f.castingbarNormal
         end
         
         for _, bar in ipairs(reverseElements) do
@@ -550,21 +550,23 @@ function GwUnitFrameMixin:NormalCastBarAnimation(powerPrec)
 end
 
 function GwUnitFrameMixin:ProtectedCastAnimation(powerPrec)
+    local mmax = math.max
+    local mmin = math.min
     local powerBarWidth = self.barWidth
     local bit = powerBarWidth / 16
     local spark = bit * math.floor(16 * (powerPrec))
     local segment = math.floor(16 * (powerPrec))
     local sparkPoint = (powerBarWidth * powerPrec) - 20
 
-    self.castingbarSpark:SetWidth(math.min(32, 32 * (powerPrec / 0.10)))
+    self.castingbarSpark:SetWidth(mmin(32, 32 * (powerPrec / 0.10)))
     if self.frameInvert then
-        self.castingbarSpark:SetPoint("RIGHT", self.castingbar, "RIGHT", -math.max(0, sparkPoint), 0)
-        self.castingbar:SetTexCoord(math.min(1, math.max(0, 0.0625 * segment)), 0, 0, 1)
-        self.castingbar:SetWidth(-math.min(powerBarWidth, math.max(1, spark)))
+        self.castingbarSpark:SetPoint("RIGHT", self.castingbar, "RIGHT", -mmax(0, sparkPoint), 0)
+        self.castingbar:SetTexCoord(mmin(1, mmax(0, 0.0625 * segment)), 0, 0, 1)
+        self.castingbar:SetWidth(-mmin(powerBarWidth, mmax(1, spark)))
     else
-        self.castingbarSpark:SetPoint("LEFT", self.castingbar, "LEFT", math.max(0, sparkPoint), 0)
-        self.castingbar:SetTexCoord(0, math.min(1, math.max(0, 0.0625 * segment)), 0, 1)
-        self.castingbar:SetWidth(math.min(powerBarWidth, math.max(1, spark)))
+        self.castingbarSpark:SetPoint("LEFT", self.castingbar, "LEFT", mmax(0, sparkPoint), 0)
+        self.castingbar:SetTexCoord(0, mmin(1, mmax(0, 0.0625 * segment)), 0, 1)
+        self.castingbar:SetWidth(mmin(powerBarWidth, mmax(1, spark)))
     end
 end
 

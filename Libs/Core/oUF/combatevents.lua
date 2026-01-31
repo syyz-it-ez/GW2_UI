@@ -62,7 +62,7 @@ function frame_metatable.__index:RegisterCombatEvent(event, handler)
 			if(func == handler) then return end
 		end
 
-		table.insert(current, handler)
+		current[#current+1] = handler
 	else
 		-- even with a single handler we want to make sure the frame is visible
 		listener[event][self] = setmetatable({handler}, self_metatable)

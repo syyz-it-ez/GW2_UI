@@ -308,12 +308,13 @@ end
 GW.AddForProfiling("bank", "bank_OnHide", bank_OnHide)
 
 local function bank_OnEvent(self, event, ...)
+    local sel = select
     if event == "BANKFRAME_OPENED" then
         self:Show()
     elseif event == "BANKFRAME_CLOSED" then
         self:Hide()
     elseif event == "PLAYERBANKSLOTS_CHANGED" then
-        local slot = select(1, ...)
+        local slot = sel(1, ...)
         if slot > NUM_BANKGENERIC_SLOTS then
             -- a bank bag was un/equipped
             for bag_id = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
@@ -334,8 +335,8 @@ local function bank_OnEvent(self, event, ...)
         updateBagBar(self.ItemFrame)
     elseif event == "ITEM_LOCKED" or event == "ITEM_UNLOCKED" then
         -- check if the item un/locked is a bank bag and gray it out if so
-        local bag = select(1, ...)
-        local slot = select(2, ...)
+        local bag = sel(1, ...)
+        local slot = sel(2, ...)
         if bag == BANK_CONTAINER and slot > NUM_BANKGENERIC_SLOTS then
             local bag_id = slot - NUM_BANKGENERIC_SLOTS
             local b = self.ItemFrame.bags[bag_id]
@@ -348,7 +349,7 @@ local function bank_OnEvent(self, event, ...)
             end
         end
     elseif event == "BAG_UPDATE" then
-        local bag_id = select(1, ...)
+        local bag_id = sel(1, ...)
         if bag_id == BANK_CONTAINER or bag_id > NUM_BAG_SLOTS then
             if self.ItemFrame:IsShown() then
                 updateFreeBankSlots(self.ItemFrame)

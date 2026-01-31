@@ -33,15 +33,16 @@ local strbyte, strlen, strsub, type = string.byte, string.len, string.sub, type
 -- returns the number of bytes used by the UTF-8 character at byte i in s
 -- also doubles as a UTF-8 character validator
 local function utf8charbytes(s, i)
+	local type_ = type
 	-- argument defaults
 	i = i or 1
 
 	-- argument checking
-	if type(s) ~= "string" then
-		error("bad argument #1 to 'utf8charbytes' (string expected, got ".. type(s).. ")")
+	if type_(s) ~= "string" then
+		error("bad argument #1 to 'utf8charbytes' (string expected, got ".. type_(s).. ")")
 	end
-	if type(i) ~= "number" then
-		error("bad argument #2 to 'utf8charbytes' (number expected, got ".. type(i).. ")")
+	if type_(i) ~= "number" then
+		error("bad argument #2 to 'utf8charbytes' (number expected, got ".. type_(i).. ")")
 	end
 
 	local c = strbyte(s, i)
@@ -155,18 +156,19 @@ end
 -- functions identically to string.sub except that i and j are UTF-8 characters
 -- instead of bytes
 local function utf8sub(s, i, j)
+	local type_ = type
 	-- argument defaults
 	j = j or -1
 
 	-- argument checking
-	if type(s) ~= "string" then
-		error("bad argument #1 to 'utf8sub' (string expected, got ".. type(s).. ")")
+	if type_(s) ~= "string" then
+		error("bad argument #1 to 'utf8sub' (string expected, got ".. type_(s).. ")")
 	end
-	if type(i) ~= "number" then
-		error("bad argument #2 to 'utf8sub' (number expected, got ".. type(i).. ")")
+	if type_(i) ~= "number" then
+		error("bad argument #2 to 'utf8sub' (number expected, got ".. type_(i).. ")")
 	end
-	if type(j) ~= "number" then
-		error("bad argument #3 to 'utf8sub' (number expected, got ".. type(j).. ")")
+	if type_(j) ~= "number" then
+		error("bad argument #3 to 'utf8sub' (number expected, got ".. type_(j).. ")")
 	end
 
 	local pos = 1
@@ -211,12 +213,13 @@ end
 
 -- replace UTF-8 characters based on a mapping table
 local function utf8replace(s, mapping)
+	local type_ = type
 	-- argument checking
-	if type(s) ~= "string" then
-		error("bad argument #1 to 'utf8replace' (string expected, got ".. type(s).. ")")
+	if type_(s) ~= "string" then
+		error("bad argument #1 to 'utf8replace' (string expected, got ".. type_(s).. ")")
 	end
-	if type(mapping) ~= "table" then
-		error("bad argument #2 to 'utf8replace' (table expected, got ".. type(mapping).. ")")
+	if type_(mapping) ~= "table" then
+		error("bad argument #2 to 'utf8replace' (table expected, got ".. type_(mapping).. ")")
 	end
 
 	local pos = 1

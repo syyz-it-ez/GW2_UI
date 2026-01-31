@@ -401,6 +401,7 @@ end
 GW.FixHotKeyPosition = FixHotKeyPosition
 
 local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPet, hideUnused)
+    local tonum = tonumber
     local btn = _G[buttonName]
 
     if btn.icon then
@@ -476,11 +477,11 @@ local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPe
         btn.gwBackdrop = backDrop
 
         if not isStanceButton and not isPet then
-            btn.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-            btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+            btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         end
     end
 
@@ -787,6 +788,7 @@ end
 GW.AddForProfiling("Actionbars2", "updateMultiBar", updateMultiBar)
 
 local function UpdateMultibarButtons()
+    local tonum = tonumber
     local margin = GW.settings.MULTIBAR_MARGIIN
     local fmActionbar = MainMenuBarArtFrame
     local fmMultiBar
@@ -846,11 +848,11 @@ local function UpdateMultibarButtons()
                     used_height = used_height + settings.size + margin
                 end
 
-                btn.gwBackdrop.bg:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border1:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border2:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border3:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border4:SetAlpha(tonumber(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
                 if hideActionbuttonBackdrop then
                     btn.gwBackdrop:Hide()

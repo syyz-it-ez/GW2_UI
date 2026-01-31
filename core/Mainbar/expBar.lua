@@ -149,6 +149,8 @@ local function UpdateXPValues(self)
 end
 
 local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
+    local mfloor = math.floor
+    local sformat = string.format
     local showRepu = false
     local valPrecRepu = 0
     local repuLevel, repuNextLevel = nil, nil
@@ -161,9 +163,9 @@ local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
         local currentValue, maxValueParagon = C_Reputation.GetFactionParagonInfo(data.factionID)
         currentValue = currentValue % maxValueParagon
         valPrecRepu = (maxValueParagon > 0) and (currentValue / maxValueParagon) or 0
-        tinsert(self.tooltip, string.format("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
+        tinsert(self.tooltip, sformat("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
             data.name, REPUTATION,
-            FormatNumber(currentValue), FormatNumber(maxValueParagon), math.floor(valPrecRepu * 100)))
+            FormatNumber(currentValue), FormatNumber(maxValueParagon), mfloor(valPrecRepu * 100)))
         self.RepuBar:SetStatusBarColor(FACTION_BAR_COLORS[9].r, FACTION_BAR_COLORS[9].g, FACTION_BAR_COLORS[9].b)
         isParagon = true
         isFriend = (friendReputationInfo and friendReputationInfo.friendshipFactionID > 0)
@@ -171,14 +173,14 @@ local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
         if friendReputationInfo.nextThreshold then
             valPrecRepu = (friendReputationInfo.standing - friendReputationInfo.reactionThreshold) /
                             (friendReputationInfo.nextThreshold - friendReputationInfo.reactionThreshold)
-            tinsert(self.tooltip, string.format("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
+            tinsert(self.tooltip, sformat("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
                 friendReputationInfo.name, REPUTATION,
                 FormatNumber(friendReputationInfo.standing - friendReputationInfo.reactionThreshold),
                 FormatNumber(friendReputationInfo.nextThreshold - friendReputationInfo.reactionThreshold),
-                math.floor(valPrecRepu * 100)))
+                mfloor(valPrecRepu * 100)))
         else
             valPrecRepu = 1
-            tinsert(self.tooltip, string.format("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
+            tinsert(self.tooltip, sformat("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
                 friendReputationInfo.name, REPUTATION,
                 FormatNumber(friendReputationInfo.maxRep), FormatNumber(friendReputationInfo.maxRep), 100))
         end
@@ -194,11 +196,11 @@ local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
             else
                 valPrecRepu = (majorFactionData.renownReputationEarned or 0) / majorFactionData.renownLevelThreshold
             end
-            tinsert(self.tooltip, string.format("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
+            tinsert(self.tooltip, sformat("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
                 data.name, REPUTATION,
                 FormatNumber(majorFactionData.renownReputationEarned or 0),
                 FormatNumber(majorFactionData.renownLevelThreshold),
-                math.floor(valPrecRepu * 100)))
+                mfloor(valPrecRepu * 100)))
             self.RepuBar:SetStatusBarColor(FACTION_BAR_COLORS[11].r, FACTION_BAR_COLORS[11].g, FACTION_BAR_COLORS[11].b)
             isMajor = true
         end
@@ -208,14 +210,14 @@ local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
         local nextThreshold = data.nextReactionThreshold or 0
         if (currentStanding - currentThreshold) == 0 then
             valPrecRepu = 1
-            tinsert(self.tooltip, string.format("%s %s 21,000 / 21,000 |cffa6a6a6 (%d%%)|r", data.name, REPUTATION, 100))
+            tinsert(self.tooltip, sformat("%s %s 21,000 / 21,000 |cffa6a6a6 (%d%%)|r", data.name, REPUTATION, 100))
         else
             valPrecRepu = (currentStanding - currentThreshold) / (nextThreshold - currentThreshold)
-            tinsert(self.tooltip, string.format("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
+            tinsert(self.tooltip, sformat("%s %s %s / %s |cffa6a6a6 (%d%%)|r",
                 data.name, REPUTATION,
                 FormatNumber(currentStanding - currentThreshold),
                 FormatNumber(nextThreshold - currentThreshold),
-                math.floor(valPrecRepu * 100)))
+                mfloor(valPrecRepu * 100)))
         end
         local reaction = data.reaction or 1
         self.RepuBar:SetStatusBarColor(FACTION_BAR_COLORS[reaction].r, FACTION_BAR_COLORS[reaction].g, FACTION_BAR_COLORS[reaction].b)
@@ -317,7 +319,7 @@ end
 
 local function AddBar(visibleBars, show, bar, candy, spark, onHide)
     if show then
-        table.insert(visibleBars, {bar = bar, candy = candy, spark = spark})
+        visibleBars[#visibleBars+1] = {bar = bar, candy = candy, spark = spark}
     else
         bar:Hide()
         candy:Hide()
@@ -360,6 +362,8 @@ local function LayoutBars(self, showExp, showSecondary, showRepu)
 end
 
 local function UpdateData(self)
+    local mmax = math.max
+    local mmin = math.min
     local animationSpeed = 15
     local maxPlayerLevel = GetMaxLevel()
     local restingIconString = IsResting() and " |TInterface/AddOns/GW2_UI/textures/icons/resting-icon.png:16:16:0:0|t " or ""
@@ -423,7 +427,7 @@ local function UpdateData(self)
         self.AzeritBarCandy:SetValue(valPrecAzerite)
         GW.AddToAnimation("AzeritBarAnimation", self.AzeritBar.AzeritBarAnimation, valPrecAzerite, GetTime(), animationSpeed,
             function(p)
-                self.AzeritBar.Spark:SetWidth(math.max(8, math.min(9, self.AzeritBar:GetWidth() * p)))
+                self.AzeritBar.Spark:SetWidth(mmax(8, mmin(9, self.AzeritBar:GetWidth() * p)))
                 self.AzeritBar:SetValue(p)
                 self.AzeritBar.Spark:SetPoint("LEFT", self.AzeritBar:GetWidth() * p - 8, 0)
             end)
@@ -447,7 +451,7 @@ local function UpdateData(self)
 
     if showExp then
         local GainBigExp = false
-        local FlareBreakPoint = math.max(0.05, 0.15 * (1 - (GW.mylevel / maxPlayerLevel)))
+        local FlareBreakPoint = mmax(0.05, 0.15 * (1 - (GW.mylevel / maxPlayerLevel)))
         if (valPrec - experiencebarAnimation) > FlareBreakPoint then
             GainBigExp = true
             flareAnim(self)
@@ -461,10 +465,10 @@ local function UpdateData(self)
         local expSoundCooldown = 0
         local startTime = GetTime()
         animationSpeed = Diff(experiencebarAnimation, valPrec)
-        animationSpeed = math.min(15, math.max(5, 10 * animationSpeed))
+        animationSpeed = mmin(15, mmax(5, 10 * animationSpeed))
 
         GW.AddToAnimation("experiencebarAnimation", experiencebarAnimation, valPrec, GetTime(), animationSpeed, function(step)
-            self.ExpBar.Spark:SetWidth(math.max(8, math.min(9, self.ExpBar:GetWidth() * step)))
+            self.ExpBar.Spark:SetWidth(mmax(8, mmin(9, self.ExpBar:GetWidth() * step)))
             if not GainBigExp then
                 self.ExpBar:SetValue(step)
                 self.ExpBar.Spark:SetPoint("LEFT", self.ExpBar:GetWidth() * step - 8, 0)
@@ -475,7 +479,7 @@ local function UpdateData(self)
             self.ExpBar.Rested:SetPoint("LEFT", self.ExpBar, "LEFT", self.ExpBar:GetWidth() * step, 0)
 
             if GainBigExp and self.barOverlay.flare.soundCooldown < GetTime() then
-                expSoundCooldown = math.max(0.1, lerp(0.1, 2, math.sin((GetTime() - startTime) / animationSpeed) * math.pi * 0.5))
+                expSoundCooldown = mmax(0.1, lerp(0.1, 2, math.sin((GetTime() - startTime) / animationSpeed) * math.pi * 0.5))
                 self.ExpBar:SetValue(step)
                 self.ExpBar.Spark:SetPoint("LEFT", self.ExpBar:GetWidth() * step - 8, 0)
                 local flarePoint = ((UIParent:GetWidth() - 180) * step) + 90
@@ -499,7 +503,7 @@ local function UpdateData(self)
             GetTime(),
             animationSpeed,
             function()
-                self.PetBar.Spark:SetWidth(math.max(8, math.min(9, self.PetBar:GetWidth() * animations.petBarAnimation.progress)))
+                self.PetBar.Spark:SetWidth(mmax(8, mmin(9, self.PetBar:GetWidth() * animations.petBarAnimation.progress)))
                 self.PetBar:SetValue(animations.petBarAnimation.progress)
                 self.PetBar.Spark:SetPoint("LEFT", self.PetBar:GetWidth() * animations.petBarAnimation.progress - 8, 0)
             end
@@ -511,7 +515,7 @@ local function UpdateData(self)
         animationSpeed = 15
         self.RepuBarCandy:SetValue(valPrecRepu)
         GW.AddToAnimation("repuBarAnimation", self.RepuBar.repuBarAnimation, valPrecRepu, GetTime(), animationSpeed, function(p)
-            self.RepuBar.Spark:SetWidth(math.max(8, math.min(9, self.RepuBar:GetWidth() * p)))
+            self.RepuBar.Spark:SetWidth(mmax(8, mmin(9, self.RepuBar:GetWidth() * p)))
             self.RepuBar:SetValue(p)
             self.RepuBar.Spark:SetPoint("LEFT", self.RepuBar:GetWidth() * p - 8, 0)
         end)

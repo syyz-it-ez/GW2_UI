@@ -38,7 +38,7 @@ function oUF:Factory(func)
 	if(IsLoggedIn() and factory.active) then
 		return func(self)
 	else
-		table.insert(queue, func)
+		queue[#queue+1] = func
 	end
 end
 
