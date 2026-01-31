@@ -114,6 +114,7 @@ local function LoadPlayerPanel(sWindow)
             end
         end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["DODGEBAR_ENABLED"] = true}, isPrivateSetting = true})
     p_player:AddOption(GW.NewSign .. L["Show Skyridingbar"], nil, {getterSetter = "showSkyridingbar", callback = function() if GwDodgeBar then GwDodgeBar:ToggleSkyridingBar() end end, dependence = {["HEALTHGLOBE_ENABLED"] = true}, hidden = not GW.Retail})
+    p_player:AddOption(L["Show Portrait"], L["Display the character portrait on the unit frame."], {getterSetter = "player_SHOW_PORTRAIT", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})
 
     local statusBarTexturesOptions, statusBarTexturesLables = GW.GetStatusBarTextures()
     p_player:AddOptionDropdown(L["Healthbar texture"], nil, { getterSetter = "playerFrameHealthBarTexture", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, optionsList = statusBarTexturesOptions, optionNames = statusBarTexturesLables, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})

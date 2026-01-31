@@ -90,6 +90,12 @@ function GwPlayerUnitFrameMixin:ToggleSettings()
     self:SetHeight(40 + self.healthContainer:GetHeight() + self.powerbarContainer:GetHeight())
     self:SetWidth(90 + self.healthContainer:GetWidth())
 
+    -- Portrait visibility
+    local showPortrait = GW.settings.player_SHOW_PORTRAIT
+    if self.portrait then self.portrait:SetShown(showPortrait) end
+    if self.background then self.background:SetShown(showPortrait) end
+    if self.portraitInner then self.portraitInner:SetShown(showPortrait) end
+
     local frameFaderSettings = GW.settings.playerFrameFader
     if frameFaderSettings.hover or frameFaderSettings.combat or frameFaderSettings.casting or frameFaderSettings.dynamicflight or frameFaderSettings.health or frameFaderSettings.vehicle or frameFaderSettings.playertarget then
         GW.FrameFadeEnable(self)
