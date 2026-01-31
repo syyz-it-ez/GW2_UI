@@ -840,6 +840,27 @@ local function updateMainBar()
     MainActionBar:SetMovable(0)
     MainActionBar.ignoreFramePositionManager = true
 
+    -- Register main action bar as moveable
+    local L = GW.L
+    local defaultYOfs = GW.settings.XPBAR_ENABLED and 31 or 17
+    RegisterMovableFrame(fmActionbar, L["Main Action Bar"], "MainActionBar_pos", ALL .. "," .. BINDING_HEADER_ACTIONBAR, nil, {"default", "scaleable"}, true)
+
+    -- Anchor the main action bar to its mover
+    fmActionbar:ClearAllPoints()
+    fmActionbar:SetPoint("CENTER", fmActionbar.gwMover, "CENTER", 0, 0)
+    hooksecurefunc(fmActionbar, "SetPoint", function(_, _, anchor)
+        if anchor ~= fmActionbar.gwMover then
+            fmActionbar:ClearAllPoints()
+            fmActionbar:SetPoint("CENTER", fmActionbar.gwMover, "CENTER", 0, 0)
+        end
+    end)
+
+    -- Position mover at default location if not moved
+    if not fmActionbar.isMoved then
+        fmActionbar.gwMover:ClearAllPoints()
+        fmActionbar.gwMover:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, defaultYOfs)
+    end
+
     -- set fader logic
     createFaderAnim(fmActionbar, true)
     fmActionbar.gw_FadeShowing = true
