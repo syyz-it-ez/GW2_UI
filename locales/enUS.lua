@@ -305,6 +305,7 @@ L["Player frame in target frame style"] = true
 L["PvP Indicator"] = true
 L["Invert target frame"] = true
 L["Invert focus frame"] = true
+L["Invert castbar with frame"] = true
 L["Talking Head"] = true
 L["Skins"] = true
 L["Adjust Skin settings."] = true

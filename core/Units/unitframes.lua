@@ -21,7 +21,7 @@ local function castingbarOnUpdate(self)
     end
 end
 
-local function CreateUnitFrame(name, revert, animatedPowerbar)
+local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
     local template
     if GW.Retail then
         if revert then
@@ -157,15 +157,26 @@ local function CreateUnitFrame(name, revert, animatedPowerbar)
         f.healthString:SetJustifyH("RIGHT")
         f.powerbar.label:SetPoint("RIGHT", f.powerbar, "RIGHT", -5, 0)
         f.powerbar.label:SetJustifyH("RIGHT")
-        local reverseElements = { f.absorbOverlay, f.antiHeal, f.health, f.absorbbg, f.healPrediction, f.powerbar, f.castingbarNormal, f.powerbar.decay }
+        
+        -- Build list of elements to reverse, conditionally including castbar
+        local reverseElements = { f.absorbOverlay, f.antiHeal, f.health, f.absorbbg, f.healPrediction, f.powerbar, f.powerbar.decay }
+        if castbarInvert ~= false then
+            -- Include castbar in inversion (default behavior when setting is true or nil)
+            table.insert(reverseElements, f.castingbarNormal)
+        end
+        
         for _, bar in ipairs(reverseElements) do
             if bar and bar.SetReverseFill then
                 bar:SetReverseFill(true)
             end
         end
-        f.castingbarNormal.internalBar:SetTexCoord(1, 0, 0, 1)
-        if f.castingbarSpark then
-            f.castingbarSpark:SetTexCoord(1, 0, 0, 1)
+        
+        -- Only invert castbar texture if castbarInvert is enabled
+        if castbarInvert ~= false then
+            f.castingbarNormal.internalBar:SetTexCoord(1, 0, 0, 1)
+            if f.castingbarSpark then
+                f.castingbarSpark:SetTexCoord(1, 0, 0, 1)
+            end
         end
     end
 
@@ -938,7 +949,8 @@ function GwUnitFrameMixin:ToggleTargetFrameCombatFeedback()
 end
 
 local function LoadUnitFrame(unit, frameInvert)
-    local unitframe = CreateUnitFrame("Gw" .. unit .."UnitFrame", frameInvert)
+    local castbarInvert = GW.settings[unit:lower() .. "_CASTBAR_INVERT"]
+    local unitframe = CreateUnitFrame("Gw" .. unit .."UnitFrame", frameInvert, nil, castbarInvert)
     unit = unit:lower()
     unitframe.unit = unit
     unitframe.type = "NormalTarget"

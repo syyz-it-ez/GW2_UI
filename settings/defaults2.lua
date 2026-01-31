@@ -355,6 +355,7 @@ GW.globalDefault = {
         target_AURAS_ON_TOP= false,
         target_FLOATING_COMBAT_TEXT= true,
         target_FRAME_INVERT= false,
+        target_CASTBAR_INVERT= true,
         target_FRAME_ALT_BACKGROUND= false,
         target_ILVL = "PVP_LEVEL",
         target_SHORT_VALUES = false,
@@ -377,6 +378,7 @@ GW.globalDefault = {
         focus_CLASS_COLOR= true,
         focus_CASTINGBAR_DATA= false,
         focus_FRAME_INVERT= false,
+        focus_CASTBAR_INVERT= true,
         focus_FRAME_ALT_BACKGROUND= false,
         focus_SHORT_VALUES = false,
 
