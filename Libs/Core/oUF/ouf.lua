@@ -468,16 +468,17 @@ do
 	}
 
 	function getCondition(...)
-		local cond = ''
+		local _cond_parts = {}
 
 		for i = 1, select('#', ...) do
 			local short = select(i, ...)
 
 			local condition = conditions[short]
 			if(condition) then
-				cond = cond .. condition
+				_cond_parts[#_cond_parts+1] = condition
 			end
 		end
+		local cond = table.concat(_cond_parts)
 
 		return cond .. 'hide'
 	end

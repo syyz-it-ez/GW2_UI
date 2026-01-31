@@ -312,10 +312,11 @@ end
 
 do
     local function GetLink(linkType, displayText, ...)
-        local text = ""
+        local _text_parts = {}
         for i, value in next, { ... } do
-            text = text .. (i == 1 and format("|H%s:", linkType) or ":") .. value
+            _text_parts[#_text_parts+1] = (i == 1 and format("|H%s:", linkType) or ":") .. value
         end
+        local text = table.concat(_text_parts)
 
         return text .. (displayText and format("|h%s|h", displayText) or "|h")
     end

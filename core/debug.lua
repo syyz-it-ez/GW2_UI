@@ -27,11 +27,12 @@ local function AddProfiling(name, func)
 end
 
 local function Debug(...)
-    local msg = ""
+    local _msg_parts = {}
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        msg = msg .. tostring(arg) .. " "
+        _msg_parts[#_msg_parts+1] = tostring(arg) .. " "
     end
+    local msg = table.concat(_msg_parts)
     D.DebugLog("GW2_UI", "%s", msg)
 end
 

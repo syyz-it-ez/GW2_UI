@@ -615,11 +615,12 @@ local function Notice(...)
     if not msg_tab then
         return
     end
-    local msg = ""
+    local _msg_parts = {}
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
-        msg = msg .. tostring(arg) .. " "
+        _msg_parts[#_msg_parts+1] = tostring(arg) .. " "
     end
+    local msg = table.concat(_msg_parts)
     msg_tab:AddMessage(GW.Gw2Color .. "GW2 UI|r: " .. msg)
 end
 GW.Notice = Notice
@@ -982,29 +983,31 @@ end
 GW.ColorGradient = ColorGradient
 
 local function TextGradient(text, ...)
-    local msg, total = "", string.utf8len(text)
+    local _parts = {}
+    local total = string.utf8len(text)
     local idx, num = 0, select("#", ...) / 3
 
     for i = 1, total do
         local x = string.utf8sub(text, i, i)
         if strmatch(x, "%s") then
-            msg = msg .. x
+            _parts[#_parts+1] = x
             idx = idx + 1
         else
             local segment, relperc = math.modf((idx / total) * num)
             local r1, g1, b1, r2, g2, b2 = select((segment * 3) + 1, ...)
 
             if not r2 then
-                msg = msg .. GW.RGBToHex(r1, g1, b1, nil, x .. '|r')
+                _parts[#_parts+1] = GW.RGBToHex(r1, g1, b1, nil, x .. '|r')
             else
-                msg = msg .. GW.RGBToHex(r1 + (r2 - r1) * relperc, g1 + (g2 - g1) * relperc, b1 + (b2 - b1) * relperc, nil, x ..'|r')
+                _parts[#_parts+1] = GW.RGBToHex(r1 + (r2 - r1) * relperc, g1 + (g2 - g1) * relperc, b1 + (b2 - b1) * relperc, nil, x ..'|r')
                 idx = idx + 1
             end
         end
     end
 
-    return msg
+    return table.concat(_parts)
 end
+
 GW.TextGradient = TextGradient
 
 local function StatusBarColorGradient(bar, value, max, backdrop)
@@ -1113,12 +1116,13 @@ end
 GW.Matches = Matches
 
 local function Join(del, ...)
-    local s = ""
+    local _s_parts = {}
     for _, v in Each(...) do
         if not not (type(v) == "string" and v:trim() ~= "") then
-            s = s .. (s == "" and "" or del or " ") .. v
+            _s_parts[#_s_parts+1] = (#_s_parts == 0 and "" or del or " ") .. v
         end
     end
+    local s = table.concat(_s_parts)
     return s
 end
 GW.Join = Join
