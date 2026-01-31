@@ -890,8 +890,23 @@ local function powerHoly(self, event, ...)
     end
 
     local pType = select(2, ...)
-    if event ~= "CLASS_POWER_INIT" and pType ~= "HOLY_POWER" then
+    -- Handle UNIT_MAXPOWER (pType is empty) or HOLY_POWER updates
+    local isMaxPowerUpdate = event == "UNIT_MAXPOWER" or event == "CLASS_POWER_INIT"
+    if not isMaxPowerUpdate and pType ~= "HOLY_POWER" then
         return
+    end
+
+    -- Update slot visibility when max power changes (fixes initial login showing only 3 slots)
+    if isMaxPowerUpdate then
+        local maxPoints = UnitPowerMax("player", 9)
+        for _, v in pairs(self.paladin.power) do
+            local id = tonumber(v:GetParentKey())
+            if id > maxPoints then
+                v:Hide()
+            else
+                v:Show()
+            end
+        end
     end
 
     local old_power = self.gwPower
