@@ -38,6 +38,12 @@ function GwPlayerUnitFrameMixin:ToggleSettings()
     self.classColor = GW.settings.player_CLASS_COLOR
     self.showAbsorbBar = GW.settings.PLAYER_SHOW_ABSORB_BAR
 
+    -- Portrait visibility
+    local showPortrait = GW.settings.player_SHOW_PORTRAIT
+    if self.portrait then self.portrait:SetShown(showPortrait) end
+    if self.background then self.background:SetShown(showPortrait) end
+    if self.portraitInner then self.portraitInner:SetShown(showPortrait) end
+
     local frameFaderSettings = GW.settings.playerFrameFader
     if frameFaderSettings.hover or frameFaderSettings.combat or frameFaderSettings.casting or frameFaderSettings.dynamicflight or frameFaderSettings.health or frameFaderSettings.vehicle or frameFaderSettings.playertarget then
         GW.FrameFadeEnable(self)

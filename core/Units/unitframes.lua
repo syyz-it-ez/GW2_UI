@@ -888,6 +888,14 @@ function GwUnitFrameMixin:ToggleSettings()
 
     self.altBg:SetShown(GW.settings[unit .. "_FRAME_ALT_BACKGROUND"])
 
+    -- Portrait visibility
+    local showPortrait = GW.settings[unit .. "_SHOW_PORTRAIT"]
+    if showPortrait ~= nil then
+        if self.portrait then self.portrait:SetShown(showPortrait) end
+        if self.background then self.background:SetShown(showPortrait) end
+        if self.portraitInner then self.portraitInner:SetShown(showPortrait) end
+    end
+
     self.auras:ClearAllPoints()
     self.auras:SetPoint("TOPLEFT", self.castingbarBackground, "BOTTOMLEFT", 2, -15)
 

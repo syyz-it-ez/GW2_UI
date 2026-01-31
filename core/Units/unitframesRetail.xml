@@ -49,7 +49,7 @@
                 </Texture>
             </Layer>
             <Layer level="ARTWORK" textureSubLevel="5">
-                <Texture file="Interface/AddOns/GW2_UI/textures/units/targetportraitinner.png">
+                <Texture parentKey="portraitInner" file="Interface/AddOns/GW2_UI/textures/units/targetportraitinner.png">
                     <Size x="65" y="65"></Size>
                     <Anchors>
                         <Anchor point="CENTER" relativeKey="$parent.portrait" relativePoint="CENTER"></Anchor>
@@ -312,7 +312,7 @@
                 </Texture>
             </Layer>
             <Layer level="ARTWORK" textureSubLevel="5">
-                <Texture file="Interface/AddOns/GW2_UI/textures/units/targetportraitinner.png">
+                <Texture parentKey="portraitInner" file="Interface/AddOns/GW2_UI/textures/units/targetportraitinner.png">
                     <Size x="65" y="65"></Size>
                     <Anchors>
                         <Anchor point="CENTER" relativeKey="$parent.portrait" relativePoint="CENTER"></Anchor>

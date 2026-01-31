@@ -360,6 +360,7 @@ GW.globalDefault = {
         target_FRAME_ALT_BACKGROUND= false,
         target_ILVL = "PVP_LEVEL",
         target_SHORT_VALUES = false,
+        target_SHOW_PORTRAIT = true,
 
         focus_TARGET_ENABLED= true,
         focus_TARGET_SHOW_CASTBAR= true,
@@ -382,6 +383,9 @@ GW.globalDefault = {
         focus_CASTBAR_INVERT= true,
         focus_FRAME_ALT_BACKGROUND= false,
         focus_SHORT_VALUES = false,
+        focus_SHOW_PORTRAIT = true,
+
+        player_SHOW_PORTRAIT = true,
 
         target_pos= {
             point= "TOP",

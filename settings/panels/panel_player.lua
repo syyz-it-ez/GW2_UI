@@ -93,6 +93,7 @@ local function LoadPlayerPanel(sWindow)
                 GwDodgeBar:SetupBar()
             end
         end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["DODGEBAR_ENABLED"] = true}, isPrivateSetting = true})
+    p_player:AddOption(L["Show Portrait"], L["Display the character portrait on the unit frame."], {getterSetter = "player_SHOW_PORTRAIT", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})
 
     -- BUFF
     p_player_aura:AddOptionDropdown(L["Player Buff Growth Direction"], nil, { getterSetter = "PlayerBuffs.GrowDirection", callback = function() GW.UpdateAuraHeader(GW2UIPlayerBuffs) end, optionsList = {"UP", "DOWN", "UPR", "DOWNR"}, optionNames = {StrUpper(L["Up"], 1, 1), StrUpper(L["Down"], 1, 1), L["Up and right"], L["Down and right"]}, dependence = {["PLAYER_BUFFS_ENABLED"] = true}})
