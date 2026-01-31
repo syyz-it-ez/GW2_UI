@@ -499,6 +499,15 @@ GW.globalDefault = {
         },
         focustargetFrameHealthBarTexture = "GW2_UI_2_DEFAULT",
 
+        MainActionBar_pos= {
+            point= "BOTTOM",
+            relativePoint= "BOTTOM",
+            xOfs= 0,
+            yOfs= 0,
+            hasMoved= false,
+        },
+        MainActionBar_pos_scale= 1,
+
         MULTIBAR_MARGIIN = 2,
         MAINBAR_MARGIIN = 5,
 
