@@ -97,6 +97,7 @@ local function LoadPlayerPanel(sWindow)
 
     p_player:AddOption(GW.NewSign .. L["Show Dodgebar"], nil, {getterSetter = "showDodgebar", callback = function() if GwDodgeBar then GwDodgeBar:ToggleDodgeBar(); GwDodgeBar:ToggleSkyridingBar() end end, dependence = {["HEALTHGLOBE_ENABLED"] = true}})
 
+    p_player:AddOption(L["Dodge Bar"], L["Enable the dodge bar which tracks movement abilities."], {getterSetter = "DODGEBAR_ENABLED", callback = function() GW.ShowRlPopup = true end, dependence = {["HEALTHGLOBE_ENABLED"] = true}})
     p_player:AddOptionText(L["Dodge Bar Ability"], L["Enter the spell ID which should be tracked by the dodge bar.\nIf no ID is entered, the default abilities based on your specialization and talents are tracked."], { getterSetter = "PLAYER_TRACKED_DODGEBAR_SPELL", callback = function(self)
             local spellId = self:GetNumber()
             local name = ""
@@ -111,7 +112,7 @@ local function LoadPlayerPanel(sWindow)
                 GwDodgeBar:InitBar()
                 GwDodgeBar:SetupBar()
             end
-        end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["showDodgebar"] = true}, isPrivateSetting = true})
+        end, dependence = {["HEALTHGLOBE_ENABLED"] = true, ["DODGEBAR_ENABLED"] = true}, isPrivateSetting = true})
     p_player:AddOption(GW.NewSign .. L["Show Skyridingbar"], nil, {getterSetter = "showSkyridingbar", callback = function() if GwDodgeBar then GwDodgeBar:ToggleSkyridingBar() end end, dependence = {["HEALTHGLOBE_ENABLED"] = true}, hidden = not GW.Retail})
 
     local statusBarTexturesOptions, statusBarTexturesLables = GW.GetStatusBarTextures()
@@ -129,7 +130,6 @@ local function LoadPlayerPanel(sWindow)
     p_player:AddOptionSlider(GW.NewSign .. L["Powerbar Height"], nil, { getterSetter = "playerFramePowerBarSize.height", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, min = 1, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})
     p_player:AddOptionSlider(GW.NewSign .. L["Powerbar Text X-Offset"], nil, { getterSetter = "playerFramePowerBarTextOffset.x", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, min = -100, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})
     p_player:AddOptionSlider(GW.NewSign .. L["Powerbar Text Y-Offset"], nil, { getterSetter = "playerFramePowerBarTextOffset.y", callback = function() if GwPlayerUnitFrame then GwPlayerUnitFrame:ToggleSettings() end end, min = -100, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["HEALTHGLOBE_ENABLED"] = true, ["PLAYER_AS_TARGET_FRAME"] = true}})
-
 
     -- BUFF
     p_player_aura:AddOptionDropdown(L["Player Buff Growth Direction"], nil, { getterSetter = "PlayerBuffs.GrowDirection", callback = function() GW.UpdateAuraHeader(GW2UIPlayerBuffs) end, optionsList = {"UP", "DOWN", "UPR", "DOWNR"}, optionNames = {StrUpper(L["Up"], 1, 1), StrUpper(L["Down"], 1, 1), L["Up and right"], L["Down and right"]}, dependence = {["PLAYER_BUFFS_ENABLED"] = true}})
