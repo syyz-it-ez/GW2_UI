@@ -158,7 +158,7 @@ local function GetItemEquipmentSetName(itemIDOrLink)
             for _, equipmentSetItemId in pairs(equipmentSetItems) do
               if equipmentSetItemId == itemIDOrLink then
                 local equipmentSetName = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetID);
-                if string.len(equipmentSetName) > 5 then
+                if #equipmentSetName > 5 then
                     equipmentSetName = string.sub(equipmentSetName, 1, 5)
                 end
                 return equipmentSetName

@@ -342,15 +342,16 @@ local function HeaderOnEvent(self, event)
 end
 
 local function HeaderOnUpdate(self, elapsed)
+    local next_ = next
     local header = self.frame
 
     if header.elapsedSpells and header.elapsedSpells > 0.1 then
-        local button, value = next(header.spells)
+        local button, value = next_(header.spells)
         while button do
             UpdateAura(button, value)
 
             header.spells[button] = nil
-            button, value = next(header.spells)
+            button, value = next_(header.spells)
         end
 
         header.elapsedSpells = 0
@@ -359,7 +360,7 @@ local function HeaderOnUpdate(self, elapsed)
     end
 
     if header.elapsedEnchants and header.elapsedEnchants > 0.5 then
-        local index, enchant = next(header.enchants)
+        local index, enchant = next_(header.enchants)
         if index then
             local _, main, _, _, _, offhand, _, _, _, ranged = GetWeaponEnchantInfo()
 
@@ -367,7 +368,7 @@ local function HeaderOnUpdate(self, elapsed)
                 UpdateTempEnchant(enchant, enchant:GetID(), (index == 1 and main) or (index == 2 and offhand) or (index == 3 and ranged))
 
                 header.enchants[index] = nil
-                index, enchant = next(header.enchants)
+                index, enchant = next_(header.enchants)
             end
         end
 

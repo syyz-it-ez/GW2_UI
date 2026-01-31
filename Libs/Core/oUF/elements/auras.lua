@@ -200,7 +200,7 @@ local function updateAura(element, unit, data, position)
 		--]]
 		button = (element.CreateButton or CreateButton) (element, position)
 
-		table.insert(element, button)
+		element[#element+1] = button
 		element.createdButtons = element.createdButtons + 1
 	end
 
@@ -362,6 +362,9 @@ local function processData(element, unit, data, filter)
 end
 
 local function UpdateAuras(self, event, unit, updateInfo)
+	local mmin = math.min
+	local tsort = table.sort
+	local type_ = type
 	if(self.unit ~= unit) then return end
 
 	local isFullUpdate = not updateInfo or updateInfo.isFullUpdate
@@ -380,14 +383,14 @@ local function UpdateAuras(self, event, unit, updateInfo)
 		local buffsChanged = false
 		local numBuffs = auras.numBuffs or 32
 		local buffFilter = auras.buffFilter or auras.filter or 'HELPFUL'
-		if(type(buffFilter) == 'function') then
+		if(type_(buffFilter) == 'function') then
 			buffFilter = buffFilter(auras, unit)
 		end
 
 		local debuffsChanged = false
 		local numDebuffs = auras.numDebuffs or 40
 		local debuffFilter = auras.debuffFilter or auras.filter or 'HARMFUL'
-		if(type(debuffFilter) == 'function') then
+		if(type_(debuffFilter) == 'function') then
 			debuffFilter = debuffFilter(auras, unit)
 		end
 
@@ -523,7 +526,7 @@ local function UpdateAuras(self, event, unit, updateInfo)
 				auras.sortedBuffs = table.wipe(auras.sortedBuffs or {})
 
 				for auraInstanceID in next, auras.activeBuffs do
-					table.insert(auras.sortedBuffs, auras.allBuffs[auraInstanceID])
+					auras.sortedBuffs[#auras.sortedBuffs+1] = auras.allBuffs[auraInstanceID]
 				end
 
 				--[[ Override: Auras:SortBuffs(a, b)
@@ -538,15 +541,15 @@ local function UpdateAuras(self, event, unit, updateInfo)
 
 				Overridden by the more specific SortBuffs and/or SortDebuffs overrides if they are defined.
 				--]]
-				table.sort(auras.sortedBuffs, auras.SortBuffs or auras.SortAuras or SortAuras)
+				tsort(auras.sortedBuffs, auras.SortBuffs or auras.SortAuras or SortAuras)
 
-				numVisible = math.min(numBuffs, numTotal, #auras.sortedBuffs)
+				numVisible = mmin(numBuffs, numTotal, #auras.sortedBuffs)
 
 				for i = 1, numVisible do
 					updateAura(auras, unit, auras.sortedBuffs[i], i)
 				end
 			else
-				numVisible = math.min(numBuffs, numTotal, #auras.sortedBuffs)
+				numVisible = mmin(numBuffs, numTotal, #auras.sortedBuffs)
 			end
 
 			-- do it before adding the gap because numDebuffs could end up being 0
@@ -554,7 +557,7 @@ local function UpdateAuras(self, event, unit, updateInfo)
 				auras.sortedDebuffs = table.wipe(auras.sortedDebuffs or {})
 
 				for auraInstanceID in next, auras.activeDebuffs do
-					table.insert(auras.sortedDebuffs, auras.allDebuffs[auraInstanceID])
+					auras.sortedDebuffs[#auras.sortedDebuffs+1] = auras.allDebuffs[auraInstanceID]
 				end
 
 				--[[ Override: Auras:SortDebuffs(a, b)
@@ -562,10 +565,10 @@ local function UpdateAuras(self, event, unit, updateInfo)
 
 				Defaults to [AuraUtil.DefaultAuraCompare](https://github.com/Gethe/wow-ui-source/search?q=symbol:DefaultAuraCompare).
 				--]]
-				table.sort(auras.sortedDebuffs, auras.SortDebuffs or auras.SortAuras or SortAuras)
+				tsort(auras.sortedDebuffs, auras.SortDebuffs or auras.SortAuras or SortAuras)
 			end
 
-			numDebuffs = math.min(numDebuffs, numTotal - numVisible, #auras.sortedDebuffs)
+			numDebuffs = mmin(numDebuffs, numTotal - numVisible, #auras.sortedDebuffs)
 
 			if(auras.gap and numVisible > 0 and numDebuffs > 0) then
 				-- adjust the number of visible debuffs if there's an overflow
@@ -580,7 +583,7 @@ local function UpdateAuras(self, event, unit, updateInfo)
 					local button = auras[numVisible]
 					if(not button) then
 						button = (auras.CreateButton or CreateButton) (auras, numVisible)
-						table.insert(auras, button)
+						auras[#auras+1] = button
 						auras.createdButtons = auras.createdButtons + 1
 					end
 
@@ -661,7 +664,7 @@ local function UpdateAuras(self, event, unit, updateInfo)
 		local buffsChanged = false
 		local numBuffs = buffs.num or 32
 		local buffFilter = buffs.filter or 'HELPFUL'
-		if(type(buffFilter) == 'function') then
+		if(type_(buffFilter) == 'function') then
 			buffFilter = buffFilter(buffs, unit)
 		end
 
@@ -728,12 +731,12 @@ local function UpdateAuras(self, event, unit, updateInfo)
 			buffs.sorted = table.wipe(buffs.sorted or {})
 
 			for auraInstanceID in next, buffs.active do
-				table.insert(buffs.sorted, buffs.all[auraInstanceID])
+				buffs.sorted[#buffs.sorted+1] = buffs.all[auraInstanceID]
 			end
 
-			table.sort(buffs.sorted, buffs.SortBuffs or buffs.SortAuras or SortAuras)
+			tsort(buffs.sorted, buffs.SortBuffs or buffs.SortAuras or SortAuras)
 
-			local numVisible = math.min(numBuffs, #buffs.sorted)
+			local numVisible = mmin(numBuffs, #buffs.sorted)
 
 			for i = 1, numVisible do
 				updateAura(buffs, unit, buffs.sorted[i], i)
@@ -770,7 +773,7 @@ local function UpdateAuras(self, event, unit, updateInfo)
 		local debuffsChanged = false
 		local numDebuffs = debuffs.num or 40
 		local debuffFilter = debuffs.filter or 'HARMFUL'
-		if(type(debuffFilter) == 'function') then
+		if(type_(debuffFilter) == 'function') then
 			debuffFilter = debuffFilter(debuffs, unit)
 		end
 
@@ -837,12 +840,12 @@ local function UpdateAuras(self, event, unit, updateInfo)
 			debuffs.sorted = table.wipe(debuffs.sorted or {})
 
 			for auraInstanceID in next, debuffs.active do
-				table.insert(debuffs.sorted, debuffs.all[auraInstanceID])
+				debuffs.sorted[#debuffs.sorted+1] = debuffs.all[auraInstanceID]
 			end
 
-			table.sort(debuffs.sorted, debuffs.SortDebuffs or debuffs.SortAuras or SortAuras)
+			tsort(debuffs.sorted, debuffs.SortDebuffs or debuffs.SortAuras or SortAuras)
 
-			local numVisible = math.min(numDebuffs, #debuffs.sorted)
+			local numVisible = mmin(numDebuffs, #debuffs.sorted)
 
 			for i = 1, numVisible do
 				updateAura(debuffs, unit, debuffs.sorted[i], i)

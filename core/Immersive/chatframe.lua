@@ -772,13 +772,14 @@ GW.UpdateChatKeywords = UpdateChatKeywords
 
 local protectLinks = {}
 local function CheckKeyword(message, author)
+    local pairs_ = pairs
     local letSound = not SoundTimer and author ~= PLAYER_NAME and GW.settings.CHAT_KEYWORDS_ALERT_NEW ~= "None"
 
     for hyperLink in gmatch(message, "|c%x-|H.-|h.-|h|r") do
         protectLinks[hyperLink] = gsub(hyperLink,"%s","|s")
 
         if letSound then
-            for keyword in pairs(Keywords) do
+            for keyword in pairs_(Keywords) do
                 if hyperLink == keyword then
                     SoundTimer = C_Timer.NewTimer(5, function() SoundTimer = nil end)
                     PlaySoundFile(GW.Libs.LSM:Fetch("sound", GW.settings.CHAT_KEYWORDS_ALERT_NEW), "Master")
@@ -789,7 +790,7 @@ local function CheckKeyword(message, author)
         end
     end
 
-    for hyperLink, tempLink in pairs(protectLinks) do
+    for hyperLink, tempLink in pairs_(protectLinks) do
         message = gsub(message, GW.EscapeString(hyperLink), tempLink)
     end
 
@@ -800,7 +801,7 @@ local function CheckKeyword(message, author)
             local tempWord = gsub(word, "[%s%p]", "")
             local lowerCaseWord = strlower(tempWord)
 
-            for keyword in pairs(Keywords) do
+            for keyword in pairs_(Keywords) do
                 if lowerCaseWord == strlower(keyword) or (lowerCaseWord == strlower(GW.myname) and keyword == "%MYNAME%") then
                     local keywordColor = GW.private.CHAT_KEYWORDS_ALERT_COLOR
                     word = gsub(word, tempWord, format("%s%s|r", GW.RGBToHex(keywordColor.r, keywordColor.g, keywordColor.b), tempWord))
@@ -836,7 +837,7 @@ local function CheckKeyword(message, author)
         end
     end
 
-    for hyperLink, tempLink in pairs(protectLinks) do
+    for hyperLink, tempLink in pairs_(protectLinks) do
         rebuiltString = gsub(rebuiltString, GW.EscapeString(tempLink), hyperLink)
         protectLinks[hyperLink] = nil
     end
@@ -2486,9 +2487,10 @@ local function SocialQueueMessage(guid, message)
 end
 
 local function SocialQueueEvent(...)
+    local sel = select
     if not GW.settings.CHAT_SOCIAL_LINK then return end
-    local guid = select(1, ...)
-    local numAddedItems = select(2, ...)
+    local guid = sel(1, ...)
+    local numAddedItems = sel(2, ...)
     if numAddedItems == 0 or not guid then return end
 
     local players = GW.Retail and C_SocialQueue.GetGroupMembers(guid) or nil
@@ -2537,9 +2539,9 @@ local function SocialQueueEvent(...)
                 if queueName ~= "" then
                     if output == "" then
                         output = gsub(queueName, "\n.+","")
-                        queueCount = queueCount + select(2, gsub(queueName, "\n",""))
+                        queueCount = queueCount + sel(2, gsub(queueName, "\n",""))
                     else
-                        queueCount = queueCount + 1 + select(2, gsub(queueName, "\n",""))
+                        queueCount = queueCount + 1 + sel(2, gsub(queueName, "\n",""))
                     end
                 end
             end
@@ -2568,6 +2570,7 @@ end
 GW.UpdateChatSettings = UpdateSettings
 
 local function LoadChat()
+    local ipairs_ = ipairs
     DelayGuildMOTD()
 
     if not GW.settings.CHATFRAME_ENABLED or GW.ShouldBlockIncompatibleAddon("Chat") then return end
@@ -2617,7 +2620,7 @@ local function LoadChat()
         FriendsMicroButtonCount:SetPoint("TOP", FriendsMicroButton, "BOTTOM", 1, 1)
     end
 
-    for _, frameName in ipairs(CHAT_FRAMES) do
+    for _, frameName in ipairs_(CHAT_FRAMES) do
         local frame = _G[frameName]
         -- possible fix for chatframe floating max error
         frame.oldAlpha = frame.oldAlpha and frame.oldAlpha or DEFAULT_CHATFRAME_ALPHA
@@ -2654,7 +2657,7 @@ local function LoadChat()
     end)
 
     hooksecurefunc("FCF_DockUpdate", function()
-        for _, frameName in ipairs(CHAT_FRAMES) do
+        for _, frameName in ipairs_(CHAT_FRAMES) do
             local frame = _G[frameName]
             local _, _, _, _, _, _, _, _, isDocked = GetChatWindowInfo(frame:GetID())
             local editbox = _G[frameName .. "EditBox"]
@@ -2735,7 +2738,7 @@ local function LoadChat()
             frame.Container:Show()
         end
         --Set Button and container position after drag for every container
-        for _, frameName in ipairs(CHAT_FRAMES) do
+        for _, frameName in ipairs_(CHAT_FRAMES) do
             local frameForPosition = _G[frameName]
             if frameForPosition:IsShown() and frameForPosition.hasContainer then setButtonPosition(frameForPosition) end
         end
@@ -2776,7 +2779,7 @@ local function LoadChat()
 
     if GW.settings.chatHistory then DisplayChatHistory() end
 
-    for _, frameName in ipairs(CHAT_FRAMES) do
+    for _, frameName in ipairs_(CHAT_FRAMES) do
         local frame = _G[frameName]
         if frame and frame:IsShown() then
             if GW.settings.CHATFRAME_FADE then

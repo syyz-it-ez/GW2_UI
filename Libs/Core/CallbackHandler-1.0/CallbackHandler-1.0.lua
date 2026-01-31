@@ -40,6 +40,8 @@ end
 --   UnregisterAllName - name of the API to unregister all callbacks, default "UnregisterAllCallbacks". false == don't publish this API.
 
 function CallbackHandler:New(target, RegisterName, UnregisterName, UnregisterAllName)
+	local sel = select
+	local type_ = type
 
     RegisterName = RegisterName or "RegisterCallback"
     UnregisterName = UnregisterName or "UnregisterCallback"
@@ -88,7 +90,7 @@ function CallbackHandler:New(target, RegisterName, UnregisterName, UnregisterAll
     --   "addonId" (instead of self) with function ref, leads to functionref(...)
     -- all with an optional arg, which, if present, gets passed as first argument (after self if present)
     target[RegisterName] = function(self, eventname, method, ... --[[actually just a single arg]])
-        if type(eventname) ~= "string" then
+        if type_(eventname) ~= "string" then
             error("Usage: "..RegisterName.."(eventname, method[, arg]): 'eventname' - string expected.", 2)
         end
 
@@ -96,36 +98,36 @@ function CallbackHandler:New(target, RegisterName, UnregisterName, UnregisterAll
 
         local first = not rawget(events, eventname) or not next(events[eventname])	-- test for empty before. not test for one member after. that one member may have been overwritten.
 
-        if type(method) ~= "string" and type(method) ~= "function" then
+        if type_(method) ~= "string" and type_(method) ~= "function" then
             error("Usage: "..RegisterName.."(\"eventname\", \"methodname\"): 'methodname' - string or function expected.", 2)
         end
 
         local regfunc
 
-        if type(method) == "string" then
+        if type_(method) == "string" then
             -- self["method"] calling style
-            if type(self) ~= "table" then
+            if type_(self) ~= "table" then
                 error("Usage: "..RegisterName.."(\"eventname\", \"methodname\"): self was not a table?", 2)
             elseif self==target then
                 error("Usage: "..RegisterName.."(\"eventname\", \"methodname\"): do not use Library:"..RegisterName.."(), use your own 'self'", 2)
-            elseif type(self[method]) ~= "function" then
+            elseif type_(self[method]) ~= "function" then
                 error("Usage: "..RegisterName.."(\"eventname\", \"methodname\"): 'methodname' - method '"..tostring(method).."' not found on self.", 2)
             end
 
-            if select("#",...)>=1 then	-- this is not the same as testing for arg==nil!
-                local arg=select(1,...)
+            if sel("#",...)>=1 then	-- this is not the same as testing for arg==nil!
+                local arg=sel(1,...)
                 regfunc = function(...) self[method](self,arg,...) end
             else
                 regfunc = function(...) self[method](self,...) end
             end
         else
             -- function ref with self=object or self="addonId" or self=thread
-            if type(self)~="table" and type(self)~="string" and type(self)~="thread" then
+            if type_(self)~="table" and type_(self)~="string" and type_(self)~="thread" then
                 error("Usage: "..RegisterName.."(self or \"addonId\", eventname, method): 'self or addonId': table or string or thread expected.", 2)
             end
 
-            if select("#",...)>=1 then	-- this is not the same as testing for arg==nil!
-                local arg=select(1,...)
+            if sel("#",...)>=1 then	-- this is not the same as testing for arg==nil!
+                local arg=sel(1,...)
                 regfunc = function(...) method(arg,...) end
             else
                 regfunc = method
@@ -154,7 +156,7 @@ function CallbackHandler:New(target, RegisterName, UnregisterName, UnregisterAll
         if not self or self==target then
             error("Usage: "..UnregisterName.."(eventname): bad 'self'", 2)
         end
-        if type(eventname) ~= "string" then
+        if type_(eventname) ~= "string" then
             error("Usage: "..UnregisterName.."(eventname): 'eventname' - string expected.", 2)
         end
         if rawget(events, eventname) and events[eventname][self] then
@@ -172,16 +174,16 @@ function CallbackHandler:New(target, RegisterName, UnregisterName, UnregisterAll
     -- OPTIONAL: Unregister all callbacks for given selfs/addonIds
     if UnregisterAllName then
         target[UnregisterAllName] = function(...)
-            if select("#",...)<1 then
+            if sel("#",...)<1 then
                 error("Usage: "..UnregisterAllName.."([whatFor]): missing 'self' or \"addonId\" to unregister events for.", 2)
             end
-            if select("#",...)==1 and ...==target then
+            if sel("#",...)==1 and ...==target then
                 error("Usage: "..UnregisterAllName.."([whatFor]): supply a meaningful 'self' or \"addonId\"", 2)
             end
 
 
-            for i=1,select("#",...) do
-                local self = select(i,...)
+            for i=1,sel("#",...) do
+                local self = sel(i,...)
                 if registry.insertQueue then
                     for eventname, callbacks in pairs(registry.insertQueue) do
                         if callbacks[self] then

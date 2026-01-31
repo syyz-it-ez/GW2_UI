@@ -549,6 +549,7 @@ local function updateAchievementFrameSummaryAchievement(self, achievementID)
 end
 
 local function skinAchievementFrameListAchievement(self)
+    local sel = select
     self.skinned = true
     self:GwStripTextures()
     self:SetHeight(120)
@@ -568,11 +569,11 @@ local function skinAchievementFrameListAchievement(self)
     self.trackBackground:SetPoint("TOPLEFT",self,"TOPLEFT",0,0)
     self.trackBackground:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/achievementfootertracked.png")
 
-    local tbg = select(2,self.Tracked:GetRegions())
-    local highlight = select(3,self.Tracked:GetRegions())
-    local tText = select(1,self.Tracked:GetRegions())
-    local hover = select(4,self.Tracked:GetRegions())
-    local checked = select(5,self.Tracked:GetRegions())
+    local tbg = sel(2,self.Tracked:GetRegions())
+    local highlight = sel(3,self.Tracked:GetRegions())
+    local tText = sel(1,self.Tracked:GetRegions())
+    local hover = sel(4,self.Tracked:GetRegions())
+    local checked = sel(5,self.Tracked:GetRegions())
     tbg:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/watchicon.png")
     highlight:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/watchiconactive.png")
     checked:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/watchiconactive.png")
@@ -1060,6 +1061,7 @@ local function updatePointsDisplay()
 end
 
 local function skinAchevement()
+    local sel = select
     AchievementFrameCategories_OnLoad(AchievementFrameCategories)
     -- function to "hack" the blizzard functions
     hooksecurefunc("AchievementFrameBaseTab_OnClick", function(tabIndex)
@@ -1486,25 +1488,25 @@ local function skinAchevement()
         AchievementFrameSummaryAchievement1:SetPoint("TOPLEFT", AchievementFrameSummaryAchievementsHeader, "BOTTOMLEFT", 0, -5)
         AchievementFrameSummaryAchievement1:SetWidth(width)
         AchievementFrameSummaryAchievement1:SetHeight(height)
-        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement1, select(1, ...))
+        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement1, sel(1, ...))
 
         AchievementFrameSummaryAchievement2:ClearAllPoints()
         AchievementFrameSummaryAchievement2:SetPoint("TOPLEFT", AchievementFrameSummaryAchievement1, "TOPRIGHT", 5, 0)
         AchievementFrameSummaryAchievement2:SetWidth(width)
         AchievementFrameSummaryAchievement2:SetHeight(height)
-        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement2, select(2, ...))
+        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement2, sel(2, ...))
 
         AchievementFrameSummaryAchievement3:ClearAllPoints()
         AchievementFrameSummaryAchievement3:SetPoint("TOPLEFT", AchievementFrameSummaryAchievement1, "BOTTOMLEFT", 0, -5)
         AchievementFrameSummaryAchievement3:SetWidth(width)
         AchievementFrameSummaryAchievement3:SetHeight(height)
-        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement3, select(3, ...))
+        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement3, sel(3, ...))
 
         AchievementFrameSummaryAchievement4:ClearAllPoints()
         AchievementFrameSummaryAchievement4:SetPoint("TOPLEFT", AchievementFrameSummaryAchievement3, "TOPRIGHT", 5, 0)
         AchievementFrameSummaryAchievement4:SetWidth(width)
         AchievementFrameSummaryAchievement4:SetHeight(height)
-        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement4, select(4, ...))
+        updateAchievementFrameSummaryAchievement(AchievementFrameSummaryAchievement4, sel(4, ...))
     end)
     -- make the frame movable
     GW.MakeFrameMovable(AchievementFrame, nil, "AchievementWindow", true)

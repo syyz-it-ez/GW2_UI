@@ -147,11 +147,12 @@ end
 ------------------------------------------------------------------------
 
 function Unpack()
+    local pairs_ = pairs
     if unpackInProgress then return end
     unpackInProgress = true
     debug("Unpacking data...")
 
-    for id, info in pairs(realmData) do
+    for id, info in pairs_(realmData) do
         -- Aegwynn,PvE,enUS,US,CST
         -- Nathrezim,PvE,deDE,EU
         -- Азурегос,PvE,ruRU,EU,Azuregos
@@ -183,7 +184,7 @@ function Unpack()
 
         if not realmData[connectionID] then
             -- nameless server used to host connected realms
-            table.insert(connectedRealms, connectionID)
+            connectedRealms[#connectedRealms+1] = connectionID
             realmData[connectionID] = {
                 region = region,
                 connections = connectedRealms
@@ -201,16 +202,16 @@ function Unpack()
     local autoCompleteRealms = GetAutoCompleteRealms()
     if #autoCompleteRealms > 0 then
         local autoCompleteIDs = {}
-        for _, name in pairs(autoCompleteRealms) do
-            for realmID, realm in pairs(realmData) do
+        for _, name in pairs_(autoCompleteRealms) do
+            for realmID, realm in pairs_(realmData) do
                 if realm.nameForAPI == name then
-                    table.insert(autoCompleteIDs, realmID)
+                    autoCompleteIDs[#autoCompleteIDs+1] = realmID
                     break
                 end
             end
         end
         if #autoCompleteIDs == #autoCompleteRealms then
-            for _, realmID in pairs(autoCompleteIDs) do
+            for _, realmID in pairs_(autoCompleteIDs) do
                 local realm = realmData[realmID]
                 if realm and not realm.connections then
                     realm.connections = autoCompleteIDs

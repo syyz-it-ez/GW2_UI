@@ -3,15 +3,16 @@ local oUF = ns.oUF
 local Private = oUF.Private
 
 function Private.argcheck(value, num, ...)
-	assert(type(num) == 'number', "Bad argument #2 to 'argcheck' (number expected, got " .. type(num) .. ')')
+	local type_ = type
+	assert(type_(num) == 'number', "Bad argument #2 to 'argcheck' (number expected, got " .. type_(num) .. ')')
 
 	for i = 1, select('#', ...) do
-		if(type(value) == select(i, ...)) then return end
+		if(type_(value) == select(i, ...)) then return end
 	end
 
 	local types = string.join(', ', ...)
 	local name = debugstack(2,2,0):match(": in function [`<](.-)['>]")
-	error(string.format("Bad argument #%d to '%s' (%s expected, got %s)", num, name, types, type(value)), 3)
+	error(string.format("Bad argument #%d to '%s' (%s expected, got %s)", num, name, types, type_(value)), 3)
 end
 
 function Private.print(...)

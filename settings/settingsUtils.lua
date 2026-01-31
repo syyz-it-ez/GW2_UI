@@ -6,7 +6,7 @@ local RoundDec = GW.RoundDec
 local function CreateSettingProxy(fullPath, isPrivateSetting, isMultiselect)
     local keys = {}
     for key in string.gmatch(fullPath, "[^%.]+") do
-        table.insert(keys, key)
+        keys[#keys+1] = key
     end
 
     return {
@@ -95,7 +95,7 @@ local function AddDependenciesToOptionWidgetTooltip()
                                 end
                             end
 
-                            table.insert(valuesList, display)
+                            valuesList[#valuesList+1] = display
                         end
                         expectedText = table.concat(valuesList, ", ")
                     else
@@ -108,7 +108,7 @@ local function AddDependenciesToOptionWidgetTooltip()
                     local color = match and "|cff66cc66" or "|cffcc6666"  -- green or red
                     expectedText = color .. expectedText .. "|r"
 
-                    table.insert(of.dependenciesInfo, { name = string.format("|cffaaaaaa%s|r", settingsWidget.settingsPath .. displayName), expected = expectedText })
+                    of.dependenciesInfo[#of.dependenciesInfo+1] = { name = string.format("|cffaaaaaa%s|r", settingsWidget.settingsPath .. displayName), expected = expectedText }
                 end
             end
         end
@@ -156,7 +156,7 @@ local function CreateOption(optionType, panel, name, desc, values)
         opt.getDefault = values.getDefault
     end
 
-    table.insert(panel.gwOptions, opt)
+    panel.gwOptions[#panel.gwOptions+1] = opt
 
     if values.incompatibleAddons then
         local isLoaded, loadedAddons, isOverride = GW.GetIncompatibleAddonInfo(values.incompatibleAddons)
@@ -229,6 +229,7 @@ function GwSettingsPanelMixin:AddOptionDropdown(name, desc, values)
 end
 
 local function setDependenciesOption(type, settingName, SetEnable, deactivateColor, overrideColor)
+    local unpack_ = unpack
     local of = GW.FindSettingsWidgetByOption(settingName)
     if not of then return end
 
@@ -248,7 +249,7 @@ local function setDependenciesOption(type, settingName, SetEnable, deactivateCol
         enabled = false
     end
 
-    of.title:SetTextColor(unpack(color))
+    of.title:SetTextColor(unpack_(color))
 
     if type == "slider" then
         if enabled then
@@ -258,11 +259,11 @@ local function setDependenciesOption(type, settingName, SetEnable, deactivateCol
             of.slider:Disable()
             of.inputFrame.input:Disable()
         end
-        of.inputFrame.input:SetTextColor(unpack(inputColor))
+        of.inputFrame.input:SetTextColor(unpack_(inputColor))
     elseif type == "text" then
         if of.inputFrame and of.inputFrame.input then
             of.inputFrame.input:SetEnabled(enabled)
-            of.inputFrame.input:SetTextColor(unpack(inputColor))
+            of.inputFrame.input:SetTextColor(unpack_(inputColor))
         end
     elseif type == "dropdown" then
         if enabled then
@@ -271,7 +272,7 @@ local function setDependenciesOption(type, settingName, SetEnable, deactivateCol
             of.dropDown:Disable()
         end
         if of.dropDown.Text then
-            of.dropDown.Text:SetTextColor(unpack(inputColor))
+            of.dropDown.Text:SetTextColor(unpack_(inputColor))
         end
     elseif type == "button" then
         if enabled then
@@ -467,6 +468,7 @@ local function HandleIncompatibility(v, button)
 end
 
 local function SettingsInitOptionWidget(of, v, panel)
+    local tonum = tonumber
     local t = {}
     for _, path in ipairs{panel.header and panel.header:GetText(), panel.breadcrumb and panel.breadcrumb:GetText()} do
         if path and path ~= "" then t[#t+1] = path end
@@ -522,7 +524,7 @@ local function SettingsInitOptionWidget(of, v, panel)
             local text
             for _, selection in ipairs(selections) do
                 if not selection:IsSelectionIgnored() then
-                    table.insert(texts, MenuUtil.GetElementText(selection))
+                    texts[#texts+1] = MenuUtil.GetElementText(selection)
                 end
             end
             if #texts > 0 then
@@ -624,10 +626,10 @@ local function SettingsInitOptionWidget(of, v, panel)
             else
                 local roundValue = RoundDec(self:GetValue(), of.decimalNumbers)
 
-                of.set(tonumber(roundValue))
+                of.set(tonum(roundValue))
                 self:GetParent().inputFrame.input:SetText(roundValue)
                 if v.callback then
-                    v.callback(tonumber(roundValue))
+                    v.callback(tonum(roundValue))
                 end
             end
         end)
@@ -639,8 +641,8 @@ local function SettingsInitOptionWidget(of, v, panel)
                 local roundValue = RoundDec(self:GetNumber(), of.decimalNumbers) or v.min
 
                 self:ClearFocus()
-                if tonumber(roundValue) > v.max then self:SetText(v.max) end
-                if tonumber(roundValue) < v.min then self:SetText(v.min) end
+                if tonum(roundValue) > v.max then self:SetText(v.max) end
+                if tonum(roundValue) < v.min then self:SetText(v.min) end
                 roundValue = RoundDec(self:GetNumber(), of.decimalNumbers) or v.min
                 if v.step and v.step > 0 then
                     local min_value = v.min or 0
@@ -649,9 +651,9 @@ local function SettingsInitOptionWidget(of, v, panel)
                 self:GetParent():GetParent().slider:SetValue(roundValue)
                 self:SetText(roundValue)
 
-                of.set(tonumber(roundValue))
+                of.set(tonum(roundValue))
                 if v.callback then
-                    v.callback(tonumber(roundValue))
+                    v.callback(tonum(roundValue))
                 end
             end
         end)

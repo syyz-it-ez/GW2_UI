@@ -50,3 +50,7 @@ Temporary Items
 # =========================
 
 .vscode
+
+# ALAO Backups
+*.alao-bak
+scripts-backup-*.zip

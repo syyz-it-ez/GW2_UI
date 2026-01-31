@@ -476,6 +476,7 @@ end
 GW.UpdateGroupVisibility = UpdateGroupVisibility
 
 local function UpdateGridHeader(profile)
+    local tonum = tonumber
     -- Update header values
     local header = headers[profile]
     if header.isUpdating then return end
@@ -485,11 +486,11 @@ local function UpdateGridHeader(profile)
     local x, y = DIRECTION_TO_HORIZONTAL_SPACING_MULTIPLIER[direction], DIRECTION_TO_VERTICAL_SPACING_MULTIPLIER[direction]
     local numGroups = header.numGroups
     local isParty = profile == "PARTY"
-    local groupsPerRowCol = isParty and 1 or tonumber(settings.groupsPerColumnRow[profile])
+    local groupsPerRowCol = isParty and 1 or tonum(settings.groupsPerColumnRow[profile])
     local width, height, newCols, newRows = 0, 0, 0, 0
-    local groupSpacing = tonumber(settings.groupSpacing[profile])
-    local horizontalSpacing = tonumber(settings.horizontalSpacing[profile])
-    local verticalSpacing = tonumber(settings.verticalSpacing[profile])
+    local groupSpacing = tonum(settings.groupSpacing[profile])
+    local horizontalSpacing = tonum(settings.horizontalSpacing[profile])
+    local verticalSpacing = tonum(settings.verticalSpacing[profile])
     local WIDTH = GW.Scale(settings.raidWidth[profile]) + horizontalSpacing
     local HEIGHT = GW.Scale(settings.raidHeight[profile]) + verticalSpacing
     local HEIGHT_FIVE = HEIGHT * 5

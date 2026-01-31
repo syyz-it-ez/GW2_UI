@@ -621,6 +621,7 @@ end
 GW.ToggleMover = ToggleMover
 
 local function LoadMovers(layoutManager)
+    local tonum = tonumber
     -- Create mover settings frame
     local fnMf_OnDragStart = function(self)
         self:StartMoving()
@@ -712,7 +713,7 @@ local function LoadMovers(layoutManager)
 
     smallSettingsContainer.moverSettingsFrame.defaultButtons.gridSlider.slider:SetScript("OnValueChanged", function(self)
         local roundValue = GW.RoundDec(self:GetValue(), 0)
-        GW.settings.gridSpacing = tonumber(roundValue)
+        GW.settings.gridSpacing = tonum(roundValue)
         self:GetParent().inputFrame.input:SetText(roundValue)
         ShowGrid()
     end)
@@ -720,15 +721,15 @@ local function LoadMovers(layoutManager)
         local roundValue = GW.RoundDec(self:GetNumber(), 0) or 20
 
         self:ClearFocus()
-        if tonumber(roundValue) > 300 then self:SetText(300) end
-        if tonumber(roundValue) < 20 then self:SetText(20) end
+        if tonum(roundValue) > 300 then self:SetText(300) end
+        if tonum(roundValue) < 20 then self:SetText(20) end
         roundValue = GW.RoundDec(self:GetNumber(), 0) or 20
 
         roundValue = floor((roundValue - 20) / 2 + 0.5) * 2 + 20
         self:GetParent():GetParent().slider:SetValue(roundValue)
         self:SetText(roundValue)
 
-        GW.settings.gridSpacing = tonumber(roundValue)
+        GW.settings.gridSpacing = tonum(roundValue)
         ShowGrid()
     end)
 

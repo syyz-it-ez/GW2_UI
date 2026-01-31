@@ -47,6 +47,7 @@ end
 GW.ParseSimpleObjective = ParseSimpleObjective
 
 local function ParseCriteria(quantity, totalQuantity, criteriaString, isMythicKeystone, mythicKeystoneCurrentValue, isWeightedProgress)
+    local sformat = string.format
     if not (quantity and totalQuantity and criteriaString) then
         return criteriaString
     end
@@ -54,13 +55,13 @@ local function ParseCriteria(quantity, totalQuantity, criteriaString, isMythicKe
     if isMythicKeystone then
         if isWeightedProgress then
             local percent = mythicKeystoneCurrentValue / totalQuantity * 100
-            return string.format("%s (%d/%d) %s", GW.GetLocalizedNumber(format("%.2f%%", percent)), mythicKeystoneCurrentValue, totalQuantity, criteriaString)
+            return sformat("%s (%d/%d) %s", GW.GetLocalizedNumber(format("%.2f%%", percent)), mythicKeystoneCurrentValue, totalQuantity, criteriaString)
         end
-        return string.format("%d/%d %s", quantity, totalQuantity, criteriaString)
+        return sformat("%d/%d %s", quantity, totalQuantity, criteriaString)
     end
 
     if totalQuantity == 0 then
-        return string.format("%d %s", quantity, criteriaString)
+        return sformat("%d %s", quantity, criteriaString)
     end
 
     local startPattern = "^%d+/%d+%s+"
@@ -70,7 +71,7 @@ local function ParseCriteria(quantity, totalQuantity, criteriaString, isMythicKe
         return criteriaString
     end
 
-    return string.format("%d/%d %s", quantity, totalQuantity, criteriaString)
+    return sformat("%d/%d %s", quantity, totalQuantity, criteriaString)
 end
 GW.ParseCriteria = ParseCriteria
 
@@ -214,7 +215,7 @@ function GwObjectivesTrackerMixin:OnEvent(_, ...)
             GW.ObjectiveTrackerContainer[config.enumName] = frame
             frame:SetPoint("TOPRIGHT", GW.QuestTrackerScrollableContainer[#GW.QuestTrackerScrollableContainer], "BOTTOMRIGHT")
 
-            table.insert(GW.QuestTrackerScrollableContainer, frame)
+            GW.QuestTrackerScrollableContainer[#GW.QuestTrackerScrollableContainer+1] = frame
 
             if frame.InitModule then frame:InitModule() end
 
@@ -230,7 +231,7 @@ function GwObjectivesTrackerMixin:OnEvent(_, ...)
 end
 
 function GwObjectivesTrackerMixin:AddAddonContainerLoadingToQueue(config)
-    table.insert(addonContainerWaitingQueue, config)
+    addonContainerWaitingQueue[#addonContainerWaitingQueue+1] = config
 
     if not self:IsEventRegistered("ADDON_LOADED") then
         self:RegisterEvent("ADDON_LOADED")
@@ -239,6 +240,7 @@ function GwObjectivesTrackerMixin:AddAddonContainerLoadingToQueue(config)
 end
 
 local function LoadObjectivesTracker()
+    local ipairs_ = ipairs
     -- container configuration
     local objectivesTrackerConfiguration = {
         { name = "GwObjectivesNotification", scrollable = false, mixin = GwObjectivesTrackerNotificationMixin, enumName = "Notification", template = "GwObjectivesNotification", load = true },
@@ -271,7 +273,7 @@ local function LoadObjectivesTracker()
     GW.QuestTrackerScrollableContainer = {}
 
     -- create container
-    for _, config in ipairs(objectivesTrackerConfiguration) do
+    for _, config in ipairs_(objectivesTrackerConfiguration) do
         local shouldLoad = config.load
         if shouldLoad and config.addonName then
             shouldLoad = C_AddOns.IsAddOnLoaded(config.addonName)
@@ -286,9 +288,9 @@ local function LoadObjectivesTracker()
 
             GW.ObjectiveTrackerContainer[config.enumName] = frame
             if config.scrollable then
-                table.insert(GW.QuestTrackerScrollableContainer, frame)
+                GW.QuestTrackerScrollableContainer[#GW.QuestTrackerScrollableContainer+1] = frame
             else
-                table.insert(GW.QuestTrackerFixedContainer, frame)
+                GW.QuestTrackerFixedContainer[#GW.QuestTrackerFixedContainer+1] = frame
             end
         end
     end
@@ -308,7 +310,7 @@ local function LoadObjectivesTracker()
     objectivesTracker.ScrollFrame:SetScrollChild(objectivesTracker.ScrollFrame.Child)
 
     -- position of scrollable container
-    for i, frame in ipairs(GW.QuestTrackerScrollableContainer) do
+    for i, frame in ipairs_(GW.QuestTrackerScrollableContainer) do
         if i == 1 then
             frame:SetPoint("TOPRIGHT", objectivesTracker.ScrollFrame.Child, "TOPRIGHT")
         else
@@ -317,10 +319,10 @@ local function LoadObjectivesTracker()
     end
 
     -- init container
-    for _, frame in ipairs(GW.QuestTrackerFixedContainer) do
+    for _, frame in ipairs_(GW.QuestTrackerFixedContainer) do
         if frame.InitModule then frame:InitModule() end
     end
-    for _, frame in ipairs(GW.QuestTrackerScrollableContainer) do
+    for _, frame in ipairs_(GW.QuestTrackerScrollableContainer) do
         if frame.InitModule then frame:InitModule() end
     end
 

@@ -801,6 +801,7 @@ local function SkinLookingForGroupFrames()
 end
 
 local function ApplyPvPUISkin()
+    local pairs_ = pairs
     if not GW.settings.LFG_SKIN_ENABLED then return end
 
     PVPUIFrame:GwStripTextures()
@@ -907,7 +908,7 @@ local function ApplyPvPUISkin()
     HonorFrame:GwStripTextures()
     ConquestFrame:GwStripTextures()
 
-    for _, v in pairs({ HonorFrame, ConquestFrame, LFGListPVPStub, TrainingGroundsFrame }) do
+    for _, v in pairs_({ HonorFrame, ConquestFrame, LFGListPVPStub, TrainingGroundsFrame }) do
         GW.AddDetailsBackground(v, nil, -10)
     end
 
@@ -925,7 +926,7 @@ local function ApplyPvPUISkin()
     BonusFrame.ShadowOverlay:Hide()
     BonusFrame.WorldBattlesTexture:Hide()
 
-    for _, bonusButton in pairs({"RandomBGButton", "Arena1Button", "RandomEpicBGButton", "BrawlButton", "BrawlButton2"}) do
+    for _, bonusButton in pairs_({"RandomBGButton", "Arena1Button", "RandomEpicBGButton", "BrawlButton", "BrawlButton2"}) do
         local bu = BonusFrame[bonusButton]
         local reward = bu.Reward
 
@@ -980,7 +981,7 @@ local function ApplyPvPUISkin()
     ConquestFrame.RoleList.HealerIcon.checkButton:SetSize(15, 15)
     ConquestFrame.RoleList.DPSIcon.checkButton:SetSize(15, 15)
 
-    for _, bu in pairs({ConquestFrame.RatedSoloShuffle, ConquestFrame.Arena2v2, ConquestFrame.Arena3v3, ConquestFrame.RatedBG}) do
+    for _, bu in pairs_({ConquestFrame.RatedSoloShuffle, ConquestFrame.Arena2v2, ConquestFrame.Arena3v3, ConquestFrame.RatedBG}) do
         local reward = bu.Reward
         reward.Border:Hide()
         reward.CircleMask:Hide()
@@ -1028,7 +1029,7 @@ local function ApplyPvPUISkin()
     end
 
     -- PvP StatusBars
-    for _, Frame in pairs({ HonorFrame, ConquestFrame }) do
+    for _, Frame in pairs_({ HonorFrame, ConquestFrame }) do
         Frame.ConquestBar.Border:Hide()
         Frame.ConquestBar.Background:Hide()
         Frame.ConquestBar.Reward.Ring:Hide()

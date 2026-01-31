@@ -239,7 +239,7 @@ function GwQuestLogMixin:UpdateLayout()
 
         if questLogIndex and questLogIndex > 0 then
             local questInfo = AddQuestInfos(questLogIndex, i)
-             if questInfo then table.insert(sorted, questInfo) end
+             if questInfo then sorted[#sorted+1] = questInfo end
         end
     end
 

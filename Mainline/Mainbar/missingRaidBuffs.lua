@@ -184,15 +184,16 @@ function RaidBuffReminderMixin:UpdateBuffInfos()
 end
 
 function RaidBuffReminderMixin:CheckForBuffs()
+    local pairs_ = pairs
     -- Reset Buff-Status
-    for _, tbl in pairs(buffInfos) do
-        for _, buff in pairs(tbl) do
+    for _, tbl in pairs_(buffInfos) do
+        for _, buff in pairs_(tbl) do
             buff.hasBuff = false
         end
     end
 
-    for key, tbl in pairs(buffInfos) do
-        for _, buff in pairs(tbl) do
+    for key, tbl in pairs_(buffInfos) do
+        for _, buff in pairs_(tbl) do
             if key == "Weapon" then
                 local hasMainHandEnchant, _, _, mainHandEnchantID, hasOffHandEnchant, _, _, offHandEnchantID = GetWeaponEnchantInfo()
                 if (hasMainHandEnchant and buff.spellId == mainHandEnchantID) or (hasOffHandEnchant and buff.spellId == offHandEnchantID) then

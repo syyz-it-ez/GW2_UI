@@ -19,20 +19,22 @@ local function SetMigrateData(realm, name, key, value)
 end
 
 local function LoadStorage()
+    local pairs_ = pairs
+    local type_ = type
     GW2UI_STORAGE2 = GW2UI_STORAGE2 or {}
     storage = GW2UI_STORAGE2
 
     -- Migrate data to new table (temp function)
-    if GW2UI_STORAGE and type(GW2UI_STORAGE) == "table" then
+    if GW2UI_STORAGE and type_(GW2UI_STORAGE) == "table" then
         local oldStorage = GW2UI_STORAGE
 
-        for faction, realm in pairs(oldStorage) do
-            if type(realm) == "table" then
-                for realmName, realmValues in pairs(realm) do
-                    if type(realmValues) == "table" then
-                        for typeKey, typeValues in pairs(realmValues) do
-                            if type(typeValues) == "table" then
-                                for valueKey, values in pairs(typeValues) do
+        for faction, realm in pairs_(oldStorage) do
+            if type_(realm) == "table" then
+                for realmName, realmValues in pairs_(realm) do
+                    if type_(realmValues) == "table" then
+                        for typeKey, typeValues in pairs_(realmValues) do
+                            if type_(typeValues) == "table" then
+                                for valueKey, values in pairs_(typeValues) do
                                     SetMigrateData(realmName, valueKey, "name", valueKey)
                                     SetMigrateData(realmName, valueKey, "faction", faction)
                                     if typeKey == "CLASS" then SetMigrateData(realmName, valueKey, "class", values) end
@@ -46,9 +48,9 @@ local function LoadStorage()
         end
 
         -- add money if we do not have them
-        for _, chars in pairs(storage) do
-            if type(chars) == "table" then
-                for _, v in pairs(chars) do
+        for _, chars in pairs_(storage) do
+            if type_(chars) == "table" then
+                for _, v in pairs_(chars) do
                     if not v.money then v.money = 0 end
                 end
             end

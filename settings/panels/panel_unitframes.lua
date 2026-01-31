@@ -76,8 +76,8 @@ local function LoadTargetPanel(sWindow)
     }
 
     if not GW.Classic then
-        table.insert(panels, {name = FOCUS, frame = p_focus})
-        table.insert(panels, {name = L["Focus target"], frame = pTargetOfFocus})
+        panels[#panels+1] = {name = FOCUS, frame = p_focus}
+        panels[#panels+1] = {name = L["Focus target"], frame = pTargetOfFocus}
     end
 
     --PET

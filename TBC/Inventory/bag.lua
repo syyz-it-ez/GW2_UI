@@ -600,7 +600,7 @@ local function bagHeader_OnClick(self, btn)
             end,
         inputText = (function()
             local customName = GW.settings["BAG_HEADER_NAME" .. bag_id]
-                if string.len(customName) == 0 then
+                if #customName == 0 then
                     customName = nil
                 end
                 if bag_id > 0 then

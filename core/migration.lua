@@ -43,11 +43,12 @@ end
 GW.ConvertDbStringToInteger = ConvertDbStringToInteger
 
 local function DatabaseMigration(globalDb, privateDb)
+    local next_ = next
     local oldActiveProfileId, oldActiveProfileName
 
     if privateDb then
         if GW2UI_PRIVATE_SETTINGS then
-            if next(GW2UI_PRIVATE_SETTINGS) then
+            if next_(GW2UI_PRIVATE_SETTINGS) then
                 for setting, value in next, GW2UI_PRIVATE_SETTINGS do
                     GW.private[setting] = value
                 end
@@ -55,7 +56,7 @@ local function DatabaseMigration(globalDb, privateDb)
         end
 
         if GW2UI_PRIVATE_LAYOUTS then
-            if next(GW2UI_PRIVATE_LAYOUTS) then
+            if next_(GW2UI_PRIVATE_LAYOUTS) then
                 for setting, value in next, GW2UI_PRIVATE_LAYOUTS do
                     if not GW.private.Layouts then GW.private.Layouts = {} end
                     GW.private.Layouts[setting] = value
@@ -69,7 +70,7 @@ local function DatabaseMigration(globalDb, privateDb)
     end
     if globalDb then
         if GW2UI_SETTINGS_PROFILES then
-            if next(GW2UI_SETTINGS_PROFILES) then
+            if next_(GW2UI_SETTINGS_PROFILES) then
                 for k, profileTbl in next, GW2UI_SETTINGS_PROFILES do
                     if oldActiveProfileId and oldActiveProfileId == k then
                         oldActiveProfileName = profileTbl.profilename
@@ -105,7 +106,7 @@ local function DatabaseMigration(globalDb, privateDb)
         end
 
         if GW2UI_LAYOUTS then
-            if next(GW2UI_LAYOUTS) then
+            if next_(GW2UI_LAYOUTS) then
                 for _, profileTbl in next, GW2UI_LAYOUTS do
                     if profileTbl and profileTbl.name then
                         if not GW.globalSettings.global.layouts then GW.globalSettings.global.layouts = {} end
@@ -138,6 +139,7 @@ end
 GW.DatabaseMigration = DatabaseMigration
 
 local function DatabaseValueMigration()
+    local tonum = tonumber
     -- migration for font module
     if GW.settings.FONTS_ENABLED then
         if not GW.settings.FONTS_ENABLED then
@@ -218,7 +220,7 @@ local function DatabaseValueMigration()
             local dateString = GW.globalSettings.profiles[profile].profileCreatedDate
             if dateString and dateString:match("^(%d+)/(%d+)/(%d+) (%d+):(%d+):(%d+)$") then
                 local month, day, year, hour, min, sec = dateString:match("(%d+)/(%d+)/(%d+) (%d+):(%d+):(%d+)")
-                year = tonumber(year)
+                year = tonum(year)
                 if year < 70 then
                     year = 2000 + year
                 else
@@ -226,11 +228,11 @@ local function DatabaseValueMigration()
                 end
                 local t = {
                     year = year,
-                    month = tonumber(month),
-                    day = tonumber(day),
-                    hour = tonumber(hour),
-                    min = tonumber(min),
-                    sec = tonumber(sec),
+                    month = tonum(month),
+                    day = tonum(day),
+                    hour = tonum(hour),
+                    min = tonum(min),
+                    sec = tonum(sec),
                 }
                 local timestamp = time(t)
                 GW.globalSettings.profiles[profile].profileCreatedDate = date(GW.L["TimeStamp m/d/y h:m:s"], timestamp)

@@ -227,7 +227,7 @@ function oUF:HandleEventlessUnit(object)
 	end
 
 	if(not eventlessObjects[timer]) then eventlessObjects[timer] = {} end
-	table.insert(eventlessObjects[timer], object)
+	eventlessObjects[timer][#eventlessObjects[timer]+1] = object
 
 	createOnUpdate(timer)
 end
