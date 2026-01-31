@@ -420,11 +420,15 @@ local function UpdateFriendButton(button)
 
     button.background:Hide()
     CreateOrUpdateTexture(button, "background", "BACKGROUND")
-    SetGradientColor(button.efl.background, StatusColor[status].Inside, StatusColor[status].Outside)
+    if status and StatusColor[status] then
+        SetGradientColor(button.efl.background, StatusColor[status].Inside, StatusColor[status].Outside)
+    end
 
     button.highlight:SetVertexColor(0, 0, 0, 0)
     CreateOrUpdateTexture(button, "highlight", "HIGHLIGHT")
-    SetGradientColor(button.efl.highlight, StatusColor[status].Inside, StatusColor[status].Outside)
+    if status and StatusColor[status] then
+        SetGradientColor(button.efl.highlight, StatusColor[status].Inside, StatusColor[status].Outside)
+    end
 
     if button.Favorite and button.Favorite:IsShown() then
         button.Favorite:ClearAllPoints()
