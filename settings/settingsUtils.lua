@@ -662,7 +662,6 @@ local function SettingsInitOptionWidget(of, v, panel)
                     local min_value = v.min or 0
                     roundValue = floor((roundValue - min_value) / v.step + 0.5) * v.step + min_value
                 end
-            end
 
                 of.set(tonum(roundValue))
                 if v.callback then

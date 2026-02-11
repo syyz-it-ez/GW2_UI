@@ -115,7 +115,7 @@ local function changeVertexColorActionbars(btn)
         local valid = IsActionInRange(btn.action)
         local checksRange = (valid ~= nil)
         local inRange = checksRange and valid
-        local out_R, out_G, out_B = RED_FONT_COLOR:GetRGB()
+        local out_R, out_G, out_B = RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b
         if checksRange and not inRange then
             btn.icon:SetVertexColor(out_R, out_G, out_B)
         end
@@ -639,7 +639,7 @@ local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPe
 end
 GW.setActionButtonStyle = setActionButtonStyle
 
-local red_R, red_G, red_B = RED_FONT_COLOR:GetRGB()
+local red_R, red_G, red_B = RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b
 local function helper_RangeUpdate(slot, inRange, checkRange)
     local btn = nil
     local indicator = "RED_OVERLAY"
@@ -702,7 +702,7 @@ local function saveVertexColor(self, r, g, b, a, bypass)
 
     -- keep out of range active
     if self:GetParent().isOutOfRange then
-        r, g, b, a = RED_FONT_COLOR:GetRGBA()
+        r, g, b, a = RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b, 1
         self:SetVertexColor(r, g, b, a, true)
     end
 end
@@ -1186,11 +1186,14 @@ local function UpdateMultibarButtons()
                     end
                 end
 
-                btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
-                btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                for _, i in ipairs(buttonOrder) do
+                    local btn = fmMultiBar.gw_Buttons[i]
+
+                    btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                    btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                    btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                    btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
+                    btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
                     btn.gwX = btn_padding
                     btn.gwY = btn_padding_y
