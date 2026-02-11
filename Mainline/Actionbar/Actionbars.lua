@@ -123,14 +123,41 @@ local function changeVertexColorActionbars(btn)
 end
 AFP("changeVertexColorActionbars", changeVertexColorActionbars)
 
+local function setButtonBackgroundAlpha(btn, alpha)
+    btn.gwBackdrop.bg:SetAlpha(alpha)
+    btn.gwBackdrop.border1:SetAlpha(alpha)
+    btn.gwBackdrop.border2:SetAlpha(alpha)
+    btn.gwBackdrop.border3:SetAlpha(alpha)
+    btn.gwBackdrop.border4:SetAlpha(alpha)
+
+    if btn.SlotBackground then
+        btn.SlotBackground:SetAlpha(alpha)
+    end
+    btn:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/ui-quickslot-depress.png")
+end
+
 local function updateActionbarBorders(btn)
     local tonum = tonumber
     local texture = GetActionTexture(btn.action)
+
     if texture then
-        btn.gwBackdrop.border1:SetAlpha(1)
-        btn.gwBackdrop.border2:SetAlpha(1)
-        btn.gwBackdrop.border3:SetAlpha(1)
-        btn.gwBackdrop.border4:SetAlpha(1)
+        local shouldShowHotKey = GW.settings.BUTTON_ASSIGNMENTS
+        if shouldShowHotKey then
+            if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+                local text = btn.HotKey:GetText()
+                shouldShowHotKey =  text and text ~= RANGE_INDICATOR
+            end
+        end
+        setButtonBackgroundAlpha(btn, 1)
+        if shouldShowHotKey then
+            btn.HotKey:Show()
+            if btn.hkBg then
+                btn.hkBg.texture:Show()
+            end
+        end
+        btn:SetPushedTexture("Interface/AddOns/GW2_UI/textures/uistuff/actionbutton-pressed.png")
+        btn:SetHighlightTexture("Interface/AddOns/GW2_UI/textures/uistuff/ui-quickslot-depress.png")
+        btn.hasAction = true
     else
         btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
@@ -347,12 +374,16 @@ AFP("createFaderAnim", createFaderAnim)
 local function updateHotkey(self)
     local hotkey = self.HotKey
     local text = hotkey:GetText()
+    local shouldShow = GW.settings.BUTTON_ASSIGNMENTS
+    local hasText = text and text ~= RANGE_INDICATOR
 
-    if text == nil then
-        return
+    if shouldShow then
+        if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+            shouldShow = self.hasAction and hasText
+        end
     end
 
-    if GW.settings.BUTTON_ASSIGNMENTS then
+    if shouldShow then
         hotkey:Show()
         if self.hkBg then
             self.hkBg.texture:Show()
@@ -364,29 +395,29 @@ local function updateHotkey(self)
         end
     end
 
-    text = gsub(text, "(s%-)", "S")
-    text = gsub(text, "(a%-)", "A")
-    text = gsub(text, "(c%-)", "C")
-    text = gsub(text, KEY_BUTTON3, "M3") --middle mouse Button
-    text = gsub(text, gsub(KEY_BUTTON4, " 4", ""), "M") -- mouse button
-    text = gsub(text, KEY_PAGEUP, "PU")
-    text = gsub(text, KEY_PAGEDOWN, "PD")
-    text = gsub(text, KEY_SPACE, "SpB")
-    text = gsub(text, KEY_INSERT, "Ins")
-    text = gsub(text, KEY_HOME, "Hm")
-    text = gsub(text, KEY_DELETE, "Del")
-    text = gsub(text, KEY_LEFT, "LT")
-    text = gsub(text, KEY_RIGHT, "RT")
-    text = gsub(text, KEY_UP, "UP")
-    text = gsub(text, KEY_DOWN, "DN")
-    text = gsub(text, gsub(KEY_NUMPADPLUS, "%+", ""), "N") -- for all numpad keys
-    text = gsub(text, KEY_MOUSEWHEELDOWN, 'MwD')
-    text = gsub(text, KEY_MOUSEWHEELUP, 'MwU')
+    if hasText then
+        text = gsub(text, "(s%-)", "S")
+        text = gsub(text, "(a%-)", "A")
+        text = gsub(text, "(c%-)", "C")
+        text = gsub(text, KEY_BUTTON3, "M3") --middle mouse Button
+        text = gsub(text, gsub(KEY_BUTTON4, " 4", ""), "M") -- mouse button
+        text = gsub(text, KEY_PAGEUP, "PU")
+        text = gsub(text, KEY_PAGEDOWN, "PD")
+        text = gsub(text, KEY_SPACE, "SpB")
+        text = gsub(text, KEY_INSERT, "Ins")
+        text = gsub(text, KEY_HOME, "Hm")
+        text = gsub(text, KEY_DELETE, "Del")
+        text = gsub(text, KEY_LEFT, "LT")
+        text = gsub(text, KEY_RIGHT, "RT")
+        text = gsub(text, KEY_UP, "UP")
+        text = gsub(text, KEY_DOWN, "DN")
+        text = gsub(text, gsub(KEY_NUMPADPLUS, "%+", ""), "N") -- for all numpad keys
+        text = gsub(text, KEY_MOUSEWHEELDOWN, 'MwD')
+        text = gsub(text, KEY_MOUSEWHEELUP, 'MwU')
 
-    if hotkey:GetText() == RANGE_INDICATOR then
-        hotkey:SetText("")
-    else
         hotkey:SetText(text)
+    else
+        hotkey:SetText("")
     end
 end
 GW.updateHotkey = updateHotkey
@@ -406,16 +437,6 @@ local function updateMacroName(self)
     end
 end
 GW.updateMacroName = updateMacroName
-
-local function hideBackdrop(self)
-    self.gwBackdrop:Hide()
-end
-AFP("hideBackdrop", hideBackdrop)
-
-local function showBackdrop(self)
-    self.gwBackdrop:Show()
-end
-AFP("showBackdrop", showBackdrop)
 
 local function FixHotKeyPosition(button, isStanceButton, isPetButton, isMainBar)
     button.HotKey:ClearAllPoints()
@@ -613,8 +634,7 @@ local function setActionButtonStyle(buttonName, noBackDrop, isStanceButton, isPe
             btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
             btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         end
-        --btn:HookScript("OnHide", hideBackdrop)
-        --btn:HookScript("OnShow", showBackdrop)
+
     end
 end
 GW.setActionButtonStyle = setActionButtonStyle
@@ -651,6 +671,7 @@ local function helper_RangeUpdate(slot, inRange, checkRange)
     end
 
     if checkRange and not inRange then
+        btn.isOutOfRange = true
         if indicator == "RED_INDICATOR" or indicator == "BOTH" then
             btn.gw_RangeIndicator:Show()
         end
@@ -658,6 +679,7 @@ local function helper_RangeUpdate(slot, inRange, checkRange)
             btn.icon:SetVertexColor(red_R, red_G, red_B, 1, true)
         end
     else
+        btn.isOutOfRange = false
         if btn.gw_RangeIndicator then
             btn.gw_RangeIndicator:Hide()
         end
@@ -677,6 +699,12 @@ local function saveVertexColor(self, r, g, b, a, bypass)
     self.savedVertexColor = self.savedVertexColor or {}
     local saved = self.savedVertexColor
     saved.r, saved.g, saved.b, saved.a = r, g, b, a
+
+    -- keep out of range active
+    if self:GetParent().isOutOfRange then
+        r, g, b, a = RED_FONT_COLOR:GetRGBA()
+        self:SetVertexColor(r, g, b, a, true)
+    end
 end
 
 local function main_OnEvent(_, event, ...)
@@ -702,6 +730,7 @@ AFP("main_OnEvent", main_OnEvent)
 
 local function skinMainBar()
     local bar = MainActionBar
+    bar.isSkinOnly = true
 
     bar.gw_Buttons = {}
     for i = 1, 12 do
@@ -718,10 +747,11 @@ local function skinMainBar()
             btn.hkBg:SetPoint("CENTER", hotkey, "CENTER", 0, 0)
             btn.hkBg.texture:SetParent(hotkey:GetParent())
             setActionButtonStyle("ActionButton" .. i)
-            updateHotkey(btn)
             saveVertexColor(btn.icon, btn.icon:GetVertexColor())
             hooksecurefunc(btn.icon, "SetVertexColor", saveVertexColor)
+            hooksecurefunc(btn, "Update", updateActionbarBorders)
             updateActionbarBorders(btn)
+            updateHotkey(btn)
 
             hotkey:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
             hotkey:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
@@ -750,6 +780,8 @@ local function skinMainBar()
     local eventFrame = CreateFrame("Frame")
     eventFrame:SetScript("OnEvent", main_OnEvent)
     eventFrame:RegisterEvent("ACTION_RANGE_CHECK_UPDATE")
+
+    return bar
 end
 AFP("skinMainBar", skinMainBar)
 
@@ -783,12 +815,12 @@ local function updateMainBar()
             btn.hkBg:SetPoint("CENTER", hotkey, "CENTER", 0, 0)
             btn.hkBg.texture:SetParent(hotkey:GetParent())
             setActionButtonStyle("ActionButton" .. i)
-            updateHotkey(btn)
             saveVertexColor(btn.icon, btn.icon:GetVertexColor())
             hooksecurefunc(btn.icon, "SetVertexColor", saveVertexColor)
             hooksecurefunc(btn, "UpdateUsable", changeVertexColorActionbars)
             hooksecurefunc(btn, "Update", updateActionbarBorders)
             updateActionbarBorders(btn)
+            updateHotkey(btn)
 
             hotkey:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
             hotkey:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
@@ -936,6 +968,7 @@ local function skinMultiBar(barName, buttonName)
         end
     end
 
+    return bar
 end
 AFP("skinMultiBar", skinMultiBar)
 
@@ -1116,50 +1149,41 @@ local function UpdateMultibarButtons()
 
     for y = 1, 7 do
         fmMultiBar = fmActionbar["gw_Bar" .. y]
-        if fmMultiBar.gw_IsEnabled then
-            local settings = GW.settings[fmMultiBar.originalBarName]
-            local used_height = 0
-            local btn_padding = 0
-            local btn_padding_y = 0
-            local btn_this_row = 0
-            local used_width = 0
+        if fmMultiBar and fmMultiBar.gw_IsEnabled then
 
-            local buttonOrder = {}
-            local buttonsPerRow = settings.ButtonsPerRow or 12
-            local totalRows = math.ceil(12 / buttonsPerRow)
-
-            if settings.invert then
-                for row = totalRows - 1, 0, -1 do
-                    for col = 0, buttonsPerRow - 1 do
-                        local idx = row * buttonsPerRow + col + 1
-                        if idx <= 12 then
-                            buttonOrder[#buttonOrder + 1] = idx
-                        end
-                    end
+            if fmActionbar.isSkinOnly then
+                for i = 1, 12 do
+                    local btn = fmMultiBar.gw_Buttons[i]
+                    btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
+                    updateMacroName(btn)
+                    updateActionbarBorders(btn)
+                    updateHotkey(btn)
                 end
             else
-                for i = 1, 12 do
-                    buttonOrder[#buttonOrder + 1] = i
-                end
-            end
+                local settings = GW.settings[fmMultiBar.originalBarName]
+                local used_height = 0
+                local btn_padding = 0
+                local btn_padding_y = 0
+                local btn_this_row = 0
+                local used_width = 0
 
-            for _, i in ipairs(buttonOrder) do
-                local btn = fmMultiBar.gw_Buttons[i]
+                local buttonOrder = {}
+                local buttonsPerRow = settings.ButtonsPerRow or 12
+                local totalRows = math.ceil(12 / buttonsPerRow)
 
-                btn.gwX = btn_padding
-                btn.gwY = btn_padding_y
-                btn:ClearAllPoints()
-                btn:SetPoint("TOPLEFT", fmMultiBar, "TOPLEFT", btn_padding, -btn_padding_y)
-
-                btn_padding = btn_padding + settings.size + GW.settings.MULTIBAR_MARGIIN
-                btn_this_row = btn_this_row + 1
-                used_width = btn_padding
-
-                if btn_this_row == settings.ButtonsPerRow then
-                    btn_padding_y = btn_padding_y + settings.size + GW.settings.MULTIBAR_MARGIIN
-                    btn_this_row = 0
-                    btn_padding = 0
-                    used_height = used_height + settings.size + GW.settings.MULTIBAR_MARGIIN
+                if settings.invert then
+                    for row = totalRows - 1, 0, -1 do
+                        for col = 0, buttonsPerRow - 1 do
+                            local idx = row * buttonsPerRow + col + 1
+                            if idx <= 12 then
+                                buttonOrder[#buttonOrder + 1] = idx
+                            end
+                        end
+                    end
+                else
+                    for i = 1, 12 do
+                        buttonOrder[#buttonOrder + 1] = i
+                    end
                 end
 
                 btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
@@ -1168,13 +1192,31 @@ local function UpdateMultibarButtons()
                 btn.gwBackdrop.border3:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
                 btn.gwBackdrop.border4:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
 
-                btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
-                updateMacroName(btn)
-                updateHotkey(btn)
-            end
+                    btn.gwX = btn_padding
+                    btn.gwY = btn_padding_y
+                    btn:ClearAllPoints()
+                    btn:SetPoint("TOPLEFT", fmMultiBar, "TOPLEFT", btn_padding, -btn_padding_y)
 
-            fmMultiBar.gwMover:SetSize(used_width, used_height)
-            fmMultiBar:SetSize(used_width, used_height)
+                    btn_padding = btn_padding + settings.size + GW.settings.MULTIBAR_MARGIIN
+                    btn_this_row = btn_this_row + 1
+                    used_width = btn_padding
+
+                    if btn_this_row == settings.ButtonsPerRow then
+                        btn_padding_y = btn_padding_y + settings.size + GW.settings.MULTIBAR_MARGIIN
+                        btn_this_row = 0
+                        btn_padding = 0
+                        used_height = used_height + settings.size + GW.settings.MULTIBAR_MARGIIN
+                    end
+
+                    btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
+                    updateMacroName(btn)
+                    updateActionbarBorders(btn)
+                    updateHotkey(btn)
+                end
+
+                fmMultiBar.gwMover:SetSize(used_width, used_height)
+                fmMultiBar:SetSize(used_width, used_height)
+            end
         end
     end
 end
@@ -1339,13 +1381,15 @@ local function UpdateMainBarHot()
 
     for i = 1, 12 do
         local btn = fmActionbar.gw_Buttons[i]
-        btn_padding = btn_padding + MAIN_MENU_BAR_BUTTON_SIZE + GW.settings.MAINBAR_MARGIIN
+        if not fmActionbar.isSkinOnly then
+            btn_padding = btn_padding + MAIN_MENU_BAR_BUTTON_SIZE + GW.settings.MAINBAR_MARGIIN
 
-        btn:ClearAllPoints()
-        btn:SetPoint("LEFT", fmActionbar, "LEFT", btn_padding - GW.settings.MAINBAR_MARGIIN - MAIN_MENU_BAR_BUTTON_SIZE, (GW.settings.XPBAR_ENABLED and 0 or -14))
+            btn:ClearAllPoints()
+            btn:SetPoint("LEFT", fmActionbar, "LEFT", btn_padding - GW.settings.MAINBAR_MARGIIN - MAIN_MENU_BAR_BUTTON_SIZE, (GW.settings.XPBAR_ENABLED and 0 or -14))
 
-        if i == 6 and not GW.settings.PLAYER_AS_TARGET_FRAME then
-            btn_padding = btn_padding + 108
+            if i == 6 and not GW.settings.PLAYER_AS_TARGET_FRAME then
+                btn_padding = btn_padding + 108
+            end
         end
 
         btn.gwBackdrop.bg:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
@@ -1357,35 +1401,88 @@ local function UpdateMainBarHot()
         btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
         btn.rangeIndicatorSetting = GW.settings.MAINBAR_RANGEINDICATOR
         updateMacroName(btn)
+        updateActionbarBorders(btn)
         updateHotkey(btn)
     end
-    -- position the main action bar
-    fmActionbar:SetSize(btn_padding, used_height)
-    fmActionbar.gw_Width = btn_padding
+    if not fmActionbar.isSkinOnly then
+        -- position the main action bar
+        fmActionbar:SetSize(btn_padding, used_height)
+        fmActionbar.gw_Width = btn_padding
+    end
 
     actionButtons_OnUpdate(MainActionBar, 0)
 end
 GW.UpdateMainBarHot = UpdateMainBarHot
 
 local function LoadActionBars(lm, skinOnly)
+    -- hook hotkey update calls so we can override styling changes
+    local fmActionbar
+    local eventFrame = CreateFrame("Frame")
+    eventFrame:RegisterEvent("UPDATE_BINDINGS")
+    eventFrame:RegisterEvent("ACTIONBAR_SHOWGRID")
+    eventFrame:RegisterEvent("ACTIONBAR_HIDEGRID")
+    eventFrame:SetScript("OnEvent", function(_, event)
+        if not fmActionbar then return end
+        if event == "UPDATE_BINDINGS" then
+            local fmMultiBar
+            for y = 0, 7 do
+                if y == 0 then
+                    fmMultiBar = fmActionbar
+                else
+                    fmMultiBar = fmActionbar["gw_Bar" .. y]
+                end
+                if fmMultiBar.gw_IsEnabled then
+                    for i = 1, 12 do
+                        local btn = fmMultiBar.gw_Buttons[i]
+                        updateActionbarBorders(btn)
+                        updateHotkey(btn)
+                        FixHotKeyPosition(btn, false, false, y == 0)
+                    end
+                end
+            end
+        elseif event == "ACTIONBAR_SHOWGRID" or event == "ACTIONBAR_HIDEGRID" then
+            local fmMultiBar
+            local needShow = event == "ACTIONBAR_SHOWGRID"
+            for y = 0, 7 do
+                if y == 0 then
+                    fmMultiBar = fmActionbar
+                else
+                    fmMultiBar = fmActionbar["gw_Bar" .. y]
+                end
+                if fmMultiBar.gw_IsEnabled then
+                    for i = 1, 12 do
+                        local btn = fmMultiBar.gw_Buttons[i]
+                        btn.ShowGrid = needShow
+                        if needShow then
+                            setButtonBackgroundAlpha(btn, 1)
+                        else
+                            updateActionbarBorders(btn)
+                        end
+                    end
+                end
+            end
+        end
+    end)
 
     if skinOnly then
         -- skin the buttons
-        -- TODO: most of what we do here should be re-usable for the managed layout mode too
-        --       especially the much more efficient range event handling stuff
-        skinMainBar()
-        skinMultiBar("MultiBarBottomLeft", "MultiBarBottomLeftButton")
-        skinMultiBar("MultiBarBottomRight", "MultiBarBottomRightButton")
-        skinMultiBar("MultiBarRight", "MultiBarRightButton")
-        skinMultiBar("MultiBarLeft", "MultiBarLeftButton")
-        skinMultiBar("MultiBar5", "MultiBar5Button")
-        skinMultiBar("MultiBar6", "MultiBar6Button")
-        skinMultiBar("MultiBar7", "MultiBar7Button")
+        fmActionbar = skinMainBar()
+        fmActionbar.gw_Bar1 = skinMultiBar("MultiBarBottomLeft", "MultiBarBottomLeftButton")
+        fmActionbar.gw_Bar2 = skinMultiBar("MultiBarBottomRight", "MultiBarBottomRightButton")
+        fmActionbar.gw_Bar3 = skinMultiBar("MultiBarRight", "MultiBarRightButton")
+        fmActionbar.gw_Bar4 = skinMultiBar("MultiBarLeft", "MultiBarLeftButton")
+        fmActionbar.gw_Bar5 = skinMultiBar("MultiBar5", "MultiBar5Button")
+        fmActionbar.gw_Bar6 = skinMultiBar("MultiBar6", "MultiBar6Button")
+        fmActionbar.gw_Bar7 = skinMultiBar("MultiBar7", "MultiBar7Button")
+
+        hooksecurefunc("SetActionBarToggles", function() C_Timer.After(1, trackBarChanges) end)
+        trackBarChanges()
+
         return nil
     end
 
     -- init our bars
-    local fmActionbar = updateMainBar()
+    fmActionbar = updateMainBar()
     fmActionbar.gw_Bar1 = updateMultiBar(lm, "MultiBarBottomLeft", "MultiBarBottomLeftButton", BOTTOMLEFT_ACTIONBAR_PAGE, true)
     fmActionbar.gw_Bar2 = updateMultiBar(lm, "MultiBarBottomRight", "MultiBarBottomRightButton", BOTTOMRIGHT_ACTIONBAR_PAGE, true)
     fmActionbar.gw_Bar3 = updateMultiBar(lm, "MultiBarRight", "MultiBarRightButton", RIGHT_ACTIONBAR_PAGE, nil)
@@ -1398,33 +1495,13 @@ local function LoadActionBars(lm, skinOnly)
     GW.RegisterScaleFrame(fmActionbar)
 
     -- hook existing multibars to track settings changes
-    hooksecurefunc("SetActionBarToggles", function() C_Timer.After(1, trackBarChanges) end)
     hooksecurefunc(SpellFlyout, "Toggle", changeFlyoutStyle)
+    hooksecurefunc("SetActionBarToggles", function() C_Timer.After(1, trackBarChanges) end)
     trackBarChanges()
 
     -- do stuff to other pieces of the blizz UI
     hideBlizzardsActionbars()
     GW.CreateStanceBar()
     setLeaveVehicleButton()
-
-    -- hook hotkey update calls so we can override styling changes
-    local hotkeyEventTrackerFrame = CreateFrame("Frame")
-    hotkeyEventTrackerFrame:RegisterEvent("UPDATE_BINDINGS")
-    hotkeyEventTrackerFrame:SetScript("OnEvent", function()
-        local fmMultiBar
-        for y = 0, 7 do
-            if y == 0 then
-                fmMultiBar = fmActionbar
-            else
-                fmMultiBar = fmActionbar["gw_Bar" .. y]
-            end
-            if fmMultiBar.gw_IsEnabled then
-                for i = 1, 12 do
-                    updateHotkey(fmMultiBar.gw_Buttons[i])
-                    FixHotKeyPosition(fmMultiBar.gw_Buttons[i], false, false, y == 0)
-                end
-            end
-        end
-    end)
 end
 GW.LoadActionBars = LoadActionBars

@@ -12,7 +12,6 @@ local petStateSprite = {
 
 GwPlayerPetFrameMixin = {}
 
-
 function GwPlayerPetFrameMixin:SetActionButtonPositionAndStyle()
     local BUTTON_SIZE = 28
     local BUTTON_MARGIN = 3
@@ -24,10 +23,9 @@ function GwPlayerPetFrameMixin:SetActionButtonPositionAndStyle()
         if i == 1 then
             point, relativeFrame, relativePoint, x, y = "BOTTOMLEFT", self, "BOTTOMLEFT", 3, 30
         elseif i == 8 then
-            point, relativeFrame, relativePoint, x, y = "BOTTOM", _G["PetActionButton5"], "TOP", 0, BUTTON_MARGIN
+            point, relativeFrame, relativePoint, x, y = "BOTTOM", PetActionButton5, "TOP", 0, BUTTON_MARGIN
         else
-            point, relativeFrame, relativePoint, x, y = "BOTTOMLEFT", _G["PetActionButton" .. (i - 1)], "BOTTOMRIGHT",
-                BUTTON_MARGIN, 0
+            point, relativeFrame, relativePoint, x, y = "BOTTOMLEFT", _G["PetActionButton" .. (i - 1)], "BOTTOMRIGHT", BUTTON_MARGIN, 0
         end
 
         local size = (i < 4) and 32 or BUTTON_SIZE
@@ -76,13 +74,6 @@ function GwPlayerPetFrameMixin:SetActionButtonPositionAndStyle()
             end)
         end
 
-        if i <= 3 or i >= 8 then
-            button:SetScript("OnDragStart", nil)
-            button:SetAttribute("_ondragstart", nil)
-            button:SetScript("OnReceiveDrag", nil)
-            button:SetAttribute("_onreceivedrag", nil)
-        end
-
         button.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
 
         GW.setActionButtonStyle("PetActionButton" .. i, nil, nil, true)
@@ -105,22 +96,20 @@ function GwPlayerPetFrameMixin:Update()
     for i, button in ipairs(self.buttons) do
         local name, texture = GetPetActionInfo(i)
 
-        if i == 1 then
+        if name == "PET_ACTION_ATTACK" then
             button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-attack.png")
-        elseif i == 2 then
+        elseif name == "PET_ACTION_FOLLOW" then
             button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-follow.png")
-        elseif i == 3 then
+        elseif name == "PET_ACTION_MOVE_TO"then
             button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-place.png")
+        elseif name == "PET_MODE_ASSIST" or name == "PET_MODE_AGGRESSIVE" then
+            button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-assist.png")
+        elseif name == "PET_MODE_DEFENSIVEASSIST" or name == "PET_MODE_DEFENSIVE" then
+            button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-defense.png")
+        elseif name == "PET_MODE_PASSIVE" then
+            button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-passive.png")
         else
-            if name == "PET_MODE_ASSIST" or name == "PET_MODE_AGGRESSIVE" then
-                button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-assist.png")
-            elseif name == "PET_MODE_DEFENSIVEASSIST" or name == "PET_MODE_DEFENSIVE" then
-                button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-defense.png")
-            elseif name == "PET_MODE_PASSIVE" then
-                button.icon:SetTexture("Interface/AddOns/GW2_UI/textures/icons/pet-passive.png")
-            else
-                button.icon:SetTexture(texture)
-            end
+            button.icon:SetTexture(texture)
         end
     end
 end
@@ -241,29 +230,13 @@ function GwPlayerPetFrameMixin:ToggleCombatFeedback()
     end
 end
 
-function GwPlayerPetFrameMixin:UpdateHealthTextString(health)
-    local formatFunction
-    GW.Debug("OVERRIDEN FUNCTION: UpdateHealthTextString")
-
-    if GW.Retail then
-        if GW.settings.PET_UNIT_HEALTH_SHORT_VALUES then
-            formatFunction = AbbreviateLargeNumbers
-        else
-            formatFunction = BreakUpLargeNumbers
-        end
-    else
-        if GW.settings.PET_UNIT_HEALTH_SHORT_VALUES then
-            formatFunction = GW.ShortValue
-        else
-            formatFunction = GW.GetLocalizedNumber
-        end
-    end
-
-    self.health.text:SetText(formatFunction(health))
-end
-
 function GwPlayerPetFrameMixin:UpdateSettings()
     self.showAbsorbBar = GW.settings.PET_SHOW_ABSORB_BAR
+    self.shortendHealthValues = GW.settings.PET_UNIT_HEALTH_SHORT_VALUES
+    self.showHealthValue = GW.settings.PET_HEALTH_VALUE_RAW
+    self.showHealthPrecentage = GW.settings.PET_HEALTH_VALUE_PERCENT
+
+    self:SetScale(GW.settings.pet_pos_scale)
     self:OnEvent("UNIT_PET", "player")
 end
 
@@ -283,16 +256,19 @@ local function LoadPetFrame(lm)
         GW.AddStatusbarAnimation(playerPetFrame.powerbar, true)
     end
 
+    playerPetFrame.healthString = playerPetFrame.health.text
     playerPetFrame.health.customMaskSize = 64
     playerPetFrame.powerbar.customMaskSize = 64
 
     playerPetFrame.buttons = {}
+    playerPetFrame.unit = "pet"
 
     playerPetFrame:SetAttribute("*type1", "target")
     playerPetFrame:SetAttribute("*type2", "togglemenu")
-    playerPetFrame:SetAttribute("unit", "pet")
+    playerPetFrame:SetAttribute("unit", playerPetFrame.unit)
     playerPetFrame:EnableMouse(true)
-    playerPetFrame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    playerPetFrame:RegisterForClicks("AnyDown")
+    GW.AddToClique(playerPetFrame)
     RegisterStateDriver(playerPetFrame, "visibility",
         "[overridebar] hide; [vehicleui] hide; [petbattle] hide; [target=pet,exists] show; hide")
 
@@ -300,15 +276,11 @@ local function LoadPetFrame(lm)
     playerPetFrame.health.text:GwSetFontTemplate(UNIT_NAME_FONT, GW.TextSizeType.SMALL, nil, -1)
 
     playerPetFrame:SetScript("OnEnter", function(self)
-        if self.unit then
-            GameTooltip:ClearLines()
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:SetUnit(self.unit)
-            GameTooltip:Show()
-        end
+        GameTooltip:ClearLines()
+        GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+        GameTooltip:SetUnit(self.unit)
+        GameTooltip:Show()
     end)
-
-    playerPetFrame.unit = "pet"
 
     playerPetFrame.debuffFilter = "PLAYER|HARMFUL"
     playerPetFrame.displayBuffs = 32
@@ -366,7 +338,7 @@ local function LoadPetFrame(lm)
         playerPetFrame:RegisterEvent("UNIT_HAPPINESS")
     end
 
-    RegisterMovableFrame(playerPetFrame, PET, "pet_pos", ALL .. ",Unitframe", nil, { "default", "scaleable" }, true)
+    RegisterMovableFrame(playerPetFrame, PET, "pet_pos", ALL .. ",Unitframe", nil, { "default" }, true)
     lm:RegisterPetFrame(playerPetFrame)
 
     playerPetFrame:ClearAllPoints()
@@ -383,6 +355,7 @@ local function LoadPetFrame(lm)
     if GW.Retail or GW.TBC then
         PetActionBar.ignoreFramePositionManager = true
         PetActionBar:GwKillEditMode()
+        PetActionBar:SetParent(GW.HiddenFrame)
 
         hooksecurefunc(PetActionBar, "Update", function() playerPetFrame:Update() end)
     else

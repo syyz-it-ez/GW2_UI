@@ -1240,7 +1240,7 @@ end
 
 local function MakeFrameMovable(frame, target, setting, moveFrameOnShow)
     if frame:IsMovable() then
-        return
+        --return
     end
 
     if not target then
@@ -1487,3 +1487,6 @@ local function MakeActionbuttonsVisible()
     end
 end
 GW.MakeActionbuttonsVisible = MakeActionbuttonsVisible
+
+
+

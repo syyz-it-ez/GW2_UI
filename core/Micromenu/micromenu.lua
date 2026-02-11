@@ -127,8 +127,8 @@ local function updateGuildButton(self, event)
             gmb.GwNotifyText:Hide()
         end
 
-        GW.FetchGuildMembers()
         if (StoreFrame and not StoreFrame_IsShown()) and GW.DoesAncestryIncludeAny(self, GetMouseFoci()) then
+            GW.FetchGuildMembers()
             GW.Guild_OnEnter(self)
         end
     elseif event == "MODIFIER_STATE_CHANGED" then
@@ -1042,7 +1042,7 @@ local function hook_UpdateMicroButtons()
     HelpMicroButton:Show()
     local m = GW.Classic and SocialsMicroButton or GuildMicroButton
     if GW.TBC and SocialsMicroButton:IsShown() then
-        mailIconTooltip = SocialsMicroButton
+        m = SocialsMicroButton
     end
     m:SetDisabledTexture("Interface/AddOns/GW2_UI/textures/icons/microicons/guildmicrobutton-up.png")
     m:SetNormalTexture("Interface/AddOns/GW2_UI/textures/icons/microicons/guildmicrobutton-up.png")

@@ -25,7 +25,7 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
     local template
     if GW.Retail then
         if revert then
-            template = "GwNormalUnitFrameInvertRetailTemplate"
+            template = "GwNormalUnitFrameInvertPingableRetailTemplate"
         else
             template = "GwNormalUnitFramePingableRetailTemplate"
         end
@@ -37,8 +37,11 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
         end
     end
     local f = CreateFrame("Button", name, UIParent, template)
+    --/run GwTargetUnitFrame.background:ClearAllPoints(); GwTargetUnitFrame.background:SetPoint("LEFT", GwTargetUnitFrame, "LEFT", -100, 0)
 
     local hg = f.healthContainer
+    f.portrait:ClearAllPoints()
+    f.portrait:SetPoint("CENTER", f.portraitAnchor)
 
     if GW.Retail then
         f.absorbOverlay = hg.health.overDamageAbsorbIndicator
@@ -47,6 +50,8 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
         f.absorbbg      = hg.damageAbsorb
         f.healPrediction= hg.healPrediction
         f.healthString  = hg.health.healthString
+        f.nameString    = hg.health.nameString
+        f.levelString   = hg.health.levelString
 
         f.hpValues = CreateUnitHealPredictionCalculator()
         f.hpValues:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth)
@@ -99,6 +104,8 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
         f.absorbbg      = hg.healPrediction.absorbbg
         f.healPrediction= hg.healPrediction
         f.healthString  = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.healthString
+        f.nameString    = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.nameString
+        f.levelString   = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.levelString
 
         GW.AddStatusbarAnimation(f.absorbOverlay, true)
         GW.AddStatusbarAnimation(f.antiHeal, true)
@@ -203,9 +210,6 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
     f.prestigebg:Hide()
     f.prestigeString:Hide()
 
-    f.healthValue = 0
-    f.barWidth = 214
-
     f:SetScript("OnEnter", f.OnEnter)
     f:SetScript("OnLeave", GameTooltip_Hide)
 
@@ -225,6 +229,8 @@ local function CreateSmallUnitFrame(name)
         f.absorbbg      = hg.damageAbsorb
         f.healPrediction= hg.healPrediction
         f.healthString  = hg.health.healthString
+        f.nameString    = hg.health.nameString
+        f.levelString   = hg.health.levelString
 
         f.powerbarContainer.powerbar = CreateFrame("StatusBar", name .. "Powerbar", f, "GwStatusBarBackground")
         f.powerbar = f.powerbarContainer.powerbar
@@ -266,6 +272,8 @@ local function CreateSmallUnitFrame(name)
         f.absorbbg      = hg.healPrediction.absorbbg
         f.healPrediction= hg.healPrediction
         f.healthString  = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.healthString
+        f.nameString    = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.nameString
+        f.levelString   = hg.healPrediction.absorbbg.health.antiHeal.absorbOverlay.levelString
 
         f.powerbarContainer.powerbar = GW.CreateAnimatedStatusBar(name .. "Powerbar", f, nil, true)
         f.powerbar = f.powerbarContainer.powerbar
@@ -301,9 +309,6 @@ local function CreateSmallUnitFrame(name)
     f.castingbarNormal.castingString:SetShadowOffset(1, -1)
     f.castingbarNormal.castingTimeString:GwSetFontTemplate(UNIT_NAME_FONT, GW.TextSizeType.NORMAL)
     f.castingbarNormal.castingTimeString:SetShadowOffset(1, -1)
-
-    f.healthValue = 0
-    f.barWidth = 149
 
     f:SetScript("OnEnter", f.OnEnter)
     f:SetScript("OnLeave", GameTooltip_Hide)
@@ -439,7 +444,8 @@ function GwUnitFrameMixin:SetUnitPortraitFrame()
 end
 
 function GwUnitFrameMixin:UpdateAvgItemLevel(guid)
-    if (GW.NotSecretValue(self.unit) and GW.NotSecretValue(guid)) and (guid ~= UnitGUID(self.unit) or not UnitIsPlayer(self.unit) or (GW.Mists and not InCombatLockdown() and not CheckInteractDistance(self.unit, 4)) or not CanInspect(self.unit)) then return end
+    local selfGuid = UnitGUID(self.unit)
+    if (GW.NotSecretValue(self.unit) and GW.NotSecretValue(guid) and GW.NotSecretValue(selfGuid)) and (guid ~= selfGuid or not UnitIsPlayer(self.unit) or (GW.Mists and not InCombatLockdown() and not CheckInteractDistance(self.unit, 4)) or not CanInspect(self.unit)) then return end
 
     local itemLevel, retryUnit, retryTable, iLevelDB = GW.GetUnitItemLevel(self.unit)
 
@@ -762,7 +768,7 @@ function GwUnitFrameMixin:OnEvent(event, unit, ...)
         if event == "PLAYER_TARGET_CHANGED" and self.unit == "target" and UnitIsPlayer(self.unit) and (self.showItemLevel == "PVP_LEVEL" or self.showItemLevel == "ITEM_LEVEL")
             and (not GW.Mists or (not InCombatLockdown() and CheckInteractDistance(self.unit, 4))) and CanInspect(self.unit) then
             local guid = UnitGUID(self.unit)
-            if guid and (not GW.unitIlvlsCache[guid] or (GW.unitIlvlsCache[guid] and GW.unitIlvlsCache[guid].itemLevel == nil)) then
+            if GW.NotSecretValue(guid) and guid and (not GW.unitIlvlsCache[guid] or (GW.unitIlvlsCache[guid] and GW.unitIlvlsCache[guid].itemLevel == nil)) then
                 local _, englishClass = UnitClass(self.unit)
                 local color = GWGetClassColor(englishClass, true, true)
                 GW.unitIlvlsCache[guid] = {unitColor = {color.r, color.g, color.b}}
@@ -794,8 +800,12 @@ function GwUnitFrameMixin:OnEvent(event, unit, ...)
             if secondaryFrame then secondaryFrame:UpdatePowerBar() end
         end
 
+        self:HideCastBar()
         self:StartCastbar()
-        if secondaryFrame then secondaryFrame:StartCastbar() end
+        if secondaryFrame then
+            secondaryFrame:HideCastBar()
+            secondaryFrame:StartCastbar()
+        end
         self:UpdateRaidMarkers()
         if secondaryFrame then secondaryFrame:UpdateRaidMarkers() end
 
@@ -821,6 +831,7 @@ function GwUnitFrameMixin:OnEvent(event, unit, ...)
                 secondaryFrame:UnitFrameData()
                 secondaryFrame:UpdateHealthBar(true)
                 secondaryFrame:UpdatePowerBar(true)
+                secondaryFrame:HideCastBar()
                 secondaryFrame:StartCastbar()
                 secondaryFrame:UpdateRaidMarkers()
             end
@@ -886,7 +897,7 @@ function GwUnitFrameMixin:ToggleSettings()
 
     self.auraPositionTop = GW.settings[unit .. "_AURAS_ON_TOP"]
 
-    self.altBg:SetShown(GW.settings[unit .. "_FRAME_ALT_BACKGROUND"])
+    self.backgroundOverlay:SetShown(GW.settings[unit .. "_FRAME_ALT_BACKGROUND"])
 
     -- Portrait visibility
     local showPortrait = GW.settings[unit .. "_SHOW_PORTRAIT"]
@@ -897,23 +908,71 @@ function GwUnitFrameMixin:ToggleSettings()
     end
 
     self.auras:ClearAllPoints()
-    self.auras:SetPoint("TOPLEFT", self.castingbarBackground, "BOTTOMLEFT", 2, -15)
-
     if self.auraPositionTop then
-        local yOff = GW.settings[unit .. "_FRAME_ALT_BACKGROUND"] and 22 or 17
-        self.auras:ClearAllPoints()
         if self.frameInvert then
-            self.auras:SetPoint("TOPRIGHT", self.nameString, "TOPRIGHT", -2, yOff)
+            self.auras:SetPoint("TOPRIGHT", self.levelString, "TOPRIGHT", -2, 17)
         else
-            self.auras:SetPoint("TOPLEFT", self.nameString, "TOPLEFT", 2, yOff)
+            self.auras:SetPoint("TOPLEFT", self.nameString, "TOPLEFT", 2, 17)
         end
-    elseif GW.settings[unit .. "_HOOK_COMBOPOINTS"] and (GW.myClassID == 4 or GW.myClassID == 11) then
-        self.auras:ClearAllPoints()
-        self.auras:SetPoint("TOPLEFT", self.castingbarBackground, "BOTTOMLEFT", 2, -23)
+    else
+        local comboOffset = (GW.settings[unit .. "_HOOK_COMBOPOINTS"] and (GW.myClassID == 4 or GW.myClassID == 11) and -23) or -15
+        if self.frameInvert then
+            self.auras:SetPoint("TOPRIGHT", self.castingbarBackground, "BOTTOMRIGHT", 2, comboOffset)
+        else
+            self.auras:SetPoint("TOPLEFT", self.castingbarBackground, "BOTTOMLEFT", 2, comboOffset)
+        end
     end
 
     self.debuffFilter = GW.settings[unit .. "_BUFFS_FILTER_ALL"] and "HARMFUL" or "PLAYER|HARMFUL"
     self.debuffFilterShowImportant = GW.settings[unit .. "_BUFFS_FILTER_IMPORTANT"]
+
+    self:SetScale(GW.settings[self.unit .. "_pos_scale"])
+    self.castingbarBackground:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    self.castingbarNormal:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    if self.castingbar then
+        self.castingbar:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    end
+    self.healthContainer:SetSize(GW.settings[self.unit .. "FrameHealthBarSize"].width, GW.settings[self.unit .. "FrameHealthBarSize"].height)
+    self.powerbarContainer:SetSize(GW.settings[self.unit .. "FrameHealthBarSize"].width, GW.settings[self.unit .. "FramePowerBarSize"].height) --width is shared
+
+    local powerHeight = self.powerbarContainer:GetHeight()
+    local yOffset = (powerHeight + 1) / 2
+
+    self.healthContainer:ClearAllPoints()
+    if self.frameInvert then
+        self.healthContainer:SetPoint("RIGHT", self.portrait, "LEFT", -4, yOffset)
+    else
+        self.healthContainer:SetPoint("LEFT", self.portrait, "RIGHT", 4, yOffset)
+    end
+
+    self.powerbarContainer:ClearAllPoints()
+    if self.frameInvert then
+        self.powerbarContainer:SetPoint("TOPRIGHT", self.healthContainer, "BOTTOMRIGHT", 0, -1)
+    else
+        self.powerbarContainer:SetPoint("TOPLEFT", self.healthContainer, "BOTTOMLEFT", 0, -1)
+    end
+
+    self.healthbarBackground:ClearAllPoints()
+    if self.frameInvert then
+        self.healthbarBackground:SetPoint("TOPRIGHT", self.healthContainer, "TOPRIGHT", 0, 0)
+    else
+        self.healthbarBackground:SetPoint("TOPLEFT", self.healthContainer, "TOPLEFT", 0, 0)
+    end
+    self.healthbarBackground:SetSize(self.healthContainer:GetWidth(), self.healthContainer:GetHeight())
+
+    self.healthString:ClearAllPoints()
+    if self.frameInvert then
+        self.healthString:SetPoint("RIGHT", self.health, "RIGHT", GW.settings[self.unit .. "FrameHealthBarTextOffset"].x, GW.settings[self.unit .. "FrameHealthBarTextOffset"].y)
+    else
+        self.healthString:SetPoint("LEFT", self.health, "LEFT", GW.settings[self.unit .. "FrameHealthBarTextOffset"].x, GW.settings[self.unit .. "FrameHealthBarTextOffset"].y)
+    end
+    self.nameString:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width - 15)
+
+    self:SetHeight(40 + self.healthContainer:GetHeight() + self.powerbarContainer:GetHeight())
+    self:SetWidth(90 + self.healthContainer:GetWidth())
+
+    self.auras:SetWidth(self.healthContainer:GetWidth() + 4)
+    self.auras.maxWidth = self.healthContainer:GetWidth() + 4
 
     self:OnEvent("FORCE_UPDATE")
 
@@ -940,7 +999,7 @@ function GwUnitFrameMixin:ToggleSettings()
     end
 
     if GwPlayerClassPower then
-        GW.UpdateClasspowerBar(GwPlayerClassPower.decay, "FORCE_UPDATE")
+        GW.UpdateClasspowerSetting(GwPlayerClassPower)
     end
 
     if unit == "target" then
@@ -967,10 +1026,10 @@ local function LoadUnitFrame(unit, frameInvert)
 
     LoadAuras(unitframe)
 
-    RegisterMovableFrame(unitframe, unit == "target" and TARGET or FOCUS, unit .. "_pos", ALL .. ",Unitframe", nil, {"default", "scaleable"})
+    RegisterMovableFrame(unitframe, unit == "target" and TARGET or FOCUS, unit .. "_pos", ALL .. ",Unitframe", nil, {"default"})
 
     unitframe:ClearAllPoints()
-    unitframe:SetPoint("TOPLEFT", unitframe.gwMover)
+    unitframe:SetPoint("CENTER", unitframe.gwMover, "CENTER")
 
     -- Porträt-Maske erstellen
     unitframe.portrait.mask = unitframe:CreateMaskTexture()
@@ -979,11 +1038,8 @@ local function LoadUnitFrame(unit, frameInvert)
     unitframe.portrait.mask:SetSize(58, 58)
     unitframe.portrait:AddMaskTexture(unitframe.portrait.mask)
 
-    unitframe.altBg = CreateFrame("Frame", nil, unitframe, "GwAlternativeUnitFrameBackground")
-    unitframe.altBg:SetAllPoints(unitframe)
     if unitframe.frameInvert then
-        unitframe.altBg.backgroundOverlay:SetTexCoord(1, 0, 0, 1)
-        unitframe.altBg.backgroundOverlay:SetPoint("CENTER", -15, -5)
+        unitframe.backgroundOverlay:SetPoint("CENTER", -15, -5)
         unitframe.healthContainer:ClearAllPoints()
         unitframe.healthContainer:SetPoint("RIGHT", unitframe.healthbarBackground, "RIGHT", -1, 0)
     end
@@ -1079,7 +1135,7 @@ function GwTargetUnitFrameMixin:ToggleSettings()
     self.showCastbar = GW.settings[self.parentUnitId .. "_TARGET_SHOW_CASTBAR"]
     self.showAbsorbBar = GW.settings[self.parentUnitId .. "_TARGET_SHOW_ABSORB_BAR"]
 
-    self.altBg:SetShown(GW.settings[self.parentUnitId .. "_FRAME_ALT_BACKGROUND"])
+    self.backgroundOverlay:SetShown(GW.settings[self.parentUnitId .. "_FRAME_ALT_BACKGROUND"])
 
     local frameFaderSettings = GW.settings[self.unit .. "FrameFader"]
     if frameFaderSettings.hover or frameFaderSettings.combat or frameFaderSettings.casting or frameFaderSettings.dynamicflight or frameFaderSettings.health or frameFaderSettings.vehicle or frameFaderSettings.playertarget or frameFaderSettings.unittarget then
@@ -1101,6 +1157,41 @@ function GwTargetUnitFrameMixin:ToggleSettings()
     elseif self.Fader then
         GW.FrameFadeDisable(self)
     end
+
+    self:SetScale(GW.settings[self.unit .. "_pos_scale"])
+    self.healthContainer:SetSize(GW.settings[self.unit .. "FrameHealthBarSize"].width, GW.settings[self.unit .. "FrameHealthBarSize"].height)
+    self.powerbarContainer:SetSize(GW.settings[self.unit .. "FrameHealthBarSize"].width, GW.settings[self.unit .. "FramePowerBarSize"].height) -- width is shared
+    self.castingbarBackground:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    self.castingbarNormal:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    if self.castingbar then
+        self.castingbar:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)
+    end
+
+    local powerHeight = self.powerbarContainer:GetHeight()
+    local yOffset = (powerHeight + 1) / 2
+
+    self.healthContainer:ClearAllPoints()
+    self.healthContainer:SetPoint("LEFT", self, "LEFT", 0, yOffset)
+
+    self.powerbarContainer:ClearAllPoints()
+    if self.frameInvert then
+        self.powerbarContainer:SetPoint("TOPRIGHT", self.healthContainer, "BOTTOMRIGHT", 0, -1)
+    else
+        self.powerbarContainer:SetPoint("TOPLEFT", self.healthContainer, "BOTTOMLEFT", 0, -1)
+    end
+
+    self.healthbarBackground:ClearAllPoints()
+    if self.frameInvert then
+        self.healthbarBackground:SetPoint("TOPRIGHT", self.healthContainer, "TOPRIGHT", 0, 0)
+    else
+        self.healthbarBackground:SetPoint("TOPLEFT", self.healthContainer, "TOPLEFT", 0, 0)
+    end
+    self.healthbarBackground:SetSize(self.healthContainer:GetWidth(), self.healthContainer:GetHeight())
+
+    self:SetHeight(40 + self.healthContainer:GetHeight() + self.powerbarContainer:GetHeight())
+    self:SetWidth(self.healthContainer:GetWidth() + 2)
+
+    self.nameString:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width - 15)
 
     self.parentUnitFrame:OnEvent("FORCE_UPDATE")
 end
@@ -1127,21 +1218,16 @@ local function LoadTargetOfUnit(unit, parentUnitFrame)
 
     f.castingbarNormal.Pips = {}
 
-    RegisterMovableFrame(f, unit == "Focus" and MINIMAP_TRACKING_FOCUS or SHOW_TARGET_OF_TARGET_TEXT, unitID .. "_pos", ALL .. ",Unitframe", nil, {"default", "scaleable"})
+    RegisterMovableFrame(f, unit == "Focus" and MINIMAP_TRACKING_FOCUS or SHOW_TARGET_OF_TARGET_TEXT, unitID .. "_pos", ALL .. ",Unitframe", nil, {"default"})
 
     f:ClearAllPoints()
-    f:SetPoint("TOPLEFT", f.gwMover)
+    f:SetPoint("LEFT", f.gwMover)
 
     f:SetAttribute("*type1", "target")
     f:SetAttribute("*type2", "togglemenu")
     f:SetAttribute("unit", unitID)
     f:EnableMouse(true)
     f:RegisterForClicks("AnyDown")
-
-    f.altBg = CreateFrame("Frame", nil, f, "GwAlternativeUnitFrameBackground")
-    f.altBg.backgroundOverlay:Hide()
-    f.altBg.backgroundOverlaySmall:Show()
-    f.altBg:SetAllPoints(f)
 
     GW.AddToClique(f)
 

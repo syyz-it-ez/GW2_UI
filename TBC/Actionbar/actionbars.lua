@@ -114,10 +114,24 @@ local function updateActionbarBorders(btn)
     local tonum = tonumber
     local texture = GetActionTexture(btn.action)
     if texture then
+        local shouldShowHotKey = GW.settings.BUTTON_ASSIGNMENTS
+        if shouldShowHotKey then
+            if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+                local text = btn.HotKey:GetText()
+                shouldShowHotKey =  text and text ~= RANGE_INDICATOR
+            end
+        end
         btn.gwBackdrop.border1:SetAlpha(1)
         btn.gwBackdrop.border2:SetAlpha(1)
         btn.gwBackdrop.border3:SetAlpha(1)
         btn.gwBackdrop.border4:SetAlpha(1)
+        if shouldShowHotKey then
+            btn.HotKey:Show()
+            if btn.hkBg then
+                btn.hkBg.texture:Show()
+            end
+        end
+        btn.hasAction = true
     else
         btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
@@ -330,8 +344,17 @@ end
 
 local function updateHotkey(self)
     local hotkey = self.HotKey
+    local text = hotkey:GetText()
+    local shouldShow = GW.settings.BUTTON_ASSIGNMENTS
+    local hasText = text and text ~= RANGE_INDICATOR
 
-    if GW.settings.BUTTON_ASSIGNMENTS then
+    if shouldShow then
+        if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+            shouldShow = self.hasAction and hasText
+        end
+    end
+
+    if shouldShow then
         hotkey:Show()
         if self.hkBg then
             self.hkBg.texture:Show()
@@ -343,8 +366,7 @@ local function updateHotkey(self)
         end
     end
 
-    local text = hotkey:GetText()
-    if text and text ~= RANGE_INDICATOR then
+    if hasText then
         text = gsub(text, "(s%-)", "S")
         text = gsub(text, "(a%-)", "A")
         text = gsub(text, "(c%-)", "C")
@@ -636,6 +658,7 @@ local function helper_RangeUpdate(slot, inRange, checkRange)
     end
 
     if checkRange and not inRange then
+        btn.isOutOfRange = true
         if indicator == "RED_INDICATOR" or indicator == "BOTH" then
             btn.gw_RangeIndicator:Show()
         end
@@ -643,6 +666,7 @@ local function helper_RangeUpdate(slot, inRange, checkRange)
             btn.icon:SetVertexColor(red_R, red_G, red_B, 1, true)
         end
     else
+        btn.isOutOfRange = false
         if btn.gw_RangeIndicator then
             btn.gw_RangeIndicator:Hide()
         end
@@ -662,6 +686,12 @@ local function saveVertexColor(self, r, g, b, a, bypass)
     self.savedVertexColor = self.savedVertexColor or {}
     local saved = self.savedVertexColor
     saved.r, saved.g, saved.b, saved.a = r, g, b, a
+
+    -- keep out of range active
+    if self:GetParent().isOutOfRange then
+        r, g, b, a = RED_FONT_COLOR:GetRGBA()
+        self:SetVertexColor(r, g, b, a, true)
+    end
 end
 
 local function main_OnEvent(_, event, ...)
@@ -715,12 +745,12 @@ local function updateMainBar()
             btn.hkBg:SetPoint("CENTER", hotkey, "CENTER", 0, 0)
             btn.hkBg.texture:SetParent(hotkey:GetParent())
             setActionButtonStyle("ActionButton" .. i)
-            updateHotkey(btn)
             saveVertexColor(btn.icon, btn.icon:GetVertexColor())
             hooksecurefunc(btn.icon, "SetVertexColor", saveVertexColor)
             hooksecurefunc(btn, "UpdateUsable", changeVertexColorActionbars)
             hooksecurefunc(btn, "Update", updateActionbarBorders)
             updateActionbarBorders(btn)
+            updateHotkey(btn)
 
             hotkey:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
             hotkey:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
@@ -1246,6 +1276,7 @@ local function UpdateMainBarHot()
         btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
         btn.rangeIndicatorSetting = GW.settings.MAINBAR_RANGEINDICATOR
         updateMacroName(btn)
+        updateActionbarBorders(btn)
         updateHotkey(btn)
     end
     -- position the main action bar

@@ -410,7 +410,6 @@ end
 local function sliderValueChange(self)
     local roundValue = GW.RoundDec(self:GetValue(), 2)
     local moverFrame = self:GetParent():GetParent():GetParent().child
-    moverFrame:SetScale(roundValue)
     moverFrame.parent:SetScale(roundValue)
     self:GetParent().input:SetText(roundValue)
     GW.settings[moverFrame.setting .."_scale"] = roundValue
@@ -420,13 +419,13 @@ local function sliderValueChange(self)
 end
 
 local function sliderEditBoxValueChanged(self)
-    local roundValue = GW.RoundDec(self:GetNumber(), 2) or 0.5
+    local roundValue = GW.RoundDec(self:GetNumber(), 2) or 0.1
     local moverFrame = self:GetParent():GetParent():GetParent().child
 
     self:ClearFocus()
-    if tonumber(roundValue) > 1.5 then self:SetText(1.5) end
-    if tonumber(roundValue) < 0.5 then self:SetText(0.5) end
-    roundValue = GW.RoundDec(self:GetNumber(), 2) or 0.5
+    if tonumber(roundValue) > 2 then self:SetText(2) end
+    if tonumber(roundValue) < 0.1 then self:SetText(0.1) end
+    roundValue = GW.RoundDec(self:GetNumber(), 2) or 0.1
 
     self:GetParent().slider:SetValue(roundValue)
     self:SetText(roundValue)
@@ -493,12 +492,30 @@ local function CreateMoverFrame(parent, displayName, settingsName, size, frameOp
     mf:SetFrameStrata("DIALOG")
     mf:GwCreateBackdrop("Transparent White")
     mf:SetScale(parent:GetScale())
+    parent.gwMover = mf
 
     if size then
+        mf.ignoreSize = true
         mf:SetSize(unpack(size))
     else
         mf:SetSize(parent:GetSize())
     end
+    hooksecurefunc(parent, "SetScale", function(self, scale)
+        mf:SetScale(scale)
+    end)
+    hooksecurefunc(parent, "SetWidth", function(self, width)
+        if self.gwMover.ignoreSize == true then return end
+        mf:SetWidth(width)
+    end)
+    hooksecurefunc(parent, "SetHeight", function(self, height)
+        if self.gwMover.ignoreSize == true then return end
+        mf:SetHeight(height)
+    end)
+    hooksecurefunc(parent, "SetSize", function(self, width, height)
+        if self.gwMover.ignoreSize == true then return end
+        mf:SetSize(width, height)
+    end)
+
     mf:Hide()
 
     local fs = mf:CreateFontString(nil, "OVERLAY")
@@ -548,8 +565,6 @@ local function CreateMoverFrame(parent, displayName, settingsName, size, frameOp
             mf.optionHeight = true
         end
     end
-
-    parent.gwMover = mf
 
     mf:SetScript("OnDragStart", mover_OnDragStart)
     mf:SetScript("OnDragStop", mover_OnDragStop)
@@ -651,7 +666,7 @@ local function LoadMovers(layoutManager)
     smallSettingsContainer.headerString:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
     smallSettingsContainer.headerString:SetText(L["Extra Frame Options"] .. " & Layouts")
 
-    smallSettingsContainer.moverSettingsFrame.options.scaleSlider.slider:SetMinMaxValues(0.5, 1.5)
+    smallSettingsContainer.moverSettingsFrame.options.scaleSlider.slider:SetMinMaxValues(0.1, 2)
     smallSettingsContainer.moverSettingsFrame.options.scaleSlider.slider:SetValue(1)
     smallSettingsContainer.moverSettingsFrame.options.scaleSlider.slider:SetScript("OnValueChanged", sliderValueChange)
     smallSettingsContainer.moverSettingsFrame.options.scaleSlider.input:SetText(1)

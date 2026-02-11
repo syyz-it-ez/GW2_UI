@@ -89,9 +89,33 @@ local function HandleUnitAuraEvent(unit, ...)
     end
 end
 
+local function UpdateAlphaFader(alpha)
+    for _, frame in ipairs({
+        CPWR_FRAME,
+        CPWR_FRAME.customResourceBar,
+        CPWR_FRAME.customResourceBar,
+        CPWR_FRAME.customResourceBar.decay,
+        CPWR_FRAME.lmb,
+        CPWR_FRAME.lmb.decay,
+        CPWR_FRAME.lmbSecret,
+        CPWR_FRAME.exbar,
+        CPWR_FRAME.exbar.decay,
+        CPWR_FRAME.exbarSecret
+    }) do
+        if frame then
+            GW.SetAlphaRecursive(frame, alpha)
+        end
+    end
+end
+
 local function UpdateVisibility(self, inCombat)
     local shouldBeVisible = self.shouldShowBar and (not self.onlyShowInCombat or inCombat)
     local targetAlpha = shouldBeVisible and 1 or 0
+
+    if self.shouldShowBar and GW.settings.PLAYER_AS_TARGET_FRAME and GwPlayerUnitFrame.Fader and GwPlayerUnitFrame.Fader:IsEnabled() then
+        targetAlpha = GwPlayerUnitFrame.Fader.currentAlpha
+    end
+
     for _, frame in ipairs({
         self,
         self.customResourceBar,
@@ -396,7 +420,6 @@ local function powerLittleMana(self, event, ...)
         else
             self:GetParent().lmb:UpdatePowerData(0, "MANA")
         end
-        
     end
 end
 
@@ -412,10 +435,14 @@ local function setManaBar(f)
     f:SetHeight(14)
 
     f:ClearAllPoints()
-    if GW.settings.XPBAR_ENABLED or f.isMoved then
-        f:SetPoint("TOPLEFT", f.gwMover, 0, -13)
+    if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+        f:SetPoint("CENTER", f.gwMover)
     else
-        f:SetPoint("TOPLEFT", f.gwMover, 0, -3)
+        if GW.settings.XPBAR_ENABLED or f.isMoved then
+            f:SetPoint("TOPLEFT", f.gwMover, 0, -13)
+        else
+            f:SetPoint("TOPLEFT", f.gwMover, 0, -3)
+        end
     end
 
     f:SetScript("OnEvent", powerMana)
@@ -528,7 +555,7 @@ end
 
 local function setComboBar(f)
     f:ClearAllPoints()
-    f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 0)
+    f:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", f.gwMover)
     f.barType = "combo"
     f.background:SetTexture(nil)
     f.fill:SetTexture(nil)
@@ -748,7 +775,7 @@ end
 
 local function setEvoker(f)
     f:ClearAllPoints()
-    f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 0)
+    f:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", f.gwMover)
     f.barType = "essence"
     f.background:SetTexture(nil)
     f.fill:SetTexture(nil)
@@ -943,9 +970,16 @@ local function setPaladin(f)
     f.background:SetWidth(181)
     f.background:SetTexCoord(0, 0.70703125, 0, 0.640625)
     f.paladin:ClearAllPoints()
-    f.paladin:SetPoint("TOPLEFT", f.gwMover, 0, 0)
-    f.paladin:SetPoint("BOTTOMLEFT", f.gwMover, 0, 0)
-    f.background:SetPoint("LEFT", f.gwMover, "LEFT", 0, 2)
+
+
+    if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+        f.paladin:SetPoint("CENTER", f.gwMover, 0, 0)
+        f.background:SetPoint("CENTER", f.gwMover)
+    else
+        f.paladin:SetPoint("TOPLEFT", f.gwMover, 0, 0)
+        f.paladin:SetPoint("BOTTOMLEFT", f.gwMover, 0, 0)
+        f.background:SetPoint("LEFT", f.gwMover, "LEFT", 0, 2)
+    end
 
     f.background:SetTexture("Interface/AddOns/GW2_UI/textures/altpower/holypower/background.png")
 
@@ -1110,9 +1144,14 @@ local function setPriest(f)
             f.background:SetWidth(181)
             f.background:SetTexCoord(0, 0.70703125, 0, 0.640625)
             f.priest:ClearAllPoints()
-            f.priest:SetPoint("TOPLEFT", f.gwMover, 0, 0)
-            f.priest:SetPoint("BOTTOMLEFT", f.gwMover, 0, 0)
-            f.background:SetPoint("LEFT", f.gwMover, "LEFT", 0, 2)
+            if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+                f.priest:SetPoint("CENTER", f.gwMover, 0, 0)
+                f.background:SetPoint("CENTER", f.gwMover)
+            else
+                f.priest:SetPoint("TOPLEFT", f.gwMover, 0, 0)
+                f.priest:SetPoint("BOTTOMLEFT", f.gwMover, 0, 0)
+                f.background:SetPoint("LEFT", f.gwMover, "LEFT", 0, 2)
+            end
 
             f.background:SetTexture("Interface/AddOns/GW2_UI/textures/altpower/shadoworbs/background.png")
 
@@ -1287,7 +1326,12 @@ GW.AddForProfiling("classpowers", "powerRune", powerRune)
 local function setDeathKnight(f)
     local fr = f.runeBar
     f:ClearAllPoints()
-    f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, -10)
+    if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+        f:SetPoint("CENTER", f.gwMover)
+    else
+        f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, -10)
+    end
+
     f.background:SetTexture(nil)
     f.fill:SetTexture(nil)
     f.flare:SetTexture("Interface/AddOns/GW2_UI/textures/altpower/runeflash.png")
@@ -1382,7 +1426,11 @@ local function setShaman(f)
             return true
         elseif GW.myspec == 2 then -- enh -- DONE
             f:ClearAllPoints()
-            f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, -10)
+            if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+                f:SetPoint("CENTER", f.gwMover)
+            else
+                f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, -10)
+            end
             f.background:SetTexture(nil)
             f.fill:SetTexture(nil)
             local fms = f.maelstrom
@@ -1466,7 +1514,11 @@ end
 local function setMage(f)
     if GW.myspec == 1 then -- arcane
         f:ClearAllPoints()
-        f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 15)
+        if GW.settings.CLASSPOWER_ANCHOR_TO_CENTER then
+            f:SetPoint("CENTER", f.gwMover)
+        else
+            f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 15)
+        end
         f:SetHeight(64)
         f:SetWidth(512)
         f.background:SetHeight(64)
@@ -1489,7 +1541,7 @@ local function setMage(f)
         return true
     elseif GW.myspec == 3 and not GW.Retail then --frost
         f:ClearAllPoints()
-        f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 0)
+        f:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", f.gwMover)
         f:SetHeight(32)
         f:SetWidth(256)
         f.background:SetHeight(32)
@@ -1752,6 +1804,11 @@ local function setStaggerBar()
     local staggerText = GW.GetLocalizedNumber(format("%.2f%%", staggerPrec * 100))
     if bar.label._lastText ~= staggerText then
         bar.label:SetText(staggerText)
+        if GW.settings.CLASSPOWER_SHOW_VALUE then
+            bar.label:SetText(staggerText)
+        else
+            bar.label:SetText("")
+        end
         bar.label._lastText = staggerText
     end
     if not (bar.label._lastR == colorToUse.r and bar.label._lastG == colorToUse.g and bar.label._lastB == colorToUse.b) then
@@ -1798,7 +1855,7 @@ local function setMonk(f)
             return true
         elseif GW.myspec == 3 then -- ww
             f:ClearAllPoints()
-            f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 0)
+            f:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", f.gwMover)
             f:SetHeight(32)
             f:SetWidth(256)
             f.background:SetHeight(32)
@@ -1819,7 +1876,7 @@ local function setMonk(f)
         end
     elseif GW.Mists then
         f:ClearAllPoints()
-        f:SetPoint("TOPLEFT", f.gwMover, "TOPLEFT", 0, 0)
+        f:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", f.gwMover)
         f:SetHeight(32)
         f:SetWidth(256)
         f.background:SetHeight(32)
@@ -1928,7 +1985,11 @@ end
 local function voidMetamorphosisUpdatePower(self)
     self.defaultResourceBar:SetMinMaxValues(0, self.maxPoints)
     self.defaultResourceBar:SetValue(self.currentPoints, Enum.StatusBarInterpolation.ExponentialEaseOut)
-    self.defaultResourceBar.label:SetText(self.currentPoints)
+    if GW.settings.CLASSPOWER_SHOW_VALUE then
+        self.defaultResourceBar.label:SetText(self.currentPoints)
+    else
+        self.defaultResourceBar.label:SetText("")
+    end
 end
 
 local function VoidMetamorphosisGetCurrentMinMaxPower(self)
@@ -2076,10 +2137,21 @@ local function barChange_OnEvent(self, event)
         selectType(f)
     end
 end
-GW.UpdateClasspowerBar = barChange_OnEvent
+
+local function UpdateSettings(self, skipEvent)
+    self.exbarSecret.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+    self.exbar.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+    self.lmb.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+    self.lmbSecret.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+    if skipEvent then return end
+    barChange_OnEvent(self.decay, "FORCE_UPDATE")
+end
+GW.UpdateClasspowerSetting = UpdateSettings
 
 local function UpdateExtraManabar()
     if not GW.settings.CLASS_POWER then return end
+
+    UpdateSettings(GwPlayerClassPower, true)
     if GW.settings.POWERBAR_ENABLED then
         local anchorFrame = GW.settings.PLAYER_AS_TARGET_FRAME and GwPlayerUnitFrame and GwPlayerUnitFrame or
             GwPlayerPowerBar
@@ -2174,7 +2246,7 @@ local function LoadClassPowers()
             framePoint.yOfs - yOff)
     end
     cpf:ClearAllPoints()
-    cpf:SetPoint("TOPLEFT", cpf.gwMover)
+    cpf:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", cpf.gwMover)
 
     -- need to pull it out of core because of not existing atlas files on non retail clients
     if GW.Retail then
@@ -2298,6 +2370,9 @@ local function LoadClassPowers()
     cpf.unit = "player"
     cpf:Show()
 
+    cpf.UpdateAlphaFader = UpdateAlphaFader
+
+    UpdateSettings(cpf)
     updateVisibilitySetting(cpf, false)
     selectType(cpf)
     UpdateExtraManabar()

@@ -30,13 +30,40 @@ function GwPlayerUnitFrameMixin:OnEvent(event, ...)
 end
 
 function GwPlayerUnitFrameMixin:ToggleSettings()
-    self.altBg:SetShown(GW.settings.PLAYER_AS_TARGET_FRAME_ALT_BACKGROUND)
+    self.backgroundOverlay:SetShown(GW.settings.PLAYER_AS_TARGET_FRAME_ALT_BACKGROUND)
 
     self.shortendHealthValues = GW.settings.PLAYER_UNIT_HEALTH_SHORT_VALUES
     self.showHealthValue = GW.settings.PLAYER_UNIT_HEALTH == "VALUE" or GW.settings.PLAYER_UNIT_HEALTH == "BOTH"
     self.showHealthPrecentage = GW.settings.PLAYER_UNIT_HEALTH == "PREC" or GW.settings.PLAYER_UNIT_HEALTH == "BOTH"
     self.classColor = GW.settings.player_CLASS_COLOR
     self.showAbsorbBar = GW.settings.PLAYER_SHOW_ABSORB_BAR
+    self.powerbar.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+
+    self:SetScale(GW.settings.player_pos_scale)
+    self.healthContainer:SetSize(GW.settings.playerFrameHealthBarSize.width, GW.settings.playerFrameHealthBarSize.height)
+    self.powerbarContainer:SetSize(GW.settings.playerFrameHealthBarSize.width, GW.settings.playerFramePowerBarSize.height) -- width is shared
+    self.powerbar.spark:SetHeight(GW.settings.playerFramePowerBarSize.height)
+    self.powerbar.label:SetShown(GW.settings.playerFramePowerBarSize.height >= 10)
+    self.healthString:ClearAllPoints()
+    self.healthString:SetPoint("LEFT", self.health, "LEFT", GW.settings.playerFrameHealthBarTextOffset.x, GW.settings.playerFrameHealthBarTextOffset.y)
+    self.powerbar.label:ClearAllPoints()
+    self.powerbar.label:SetPoint("LEFT", self.powerbar, "LEFT", GW.settings.playerFramePowerBarTextOffset.x, GW.settings.playerFramePowerBarTextOffset.y)
+
+    local powerHeight = self.powerbarContainer:GetHeight()
+    local yOffset = (powerHeight + 1) / 2
+
+    self.healthContainer:ClearAllPoints()
+    self.healthContainer:SetPoint("LEFT", self.portrait, "RIGHT", 4, yOffset)
+
+    self.powerbarContainer:ClearAllPoints()
+    self.powerbarContainer:SetPoint("TOPLEFT", self.healthContainer, "BOTTOMLEFT", 0, -1)
+
+    self.healthbarBackground:ClearAllPoints()
+    self.healthbarBackground:SetPoint("TOPLEFT", self.healthContainer, "TOPLEFT", 0, 0)
+    self.healthbarBackground:SetSize(self.healthContainer:GetWidth(), self.healthContainer:GetHeight())
+
+    self:SetHeight(40 + self.healthContainer:GetHeight() + self.powerbarContainer:GetHeight())
+    self:SetWidth(90 + self.healthContainer:GetWidth())
 
     -- Portrait visibility
     local showPortrait = GW.settings.player_SHOW_PORTRAIT
@@ -57,6 +84,9 @@ function GwPlayerUnitFrameMixin:ToggleSettings()
         self.Fader:SetOption("Health", frameFaderSettings.health)
         self.Fader:SetOption("Vehicle", frameFaderSettings.vehicle)
         self.Fader:SetOption("PlayerTarget", frameFaderSettings.playertarget)
+        self.Fader:AddCorrespondingFrames("GW2EnergyTicker")
+        self.Fader:AddCorrespondingFrames("GwPlayerPowerBar")
+        self.Fader:AddCorrespondingFrames("GwPlayerClassPower")
 
         self.Fader:ClearTimers()
         self.Fader.configTimer = C_Timer.NewTimer(0.25, function() self.Fader:ForceUpdate() end)
@@ -64,19 +94,8 @@ function GwPlayerUnitFrameMixin:ToggleSettings()
         GW.FrameFadeDisable(self)
     end
 
-    -- ressourcebar size
-    if GW.settings.PlayerTargetFrameExtendRessourcebar then
-        self.powerbarContainer:SetHeight(10)
-        self.powerbar.spark:SetHeight(10)
-        self.powerbar.label:Show()
-
-    else
-        self.powerbarContainer:SetHeight(3)
-        self.powerbar.spark:SetHeight(3)
-        self.powerbar.label:Hide()
-    end
-
     self:UpdateHealthBar()
+    self.powerbar:UpdatePowerData()
     self:UnitFrameData()
 end
 
@@ -94,7 +113,7 @@ local function LoadPlayerFrame()
 
     frame.powerbar.label:SetJustifyH("LEFT")
 
-    RegisterMovableFrame(frame, PLAYER, "player_pos",  ALL .. ",Unitframe", nil, {"default", "scaleable"})
+    RegisterMovableFrame(frame, PLAYER, "player_pos",  ALL .. ",Unitframe", nil, {"default"})
 
     frame:ClearAllPoints()
     frame:SetPoint("TOPLEFT", frame.gwMover)
@@ -105,10 +124,6 @@ local function LoadPlayerFrame()
     RegisterUnitWatch(frame)
     frame:EnableMouse(true)
     frame:RegisterForClicks("AnyDown")
-
-    frame.altBg = CreateFrame("Frame", nil, frame, "GwAlternativeUnitFrameBackground")
-    frame.altBg:SetAllPoints(frame)
-    frame.altBg:SetFrameLevel(0)
 
     frame.mask = UIParent:CreateMaskTexture()
     frame.mask:SetPoint("CENTER", frame.portrait, "CENTER", 0, 0)

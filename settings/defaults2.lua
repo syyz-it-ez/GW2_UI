@@ -118,6 +118,9 @@ GW.globalDefault = {
 
         NumberFormat = "POINT",
 
+        showDodgebar = true,
+        showSkyridingbar = true,
+
         FONT_STYLE_TEMPLATE = "GW2",
         FONT_NORMAL = "Interface/AddOns/GW2_UI/fonts/menomonia.ttf",
         FONT_HEADERS = "",
@@ -133,6 +136,9 @@ GW.globalDefault = {
         TOOLTIP_HEADER_FONT_SIZE = 16,
         TOOLTIP_SMALL_FONT_SIZE = 12,
         TOOLTIP_FONT_SIZE = 14,
+        TooltipHealthBarTextFontSize = 10,
+        TooltipHealthBarValues = "RAW",
+        TooltipHealthBarValuesShortend = false,
         HIDE_TOOLTIP_IN_COMBAT = false,
         HIDE_TOOLTIP_IN_COMBAT_UNIT = "ALL",
         HIDE_TOOLTIP_IN_COMBAT_OVERRIDE = "NONE",
@@ -154,7 +160,6 @@ GW.globalDefault = {
         ADVANCED_TOOLTIP_SHOW_GENDER = false,
         ADVANCED_TOOLTIP_SHOW_DUNGEONSCORE = true,
         ADVANCED_TOOLTIP_SHOW_KEYSTONEINFO = true,
-        ADVANCED_TOOLTIP_SHOW_HEALTHBAR_TEXT = true,
         ADVANCED_TOOLTIP_ID_MODIFIER = "NONE",
         TOOLTIP_SHOW_PREMADE_GROUP_INFO = true,
         DYNAMIC_CAM = false,
@@ -181,8 +186,12 @@ GW.globalDefault = {
         PET_FLOATING_COMBAT_TEXT= false,
         PET_AURAS_UNDER= false,
         PET_SHOW_ABSORB_BAR = true,
+        PET_HEALTH_VALUE_RAW = true,
+        PET_HEALTH_VALUE_PERCENT = false,
+
 
         BUTTON_ASSIGNMENTS= true,
+        BUTTON_ASSIGNMENTS_USED_ONLY = false,
 
         singingSockets = true,
 
@@ -395,6 +404,17 @@ GW.globalDefault = {
             hasMoved= false,
         },
         target_pos_scale= 1,
+        targetFrameHealthBarSize = {
+            height = 13,
+            width = 213,
+        },
+        targetFramePowerBarSize = {
+            height = 3,
+        },
+        targetFrameHealthBarTextOffset = {
+            x = 5,
+            y = 0,
+        },
 
         pet_pos= {
             point= "BOTTOMRIGHT",
@@ -422,6 +442,13 @@ GW.globalDefault = {
             hasMoved= false,
         },
         targettarget_pos_scale= 1,
+        targettargetFrameHealthBarSize = {
+            height = 13,
+            width = 148,
+        },
+        targettargetFramePowerBarSize = {
+            height = 3,
+        },
 
         focus_pos= {
             point= "CENTER",
@@ -431,6 +458,17 @@ GW.globalDefault = {
             hasMoved= false,
         },
         focus_pos_scale= 1,
+        focusFrameHealthBarSize = {
+            height = 13,
+            width = 213,
+        },
+        focusFrameHealthBarTextOffset = {
+            x = 5,
+            y = 0,
+        },
+        focusFramePowerBarSize = {
+            height = 3,
+        },
 
         focustarget_pos= {
             point= "CENTER",
@@ -440,6 +478,13 @@ GW.globalDefault = {
             hasMoved= false,
         },
         focustarget_pos_scale= 1,
+        focustargetFrameHealthBarSize = {
+            height = 13,
+            width = 148,
+        },
+        focustargetFramePowerBarSize = {
+            height = 3,
+        },
 
         MainActionBar_pos= {
             point= "BOTTOM",
@@ -586,6 +631,7 @@ GW.globalDefault = {
         ZoneAbilityFramePos_scale= 1,
 
         TalkingHeadFrameScale= 0.9,
+        ChatBubbleScale = 1,
 
         HealthGlobe_pos= {
             point= "BOTTOM",
@@ -795,7 +841,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS_TANK= false,
         RAID_WIDTH_TANK= 120,
         RAID_HEIGHT_TANK= 28,
-        RAID_POWER_BARS_TANK= false, -- always
         RAID_GROUPS_PER_COLUMN_TANK= 1,
         RAID_GROW_TANK= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS_TANK= true,
@@ -817,6 +862,7 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES_TANK = false,
         RAID_SHOW_ABSORB_BAR_TANK = true,
         RAID_MAINTANK_AURAS = CopyTable(GridAuraFilter),
+        maintank_show_powerbar = "NONE", -- always
         raidMaintank_pos= {
             point= "TOPLEFT",
             relativePoint= "TOPLEFT",
@@ -854,7 +900,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS_PET= false,
         RAID_WIDTH_PET= 50,
         RAID_HEIGHT_PET= 25,
-        RAID_POWER_BARS_PET= false, -- always
         RAID_GROUPS_PER_COLUMN_PET= 1,
         RAID_GROW_PET= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS_PET= true,
@@ -876,6 +921,7 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES_PET = false,
         RAID_SHOW_ABSORB_BAR_PET = true,
         RAID_PET_AURAS = CopyTable(GridAuraFilter),
+        pet_show_powerbar = "NONE", -- always
 
         raid_pet_pos= {
             point= "TOPLEFT",
@@ -892,7 +938,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS= false,
         RAID_WIDTH= 55,
         RAID_HEIGHT= 47,
-        RAID_POWER_BARS= false,
         RAID_GROUPS_PER_COLUMN= 1,
         RAID_GROW= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS= true,
@@ -914,6 +959,7 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES = false,
         RAID_SHOW_ABSORB_BAR = true,
         RAID_AURAS = CopyTable(GridAuraFilter),
+        raid40_show_powerbar = "ALL",
 
         raid_pos= {
             point= "TOPLEFT",
@@ -931,7 +977,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS_RAID25= false,
         RAID_WIDTH_RAID25= 55,
         RAID_HEIGHT_RAID25= 47,
-        RAID_POWER_BARS_RAID25= false,
         RAID_GROUPS_PER_COLUMN_RAID25= 1,
         RAID_GROW_RAID25= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS_RAID25= true,
@@ -953,6 +998,7 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES_RAID25 = false,
         RAID_SHOW_ABSORB_BAR_RAID25 = true,
         RAID_25_AURAS = CopyTable(GridAuraFilter),
+        raid25_show_powerbar = "ALL",
 
         raid25_pos= {
             point= "TOPLEFT",
@@ -970,7 +1016,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS_RAID10= false,
         RAID_WIDTH_RAID10= 55,
         RAID_HEIGHT_RAID10= 47,
-        RAID_POWER_BARS_RAID10= false,
         RAID_GROUPS_PER_COLUMN_RAID10= 1,
         RAID_GROW_RAID10= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS_RAID10= true,
@@ -992,6 +1037,7 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES_RAID10 = false,
         RAID_SHOW_ABSORB_BAR_RAID10 = true,
         RAID_10_AURAS = CopyTable(GridAuraFilter),
+        raid10_show_powerbar = "ALL",
 
         raid10_pos= {
             point= "TOPLEFT",
@@ -1008,7 +1054,6 @@ GW.globalDefault = {
         RAID_UNIT_MARKERS_PARTY= false,
         RAID_WIDTH_PARTY= 500,
         RAID_HEIGHT_PARTY= 80,
-        RAID_POWER_BARS_PARTY= true,
         RAID_GROUPS_PER_COLUMN_PARTY= 1,
         RAID_GROW_PARTY= "DOWN+RIGHT",
         RAID_SHOW_DEBUFFS_PARTY= true,
@@ -1031,6 +1076,7 @@ GW.globalDefault = {
         RAID_SHOW_PLAYER_PARTY = true, -- only for party grid
         RAID_SHOW_ABSORB_BAR_PARTY = true,
         RAID_PARTY_AURAS = CopyTable(GridAuraFilter),
+        party_grid_show_powerbar = "ALL",
 
         raid_party_pos= {
             point= "TOPLEFT",
@@ -1069,6 +1115,10 @@ GW.globalDefault = {
         MINIMAP_COORDS_TOGGLE= false,
         MINIMAP_COORDS_PRECISION= 0,
         MINIMAP_ADDON_COMPARTMENT_TOGGLE= true,
+        Minimap = {
+            HeightPercentage = 100,
+            KeepSizeRatio = true
+        },
         WORLDMAP_COORDS_TOGGLE= false,
         WORLDMAP_COORDS_POSITION= "TOP",
         WORLDMAP_COORDS_X_OFFSET= 0,
@@ -1257,10 +1307,12 @@ GW.globalDefault = {
         PLAYER_SHOW_PVP_INDICATOR= true,
         PLAYER_ENERGY_MANA_TICK_HIDE_OFC = false,
         PLAYER_ENERGY_MANA_TICK = true,
+        PLAYER_5SR_TIMER = true,
         PLAYER_CASTBAR_SHOW_SPELL_QUEUEWINDOW= true,
         PLAYER_AS_TARGET_FRAME_ALT_BACKGROUND= false,
         CLASSPOWER_ONLY_SHOW_IN_COMBAT= false,
-        PlayerTargetFrameExtendRessourcebar = false,
+        CLASSPOWER_ANCHOR_TO_CENTER = false,
+        CLASSPOWER_SHOW_VALUE = true,
 
         player_pos= {
             point= "CENTER",
@@ -1270,6 +1322,21 @@ GW.globalDefault = {
             hasMoved= false,
         },
         player_pos_scale= 1,
+        playerFrameHealthBarSize = {
+            height = 13,
+            width = 213,
+        },
+        playerFramePowerBarSize = {
+            height = 3,
+        },
+        playerFrameHealthBarTextOffset = {
+            x = 5,
+            y = 0,
+        },
+        playerFramePowerBarTextOffset = {
+            x = 5,
+            y = 0,
+        },
 
         --general raid tag update rate
         tagUpdateRate = 0.2, -- eventTimerThreshold
@@ -1358,6 +1425,13 @@ GW.globalDefault = {
 
         IncompatibleAddons = {
             Actionbars = {
+                Override = false,
+                Addons = {
+                    "Bartender4",
+                    "Dominos",
+                },
+            },
+            PetFrame = {
                 Override = false,
                 Addons = {
                     "Bartender4",

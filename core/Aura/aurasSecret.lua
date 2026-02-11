@@ -302,8 +302,6 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
         auras.activeBuffs = auras.activeBuffs or {}
         auras.allDebuffs = auras.allDebuffs or {}
         auras.activeDebuffs = auras.activeDebuffs or {}
-        auras.sortedBuffs = auras.sortedBuffs or {}
-        auras.sortedDebuffs = auras.sortedDebuffs or {}
 
         if updateInfo.addedAuras then
             for _, data in next, updateInfo.addedAuras do
@@ -448,6 +446,11 @@ local function ForceUpdate(element)
     local parent = element:GetParent()
     UpdateBuffLayout(parent, "ForceUpdate", parent.unit)
 end
+
+local function UpdateAuraSettings(self)
+    self.auras.maxWidth = self.auras:GetWidth()
+end
+GW.UpdateUnitAuraSettings = UpdateAuraSettings
 
 -- No use for player (not secure)
 local function LoadAuras(self)

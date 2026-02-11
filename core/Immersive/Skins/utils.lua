@@ -908,11 +908,13 @@ local function HandleItemListScrollBoxHover(self)
         end
 
         --zebra
-        local zebra = child.GetOrderIndex and (child:GetOrderIndex() % 2) == 1 or false
-        if zebra then
-            child.Background:SetVertexColor(1, 1, 1, 1)
-        else
-            child.Background:SetVertexColor(0, 0, 0, 0)
+        if child.Background then
+            local zebra = child.GetOrderIndex and (child:GetOrderIndex() % 2) == 1 or false
+            if zebra then
+                child.Background:SetVertexColor(1, 1, 1, 1)
+            else
+                child.Background:SetVertexColor(0, 0, 0, 0)
+            end
         end
 
         if child.NormalTexture then
@@ -935,7 +937,13 @@ local function SkinSideTabButton(self, iconTexture, tooltipText)
     self.isSkinned = true
     self:GwStripTextures()
     self:SetSize(64, 40)
-    self.Text:Hide()
+    if self.Text then
+        self.Text:Hide()
+    end
+
+    if _G[self:GetName() .. "Text"] then
+        _G[self:GetName() .. "Text"]:Hide()
+    end
 
     self.icon = self:CreateTexture(nil, "BACKGROUND", nil, 0)
     self.icon:SetAllPoints()

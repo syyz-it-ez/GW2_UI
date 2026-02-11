@@ -349,9 +349,9 @@ function GwPlayerPowerBarMixin:OnUpdate()
 
     if self.textUpdate < GetTime() then
         if GW.Retail then
-            self.powerBarString:SetText(power)
+            self.powerBarString:SetText(self.showBarValues and power or "")
         else
-            self.powerBarString:SetText(GW.GetLocalizedNumber(powerMax * powerPrec))
+            self.powerBarString:SetText(self.showBarValues and GW.GetLocalizedNumber(powerMax * powerPrec) or "")
         end
         self.textUpdate = GetTime() + 0.2
     end
@@ -383,10 +383,10 @@ function GwPlayerPowerBarMixin:UpdatePowerData(forcePowerType, powerToken)
     self:SetPowerBarVisuals(forcePowerType, powerToken)
 
     if GW.Retail then
-        self.label:SetText(BreakUpLargeNumbers(power))
+        self.label:SetText(self.showBarValues and BreakUpLargeNumbers(power) or "")
         self:SetValue(powerPrec, Enum.StatusBarInterpolation.ExponentialEaseOut)
     else
-        self.label:SetText(GW.GetLocalizedNumber(self.lostKnownPower))
+        self.label:SetText(self.showBarValues and GW.GetLocalizedNumber(self.lostKnownPower) or "")
         self:SetFillAmount(powerPrec)
     end
 
@@ -428,6 +428,7 @@ function GwPlayerPowerBarMixin:ToggleBar()
         self:SetScript("OnEvent", OnEvent)
         self:UpdatePowerData()
         GW.ToggleMover(self.gwMover, true)
+        self.shouldShow = true
     else
         self:SetParent(GW.HiddenFrame)
         if self.decay then
@@ -435,7 +436,15 @@ function GwPlayerPowerBarMixin:ToggleBar()
         end
         self:SetScript("OnEvent", nil)
         GW.ToggleMover(self.gwMover, false)
+        self.shouldShow = false
     end
+end
+
+function GwPlayerPowerBarMixin:ToggleSettings()
+    self.showBarValues = GW.settings.CLASSPOWER_SHOW_VALUE
+    self:ClearAllPoints()
+    self:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", self.gwMover)
+    self:UpdatePowerData()
 end
 
 local function LoadPowerBar()
@@ -469,7 +478,7 @@ local function LoadPowerBar()
     GW.RegisterMovableFrame(playerPowerBar, DISPLAY_POWER_BARS, "PowerBar_pos", ALL .. ",Unitframe,Power", nil, {"default", "scaleable"}, true)
 
     playerPowerBar:ClearAllPoints()
-    playerPowerBar:SetPoint("TOPLEFT", playerPowerBar.gwMover)
+    playerPowerBar:SetPoint(GW.settings.CLASSPOWER_ANCHOR_TO_CENTER and "CENTER" or "TOPLEFT", playerPowerBar.gwMover)
 
     -- position mover
     if (not GW.settings.XPBAR_ENABLED or GW.settings.PLAYER_AS_TARGET_FRAME) and not playerPowerBar.isMoved  then
@@ -493,6 +502,7 @@ local function LoadPowerBar()
     playerPowerBar:RegisterEvent("PLAYER_ENTERING_WORLD")
     playerPowerBar:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
+    playerPowerBar:ToggleSettings()
     playerPowerBar:ToggleBar()
 
     if (GW.Classic or GW.TBC) and GW.settings.PLAYER_ENERGY_MANA_TICK then

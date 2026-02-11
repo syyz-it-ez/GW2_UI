@@ -156,7 +156,7 @@ local function SetPosition(element, from, to, unit, isInvert, auraPositon)
     local marginY = 20
     local marginX = 3
     local smallSize = 20
-    local maxWidth = element:GetWidth()
+    local maxWidth = element.maxWidth
     local usedWidth = 0
     local usedWidth2 = 0
     local maxHeightInRow = smallSize
@@ -383,8 +383,6 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
         auras.activeBuffs = auras.activeBuffs or {}
         auras.allDebuffs = auras.allDebuffs or {}
         auras.activeDebuffs = auras.activeDebuffs or {}
-        auras.sortedBuffs = auras.sortedBuffs or {}
-        auras.sortedDebuffs = auras.sortedDebuffs or {}
 
         if updateInfo.addedAuras then
             for _, data in next, updateInfo.addedAuras do
@@ -537,5 +535,7 @@ local function LoadAuras(self)
     self.auras.anchoredButtons = 0
     self.auras.ForceUpdate = ForceUpdate
     self.auras.__owner = self
+
+    self.auras.maxWidth = self.auras:GetWidth()
 end
 GW.LoadAuras = LoadAuras

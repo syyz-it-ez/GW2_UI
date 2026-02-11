@@ -46,22 +46,26 @@ local function Construct_HealthBar(frame)
     health:SetPoint('RIGHT')
     health:SetFrameLevel(10)
 
-    health.bg = frame:CreateTexture(nil, 'BORDER')
-    health.bg:SetPoint("TOPLEFT", -1, 1)
-    health.bg:SetPoint("BOTTOMRIGHT", 1, -1)
-    health.bg:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar.png")
-    health.bg:SetVertexColor(0, 0, 0, 1)
-
-    health.highlightBorder = frame:CreateTexture(nil, 'BORDER', nil, -7)
-    health.highlightBorder:SetPoint("TOPLEFT", -1, 1)
-    health.highlightBorder:SetPoint("BOTTOMRIGHT", 1, -1)
-    health.highlightBorder:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar.png")
-    health.highlightBorder:SetVertexColor(0, 0, 0, 0)
-
     health.PostUpdateColor = PostUpdateHealthColor
     health.PostUpdate = PostUpdateHealth
-
     health.smoothing = Enum.StatusBarInterpolation and Enum.StatusBarInterpolation.ExponentialEaseOut or nil
+
+    frame.bg = frame:CreateTexture(nil, 'BORDER')
+    frame.bg:SetPoint("TOPLEFT", -1, 1)
+    frame.bg:SetPoint("BOTTOMRIGHT", 1, -1)
+    frame.bg:SetTexture("Interface/AddOns/GW2_UI/textures/uistuff/gwstatusbar.png")
+    frame.bg:SetVertexColor(0, 0, 0, 1)
+
+    frame:GwCreateBackdrop({
+            edgeFile = "Interface/AddOns/GW2_UI/textures/uistuff/white.png",
+            bgFile = "",
+            edgeSize = GW.Scale(1)
+        })
+    frame.highlightBorder = frame.backdrop
+    frame.backdrop:OffsetFrameLevel(health:GetFrameLevel() + 1, frame)
+    frame.backdrop:ClearAllPoints()
+    frame.backdrop:SetPoint("TOPLEFT", -1, 1)
+    frame.backdrop:SetPoint("BOTTOMRIGHT", 1, -1)
 
     return health
 end

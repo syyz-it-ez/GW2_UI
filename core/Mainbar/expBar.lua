@@ -39,7 +39,7 @@ local function xpbar_OnEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
     GameTooltip:ClearLines()
 
-    local isRestingString = IsResting() and L[" (Resting)"] or ""
+    local isRestingString = IsResting() and not IsAtMaxLevel() and L[" (Resting)"] or ""
 
     GameTooltip:AddLine(COMBAT_XP_GAIN .. isRestingString, 1, 1, 1)
 
@@ -159,7 +159,7 @@ local function UpdateReputation(self, data, lockLevelTextUnderMaxLevel)
     local isParagon, isFriend, isMajor, isNormal = false, false, false, false
     showRepu = true
 
-    if C_Reputation.IsFactionParagon and C_Reputation.IsFactionParagon(data.factionID) then
+    if C_Reputation.IsFactionParagonForCurrentPlayer and C_Reputation.IsFactionParagonForCurrentPlayer(data.factionID) then
         local currentValue, maxValueParagon = C_Reputation.GetFactionParagonInfo(data.factionID)
         currentValue = currentValue % maxValueParagon
         valPrecRepu = (maxValueParagon > 0) and (currentValue / maxValueParagon) or 0
@@ -653,8 +653,9 @@ local function LoadXPBar()
     local experiencebar = CreateFrame("Frame", "GwExperienceFrame", UIParent, "GwExperienceBar")
     experiencebar.tooltip = {}
 
-    if GW.Mists then
-        GW.MixinHideDuringOverride(experiencebar)
+    if PetBattleFrame then
+        PetBattleFrame.BottomFrame:SetPoint("BOTTOM", PetBattleFrame, "BOTTOM", 0, 14)
+        PetBattleFrame.BottomFrame:SetFrameLevel(PetBattleFrame.BottomFrame:GetFrameLevel() + 5)
     end
 
     if GW.Retail or GW.TBC then

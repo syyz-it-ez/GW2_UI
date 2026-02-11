@@ -339,8 +339,17 @@ end
 
 local function updateHotkey(self)
     local hotkey = self.HotKey
+    local text = hotkey:GetText()
+    local shouldShow = GW.settings.BUTTON_ASSIGNMENTS
+    local hasText = text and text ~= RANGE_INDICATOR
 
-    if GW.settings.BUTTON_ASSIGNMENTS then
+    if shouldShow then
+        if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+            shouldShow = self.hasAction and hasText
+        end
+    end
+
+    if shouldShow then
         hotkey:Show()
         if self.hkBg then
             self.hkBg.texture:Show()
@@ -352,8 +361,7 @@ local function updateHotkey(self)
         end
     end
 
-    local text = hotkey:GetText()
-    if text and text ~= RANGE_INDICATOR then
+    if hasText then
         text = gsub(text, "(s%-)", "S")
         text = gsub(text, "(a%-)", "A")
         text = gsub(text, "(c%-)", "C")
@@ -394,10 +402,24 @@ local function UpdateActionbarBorders(btn)
     if not btn.gwBackdrop then return end
     local texture = GetActionTexture(btn.action)
     if texture then
+        local shouldShowHotKey = GW.settings.BUTTON_ASSIGNMENTS
+        if shouldShowHotKey then
+            if GW.settings.BUTTON_ASSIGNMENTS_USED_ONLY then
+                local text = btn.HotKey:GetText()
+                shouldShowHotKey =  text and text ~= RANGE_INDICATOR
+            end
+        end
         btn.gwBackdrop.border1:SetAlpha(1)
         btn.gwBackdrop.border2:SetAlpha(1)
         btn.gwBackdrop.border3:SetAlpha(1)
         btn.gwBackdrop.border4:SetAlpha(1)
+        if shouldShowHotKey then
+            btn.HotKey:Show()
+            if btn.hkBg then
+                btn.hkBg.texture:Show()
+            end
+        end
+        btn.hasAction = true
     else
         btn.gwBackdrop.border1:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
         btn.gwBackdrop.border2:SetAlpha(tonum(GW.settings.ACTIONBAR_BACKGROUND_ALPHA))
@@ -594,12 +616,21 @@ local function saveVertexColor(self, r, g, b, a, bypass)
     if a == nil then
         a = 1
     end
-    self.savedVertexColor = {["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+    -- reuse the same table to avoid allocating on every SetVertexColor call
+    self.savedVertexColor = self.savedVertexColor or {}
+    local saved = self.savedVertexColor
+    saved.r, saved.g, saved.b, saved.a = r, g, b, a
+
+    -- keep out of range active
+    if self:GetParent().isOutOfRange then
+        r, g, b, a = RED_FONT_COLOR:GetRGBA()
+        self:SetVertexColor(r, g, b, a, true)
+    end
 end
 
 local function main_OnEvent(_, event, ...)
     if event == "ACTION_RANGE_CHECK_UPDATE" then
-        helper_RangeUpdate(...)
+        --helper_RangeUpdate(...)
     elseif event == "PLAYER_EQUIPMENT_CHANGED" then
         actionBarEquipUpdate()
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
@@ -653,6 +684,7 @@ local function updateMainBar()
             btn.showMacroName = showName
 
             setActionButtonStyle("ActionButton" .. i)
+            UpdateActionbarBorders(btn)
             updateHotkey(btn)
             saveVertexColor(btn.icon, btn.icon:GetVertexColor())
             hooksecurefunc(btn.icon, "SetVertexColor", saveVertexColor)
@@ -679,20 +711,9 @@ local function updateMainBar()
             rangeIndicator:Hide()
 
             btn.gw_RangeIndicator = rangeIndicator
-            btn["gw_HotKey"] = hotkey
-
-            if GW.settings.BUTTON_ASSIGNMENTS then
-                local hkBg =
-                    CreateFrame(
-                    "Frame",
-                    "GwHotKeyBackDropActionButton" .. i,
-                    hotkey:GetParent(),
-                    "GwActionHotkeyBackdropTmpl"
-                )
-
-                hkBg:SetPoint("CENTER", hotkey, "CENTER", 0, 0)
-                _G["GwHotKeyBackDropActionButton" .. i .. "Texture"]:SetParent(hotkey:GetParent())
-            end
+            btn.hkBg = CreateFrame("Frame", "GwHotKeyBackDropActionButton" .. i, hotkey:GetParent(),"GwActionHotkeyBackdropTmpl")
+            btn.hkBg:SetPoint("CENTER", hotkey, "CENTER", 0, 0)
+            btn.hkBg.texture:SetParent(hotkey:GetParent())
 
             btn:ClearAllPoints()
             btn:SetPoint("LEFT", fmActionbar, "LEFT", btn_padding - GW.settings.MAINBAR_MARGIIN - MAIN_MENU_BAR_BUTTON_SIZE, (GW.settings.XPBAR_ENABLED and 0 or -14))
@@ -718,7 +739,7 @@ local function updateMainBar()
     helperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     helperFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     helperFrame:RegisterEvent("PLAYER_LEVEL_UP")
-    helperFrame:RegisterEvent("ACTION_RANGE_CHECK_UPDATE")
+    --helperFrame:RegisterEvent("ACTION_RANGE_CHECK_UPDATE")
     helperFrame:HookScript("OnEvent", main_OnEvent)
 
     -- disable default main action bar behaviors
@@ -1104,6 +1125,7 @@ local function actionButtons_OnUpdate(self, elapsed, testRange)
             local checksRange = (valid ~= nil)
             local inRange = checksRange and valid
             if checksRange and not inRange then
+                btn.isOutOfRange = true
                 if btn.rangeIndicatorSetting == "RED_INDICATOR"  or btn.rangeIndicatorSetting == "BOTH" then
                     btn.gw_RangeIndicator:Show()
                 end
@@ -1111,6 +1133,7 @@ local function actionButtons_OnUpdate(self, elapsed, testRange)
                     btn.icon:SetVertexColor(out_R, out_G, out_B, 1, true)
                 end
             else
+                btn.isOutOfRange = false
                 if btn.gw_RangeIndicator then
                     btn.gw_RangeIndicator:Hide()
                 end
@@ -1228,6 +1251,7 @@ local function UpdateMainBarHot()
         btn.showMacroName = GW.settings.SHOWACTIONBAR_MACRO_NAME_ENABLED
         btn.rangeIndicatorSetting = GW.settings.MAINBAR_RANGEINDICATOR
         updateMacroName(btn)
+        UpdateActionbarBorders(btn)
         updateHotkey(btn)
     end
    -- position the main action bar
