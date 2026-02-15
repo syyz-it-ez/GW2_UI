@@ -15,6 +15,7 @@ local GW_PORTRAIT_BACKGROUND = {
 
 local partyFrames = {}
 local healtTextColorCurve
+local previewMode = false
 
 if GW.Retail then
     healtTextColorCurve = C_CurveUtil.CreateColorCurve()
@@ -30,12 +31,19 @@ local function GetPartyPetUnit(i)
     return (i == 1 and GW.settings.PARTY_PLAYER_FRAME) and "pet" or "partypet" .. (i - (GW.settings.PARTY_PLAYER_FRAME and 1 or 0))
 end
 
-local function FilterAura(element, unit, data, isBuff)
-    if isBuff then
+local function FilterAura(element, unit, data)
+    if data.isHelpfulAura then
         return data and data.name
     else
         if GW.Retail then
-            return GW.settings.PARTY_SHOW_DEBUFFS and data and data.name
+            if not GW.settings.PARTY_SHOW_DEBUFFS then
+                return false
+            end
+            if GW.settings.PARTY_ONLY_DISPELL_DEBUFFS then
+                return data.isAuraRaidPlayerDispellable
+            else
+                return data and data.name
+            end
         else
             if data and data.name then
                 local shouldDisplay = false
@@ -429,7 +437,6 @@ local function CreatePartyFrame(i, isPlayer)
     frame.level:SetFont(UNIT_NAME_FONT, 12, "OUTLINE")
     frame.healthString:SetFontObject(GameFontNormalSmall)
 
-
     --Create party pet frame
     local petUnit = (registerUnit == "player") and "pet" or "partypet" .. (i - (GW.settings.PARTY_PLAYER_FRAME and 1 or 0))
     local petFrame = CreateFrame("Button", "GwPartyPetFrame" .. i, UIParent, GW.Retail and "GwPartyPetFrameRetailTemplate" or "GwPartyPetFrameTemplate")
@@ -629,9 +636,8 @@ local function CreatePartyFrame(i, isPlayer)
     tinsert(partyFrames, frame)
 end
 
-local function TogglePartyPreview(self)
-    if self.previewMode then
-        self:SetText("-")
+local function TogglePartyPreview()
+    if previewMode then
         for i, frame in ipairs(partyFrames) do
             local unit = GetPartyUnit(i)
             local petUnit = GetPartyPetUnit(i)
@@ -658,9 +664,8 @@ local function TogglePartyPreview(self)
                 RegisterStateDriver(frame.PetFrame, "visibility", "hide")
             end
         end
-        self.previewMode = false
+        previewMode = false
     else
-        self:SetText("5")
         for i, frame in ipairs(partyFrames) do
             frame.unit = "player"
             frame.guid = GW.myguid
@@ -679,10 +684,10 @@ local function TogglePartyPreview(self)
                 RegisterStateDriver(frame.PetFrame, "visibility", "hide")
             end
         end
-        self.previewMode = true
+        previewMode = true
     end
 end
-
+GW.TogglePartyPreview = TogglePartyPreview
 
 local function LoadPartyFrames()
     GW.CreateRaidControlFrame()
@@ -692,9 +697,5 @@ local function LoadPartyFrames()
     end
 
     UpdatePlayerInPartySetting(GW.settings.RAID_FRAMES and GW.settings.RAID_STYLE_PARTY)
-
-    -- Set up preview mode
-    GwSettingsPartyPanel.buttonPartyPreview.previewMode = false
-    GwSettingsPartyPanel.buttonPartyPreview:SetScript("OnClick", TogglePartyPreview)
 end
 GW.LoadPartyFrames = LoadPartyFrames

@@ -301,12 +301,6 @@ local function GameTooltip_OnTooltipCleared(self)
     if self.ItemTooltip then
         self.ItemTooltip:Hide()
     end
-
-    -- This code is to reset stuck widgets.
-    GameTooltip_ClearMoney(self)
-    GameTooltip_ClearStatusBars(self)
-    GameTooltip_ClearProgressBars(self)
-    GameTooltip_ClearWidgetSet(self)
 end
 
 local function GameTooltip_OnTooltipSetItem(self, data)
@@ -428,7 +422,7 @@ local function SetUnitText(self, unit, isPlayerUnit)
             end
         end
 
-        local awayText = UnitIsAFK(unit) and AFK_LABEL or UnitIsDND(unit) and DND_LABEL or ""
+        local awayText = GW.UnitIsAFK(unit) and AFK_LABEL or GW.UnitIsDND(unit) and DND_LABEL or ""
         GameTooltipTextLeft1:SetFormattedText("|c%s%s%s|r", nameColor.colorStr, name or UNKNOWN, awayText)
 
         local levelLine, specLine = GetLevelLine(self, (guildName and not (GW.Classic or GW.TBC) and 2) or 1)
@@ -1032,6 +1026,7 @@ local function SetStyle(self, _, isEmbedded)
             end
         end
 
+        GW.ReplaceSetupTextureCoordinates(self)
         self:SetBackdrop({
             edgeFile = "Interface/AddOns/GW2_UI/textures/uistuff/white.png",
             bgFile = "Interface/AddOns/GW2_UI/textures/uistuff/ui-tooltip-background.png",
@@ -1046,6 +1041,7 @@ local function SetStyle(self, _, isEmbedded)
         local level = self:GetFrameLevel()
         if not self.iborder then
             local border = CreateFrame("Frame", nil, self, "BackdropTemplate")
+            GW.ReplaceSetupTextureCoordinates(border)
             border:SetBackdrop(backdrop)
             border:SetBackdropBorderColor(0, 0, 0, 1)
             border:SetFrameLevel(level)
@@ -1055,6 +1051,7 @@ local function SetStyle(self, _, isEmbedded)
 
         if not self.oborder then
             local border = CreateFrame("Frame", nil, self, "BackdropTemplate")
+            GW.ReplaceSetupTextureCoordinates(border)
             border:SetBackdrop(backdrop)
             border:SetBackdropBorderColor(0, 0, 0, 1)
             border:SetFrameLevel(level)

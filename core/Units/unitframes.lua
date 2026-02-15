@@ -37,7 +37,6 @@ local function CreateUnitFrame(name, revert, animatedPowerbar, castbarInvert)
         end
     end
     local f = CreateFrame("Button", name, UIParent, template)
-    --/run GwTargetUnitFrame.background:ClearAllPoints(); GwTargetUnitFrame.background:SetPoint("LEFT", GwTargetUnitFrame, "LEFT", -100, 0)
 
     local hg = f.healthContainer
     f.portrait:ClearAllPoints()
@@ -232,7 +231,7 @@ local function CreateSmallUnitFrame(name)
         f.nameString    = hg.health.nameString
         f.levelString   = hg.health.levelString
 
-        f.powerbarContainer.powerbar = CreateFrame("StatusBar", name .. "Powerbar", f, "GwStatusBarBackground")
+        f.powerbarContainer.powerbar = CreateFrame("StatusBar", name .. "Powerbar", f, "GwStatusPowerBarRetailTemplate")
         f.powerbar = f.powerbarContainer.powerbar
         f.powerbar:SetAllPoints(f.powerbarContainer)
 
@@ -870,6 +869,37 @@ function GwUnitFrameMixin:OnEvent(event, unit, ...)
     end
 end
 
+local function UpdateFilters(frame)
+    for i = 1, 2 do
+        local db = i == 1 and frame.buffAdvancedFilters or frame.debuffAdvancedFilters
+        local isPlayer = db.isAuraPlayer
+        local isRaidPlayerDispellable = db.isAuraRaidPlayerDispellable
+        local isImportant = db.isAuraImportant
+        local isImportantPlayer = db.isAuraImportantPlayer
+        local isCrowdControl = db.isAuraCrowdControl
+        local isCrowdControlPlayer = db.isAuraCrowdControlPlayer
+        local isBigDefensive = db.isAuraBigDefensive
+        local isBigDefensivePlayer = db.isAuraBigDefensivePlayer
+        local isRaidInCombat = db.isAuraRaidInCombat
+        local isRaidInCombatPlayer = db.isAuraRaidInCombatPlayer
+        local isExternalDefensive = db.isAuraExternalDefensive
+        local isExternalDefensivePlayer = db.isAuraExternalDefensivePlayer
+        local isCancelable = db and db.isAuraCancelable
+        local isCancelablePlayer = db and db.isAuraCancelablePlayer
+        local notCancelable = db and db.notAuraCancelable
+        local notCancelablePlayer = db and db.notAuraCancelablePlayer
+        local isRaid = db and db.isAuraRaid
+        local isRaidPlayer = db and db.isAuraRaidPlayer
+
+        local shared = isPlayer or isCancelable or isCancelablePlayer or notCancelable or notCancelablePlayer or isRaid or isRaidPlayer
+        if GW.Retail then
+            db.noFilter = not (shared or isRaidPlayerDispellable or isImportant or isImportantPlayer or isCrowdControl or isCrowdControlPlayer or isBigDefensive or isBigDefensivePlayer or isRaidInCombat or isRaidInCombatPlayer or isExternalDefensive or isExternalDefensivePlayer)
+        else
+            db.noFilter = not shared
+        end
+    end
+end
+
 function GwUnitFrameMixin:ToggleSettings()
     local unit = self.unit:lower()
 
@@ -881,8 +911,14 @@ function GwUnitFrameMixin:ToggleSettings()
 
     self.showCastingbarData = GW.settings[unit .. "_CASTINGBAR_DATA"]
 
-    self.displayBuffs = GW.settings[unit .. "_BUFFS"] and 32 or 0
-    self.displayDebuffs = GW.settings[unit .. "_DEBUFFS"] and 40 or 0
+    self.displayBuffs = GW.settings[unit .. "_Buff_Filter"] == "none" and 0 or 32
+    self.auras.buffFilter = GW.settings[unit .. "_Buff_Filter"]
+    self.auras.buffAdvancedFilters = GW.settings[unit .. "_Buff_Filter_advanced"]
+
+    self.displayDebuffs = GW.settings[unit .. "_Debuff_Filter"] == "none" and 0 or 40
+    self.auras.debuffFilter = GW.settings[unit .. "_Debuff_Filter"]
+    self.auras.debuffAdvancedFilters = GW.settings[unit .. "_Debuff_Filter_advanced"]
+    UpdateFilters(self.auras)
 
     self.auras.smallSize = 20
     self.auras.bigSize = 26
@@ -922,9 +958,6 @@ function GwUnitFrameMixin:ToggleSettings()
             self.auras:SetPoint("TOPLEFT", self.castingbarBackground, "BOTTOMLEFT", 2, comboOffset)
         end
     end
-
-    self.debuffFilter = GW.settings[unit .. "_BUFFS_FILTER_ALL"] and "HARMFUL" or "PLAYER|HARMFUL"
-    self.debuffFilterShowImportant = GW.settings[unit .. "_BUFFS_FILTER_IMPORTANT"]
 
     self:SetScale(GW.settings[self.unit .. "_pos_scale"])
     self.castingbarBackground:SetWidth(GW.settings[self.unit .. "FrameHealthBarSize"].width)

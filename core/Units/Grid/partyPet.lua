@@ -1,6 +1,6 @@
 local _, GW = ...
 
-local function GridRaid25StyleRegister(self)
+local function GridPartyPetStyleRegister(self)
     self:RegisterForClicks('AnyUp')
     self:SetScript("OnLeave", function()
         GameTooltip_Hide()
@@ -27,32 +27,33 @@ local function GridRaid25StyleRegister(self)
     GW.Construct_PredictionBar(self) -- creates only the function regestration
     self.Auras = GW.Construct_Auras(self)
     self.MissingBuffFrame = GW.Construct_MissingAuraIndicator(self)
-    self.PrivateAuras = GW.Construct_PrivateAura(self)
     self.Fader = GW.Construct_Faderframe(self)
+
+    self:DisableElement("MiddleIcon")
 
     return self
 end
-GW.GridRaid25StyleRegister = GridRaid25StyleRegister
+GW.GridPartyPetStyleRegister = GridPartyPetStyleRegister
 
-local function UpdateGridRaid25Frame(frame)
+local function UpdateGridPartyPetFrame(frame)
     -- set frame settings
-    frame.useClassColor = GW.settings.RAID_CLASS_COLOR_RAID25
-    frame.hideClassIcon = GW.settings.RAID_HIDE_CLASS_ICON_RAID25
-    frame.showResscoureBar = GW.settings.raid25_show_powerbar
-    frame.showRealmFlags = GW.settings.RAID_UNIT_FLAGS_RAID25
-    frame.healthStringFormat = GW.settings.RAID_UNIT_HEALTH_RAID25
-    frame.showTargetmarker = GW.settings.RAID_UNIT_MARKERS_RAID25
-    frame.unitWidth = tonumber(GW.settings.RAID_WIDTH_RAID25)
-    frame.unitHeight = tonumber(GW.settings.RAID_HEIGHT_RAID25)
-    frame.raidShowImportantInstanceDebuffs = GW.settings.RAID_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF_RAID25
-    frame.showDebuffs = GW.settings.RAID_SHOW_DEBUFFS_RAID25
-    frame.showOnlyDispelDebuffs = GW.settings.RAID_ONLY_DISPELL_DEBUFFS_RAID25
-    frame.showBuffs = GW.settings.RAID_25_SHOW_BUFFS
-    frame.showAuraTooltipInCombat = GW.settings.RAID_AURA_TOOLTIP_INCOMBAT_RAID25
+    frame.useClassColor = GW.settings.PARTY_CLASS_COLOR_PET
+    frame.hideClassIcon = GW.settings.PARTY_HIDE_CLASS_ICON_PET
+    frame.showResscoureBar = GW.settings.pet_show_powerbar
+    frame.showRealmFlags = GW.settings.PARTY_UNIT_FLAGS_PET
+    frame.healthStringFormat = GW.settings.PARTY_UNIT_HEALTH_PET
+    frame.showTargetmarker = GW.settings.PARTY_UNIT_MARKERS_PET
+    frame.unitWidth = tonumber(GW.settings.PARTY_WIDTH_PET)
+    frame.unitHeight = tonumber(GW.settings.PARTY_HEIGHT_PET)
+    frame.PARTYShowImportantInstanceDebuffs = GW.settings.PARTY_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF_PET
+    frame.showDebuffs = GW.settings.PARTY_SHOW_DEBUFFS_PET
+    frame.showOnlyDispelDebuffs = GW.settings.PARTY_ONLY_DISPELL_DEBUFFS_PET
+    frame.showBuffs = GW.settings.PARTY_PET_SHOW_BUFFS
+    frame.showAuraTooltipInCombat = GW.settings.PARTY_AURA_TOOLTIP_INCOMBAT_PET
     frame.ignoredAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_IGNORED:trim():gsub("%s*,%s*", ","))))
-    frame.missingAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_MISSING:trim():gsub("%s*,%s*", ","))))
-    frame.shortendHealthValue = GW.settings.RAID_SHORT_HEALTH_VALUES_RAID25
-    frame.showAbsorbBar = GW.settings.RAID_SHOW_ABSORB_BAR_RAID25
+    --frame.missingAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_MISSING:trim():gsub("%s*,%s*", ","))))
+    frame.shortendHealthValue = GW.settings.PARTY_SHORT_HEALTH_VALUES_PET
+    frame.showAbsorbBar = GW.settings.PARTY_SHOW_ABSORB_BAR_PET
 
     frame.raidIndicators = {}
     for _, pos in ipairs(GW.INDICATORS) do
@@ -62,21 +63,22 @@ local function UpdateGridRaid25Frame(frame)
     frame.showRaidIndicatorTimer = GW.settings.INDICATORS_TIME
     frame.raidDebuffScale = GW.settings.RAIDDEBUFFS_Scale
     frame.raidDispelDebuffScale = GW.settings.DISPELL_DEBUFFS_Scale
-    frame.showRoleIcon = GW.settings.RAID_SHOW_ROLE_ICON_RAID25
-    frame.showTankIcon = GW.settings.RAID_SHOW_TANK_ICON_RAID25
-    frame.showLeaderAssistIcon = GW.settings.RAID_SHOW_LEADER_ICON_RAID25
+    frame.showRoleIcon = GW.settings.PARTY_SHOW_ROLE_ICON_PET
+    frame.showTankIcon = GW.settings.PARTY_SHOW_TANK_ICON_PET
+    frame.showLeaderAssistIcon = GW.settings.PARTY_SHOW_LEADER_ICON_PET
 
     -- retail filtering
-    frame.debuffFilters = GW.settings.RAID_25_DEBUFF_FILTER
-    frame.buffFilters = GW.settings.RAID_25_BUFF_FILTER
+    frame.debuffFilters = GW.settings.PARTY_PET_DEBUFF_FILTER
+    frame.buffFilters = GW.settings.PARTY_PET_BUFF_FILTER
 
     if not InCombatLockdown() then
+        frame:DisableElement("MiddleIcon")
         frame:SetSize(frame.unitWidth, frame.unitHeight)
         frame:ClearAllPoints()
 
-        if GW.settings.RAID25_ENABLED and not frame:IsEnabled() then
+        if GW.settings.PARTY_PET_FRAMES_ENABLED and not frame:IsEnabled() then
             frame:Enable()
-        elseif not GW.settings.RAID25_ENABLED and frame:IsEnabled() then
+        elseif not GW.settings.PARTY_PET_FRAMES_ENABLED and frame:IsEnabled() then
             frame:Disable()
         end
     end
@@ -93,9 +95,8 @@ local function UpdateGridRaid25Frame(frame)
     GW.Update_PredictionBars(frame)
     GW.UpdateAurasSettings(frame)
     GW.Update_MissingAuraIndicator(frame)
-    GW.UpdatePrivateAurasSettings(frame)
-    GW.Update_Faderframe(frame, "grid25")
+    GW.Update_Faderframe(frame, "gridPartyPet")
 
     frame:UpdateAllElements("Gw2_UpdateAllElements")
 end
-GW.UpdateGridRaid25Frame = UpdateGridRaid25Frame
+GW.UpdateGridPartyPetFrame = UpdateGridPartyPetFrame

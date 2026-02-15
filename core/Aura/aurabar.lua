@@ -200,6 +200,7 @@ local function ClearAuraTime(self)
     self.endTime = nil
     self.auraInstanceID = nil
     self.status.duration:SetText("")
+    self.cooldown:SetAlpha(0)
 
     if not GW.Retail then
         setLongCD(self, 0) -- to reset border and timer
@@ -263,6 +264,9 @@ local function SetIcon(self, icon, dtype, auraType, spellId)
                 color = C_UnitAuras.GetAuraDispelTypeColor("player", self.auraInstanceID, debuffColorCurve)
             else
                 color = GW.DebuffColors[auraType]
+            end
+            if not color then
+                color = GW.FallbackColor
             end
             self.border.inner:SetVertexColor(color:GetRGB())
         else
@@ -381,7 +385,7 @@ end
 local function GetFilter(self)
     return self.header:GetFilter(self)
 end
-GW.AddForProfiling("aurabar_secure", "GetFilter", GetFilter)
+
 
 local function AuraOnAttributeChanged(self, attribute, value)
     if attribute == "index" then
@@ -614,7 +618,7 @@ local function newHeader(filter)
 
     return h
 end
-GW.AddForProfiling("aurabar_secure", "newHeader", newHeader)
+
 
 local function loadAuras(lm)
     -- create a new header for buffs

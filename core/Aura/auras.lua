@@ -18,7 +18,7 @@ local function auraFrame_OnEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
     self:UpdateTooltip()
 end
-GW.AddForProfiling("auras", "auraFrame_OnEnter", auraFrame_OnEnter)
+
 
 local function auraFrame_OnUpdate(self, elapsed)
     if not self.hideDuration then
@@ -41,7 +41,7 @@ local function auraFrame_OnUpdate(self, elapsed)
         self.elapsed = (self.elapsed or 0) + elapsed
     end
 end
-GW.AddForProfiling("auras", "auraFrame_OnUpdate", auraFrame_OnUpdate)
+
 
 local function CreateAuraFrame(name, parent)
     local f = CreateFrame("Button", name, parent, "GwAuraFrame")
@@ -69,19 +69,6 @@ local function CreateAuraFrame(name, parent)
     return f
 end
 
-local function GetDebuffScaleBasedOnPrio()
-    local scale = 1
-
-    if GW.settings.RAIDDEBUFFS_DISPELLDEBUFF_SCALE_PRIO == "DISPELL" then
-        return tonumber(GW.settings.DISPELL_DEBUFFS_Scale)
-    elseif GW.settings.RAIDDEBUFFS_DISPELLDEBUFF_SCALE_PRIO == "IMPORTANT" then
-        return tonumber(GW.settings.RAIDDEBUFFS_Scale)
-    end
-
-    return scale
-end
-GW.GetDebuffScaleBasedOnPrio = GetDebuffScaleBasedOnPrio
-
 local function sortAuras(a, b)
     if a.sourceUnit and b.sourceUnit and a.sourceUnit == b.sourceUnit then
         return tonumber(a.timeRemaining) < tonumber(b.timeRemaining)
@@ -89,7 +76,7 @@ local function sortAuras(a, b)
 
     return (b.sourceUnit ~= "player" and a.sourceUnit == "player")
 end
-GW.AddForProfiling("auras", "sortAuras", sortAuras)
+
 
 local function sortAurasRevert(a, b)
     if a.sourceUnit and b.sourceUnit and a.sourceUnit == b.sourceUnit then
@@ -98,7 +85,7 @@ local function sortAurasRevert(a, b)
 
     return (a.sourceUnit ~= "player" and b.sourceUnit == "player")
 end
-GW.AddForProfiling("auras", "sortAuras", sortAuras)
+
 
 
 local function sortAuraList(auraList, revert)
@@ -110,7 +97,7 @@ local function sortAuraList(auraList, revert)
 
     return auraList
 end
-GW.AddForProfiling("auras", "sortAuraList", sortAuraList)
+
 
 local function setAuraType(self, typeAura)
     if self.typeAura == typeAura then
@@ -131,7 +118,7 @@ local function setAuraType(self, typeAura)
 
     self.typeAura = typeAura
 end
-GW.AddForProfiling("auras", "setAuraType", setAuraType)
+
 
 local function auraAnimateIn(self)
     local endWidth = self:GetWidth()
@@ -147,7 +134,7 @@ local function auraAnimateIn(self)
         end
     )
 end
-GW.AddForProfiling("auras", "auraAnimateIn", auraAnimateIn)
+
 
 local function SetPosition(element, from, to, unit, isInvert, auraPositon)
     local anchorTo = unit == "pet" and "TOPRIGHT" or isInvert and "TOPRIGHT" or "TOPLEFT"
@@ -205,7 +192,7 @@ local function SetPosition(element, from, to, unit, isInvert, auraPositon)
     end
 end
 
-local function updateAura(element, unit, data, position, isBuff)
+local function updateAura(element, unit, data, position)
     if not data.name then return end
 
     local button = element[position]
@@ -256,7 +243,7 @@ local function updateAura(element, unit, data, position, isBuff)
         button.expirationTime = data.expirationTime
     end
 
-    if not isBuff then
+    if data.isHarmfulAura then
         if data.dispelName and BadDispels[data.spellId] and GW.Libs.Dispel:IsDispellableByMe(data.dispelName) then
             data.dispelName = "BadDispel"
         end
@@ -277,7 +264,7 @@ local function updateAura(element, unit, data, position, isBuff)
 
     if button.typeAura == "bigBuff" then
 
-    elseif UnitIsFriend(unit, "player") and not isBuff and button.typeAura == "smallbuff" then
+    elseif UnitIsFriend(unit, "player") and data.isHarmfulAura and button.typeAura == "smallbuff" then
         -- debuffs
         if GW.ImportantRaidDebuff[data.spellId] and data.dispelName and GW.Libs.Dispel:IsDispellableByMe(data.dispelName) then
             size = size * GetDebuffScaleBasedOnPrio()
@@ -305,25 +292,54 @@ local function updateAura(element, unit, data, position, isBuff)
     button.neededSize = size
 end
 
-local function FilterAura(element, unit, data, isBuff)
-    if isBuff then
-        if data.name then
-            return true
-        end
-    else
-        if data.name and (data.showImportant and (data.sourceUnit == "player" or GW.ImportantRaidDebuff[data.spellId]) or not data.showImportant) then
-            return true
-        end
-    end
+local function CheckFilter(data, filters)
+    if not filters or filters.noFilter then return true end
+
+    local player, cancel = data.isAuraPlayer, data.isAuraCancelable
+    local other, perma = not player, not cancel
+
+    return (filters.isAuraPlayer and player)
+        or (filters.isAuraCancelable and cancel and other)
+        or (filters.isAuraCancelablePlayer and cancel and player)
+        or (filters.notAuraCancelable and perma and other)
+        or (filters.notAuraCancelablePlayer and perma and player)
+        or (filters.isAuraRaid and data.isAuraRaid and other)
+        or (filters.isAuraRaidPlayer and data.isAuraRaid and player)
+        or (filters.isAuraRaidPlayerDispellable and data.dispelName and GW.Libs.Dispel:IsDispellableByMe(data.dispelName))
 end
 
-local function processData(data, showImportant, newBuffAnimation)
-    if not data then return end
+local function FilterAura(element, unit, data)
+    if data.isHelpfulAura then
+        if element.buffFilter == "advanced" then
+            return CheckFilter(data, element.buffAdvancedFilters)
+        elseif element.buffFilter == "all" then
+            return true
+        end
+    elseif data.isHarmfulAura then
+        if element.debuffFilter == "advanced" then
+            return CheckFilter(data, element.debuffAdvancedFilters)
+        elseif element.debuffFilter == "player" then
+            return data.isAuraPlayer
+        elseif element.debuffFilter == "important" then
+            return GW.ImportantRaidDebuff[data.spellId]
+        elseif element.debuffFilter == "all" then
+            return true
+        end
+	end
+end
 
-    data.isPlayerAura = data.sourceUnit and (UnitIsUnit('player', data.sourceUnit) or UnitIsOwnerOrControllerOfUnit('player', data.sourceUnit))
-    data.showImportant = showImportant
+local function processData(unit, data, filter, newBuffAnimation)
+    if not data or not data.name then return end
+
     data.timeRemaining = data.duration <= 0 and 500000 or data.expirationTime - GetTime()
     data.newBuffAnimation = newBuffAnimation
+
+    data.isHarmfulAura = filter:match("HARMFUL")
+    data.isHelpfulAura = not data.isHarmfulAura
+
+    data.isAuraCancelable = not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HELPFUL|CANCELABLE") or not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HARMFUL|CANCELABLE")
+    data.isAuraPlayer = not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HELPFUL|PLAYER") or not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HARMFUL|PLAYER")
+    data.isAuraRaid = not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HELPFUL|RAID") or not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, "HARMFUL|RAID")
 
     return data
 end
@@ -342,9 +358,11 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
     local debuffsChanged = false
     local numDebuffs = self.displayDebuffs or 40
     local debuffFilter = self.debuffFilter or "HARMFUL"
-    local showImportant = self.debuffFilterShowImportant
 
     local numTotal = auras.numTotal or numBuffs + numDebuffs
+
+    isFullUpdate = auras.needFullUpdate or isFullUpdate
+	auras.needFullUpdate = false
 
     if isFullUpdate then
         auras.allBuffs = table.wipe(auras.allBuffs or {})
@@ -353,11 +371,11 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
 
         local slots = {C_UnitAuras.GetAuraSlots(unit, buffFilter)}
         for i = 2, #slots do -- #1 return is continuationToken, we don't care about it
-            local data = processData(C_UnitAuras.GetAuraDataBySlot(unit, slots[i]), false, false)
+            local data = processData(unit, C_UnitAuras.GetAuraDataBySlot(unit, slots[i]), buffFilter, false)
             if data then
                 auras.allBuffs[data.auraInstanceID] = data
 
-                if ((auras.FilterAura or FilterAura)(auras, unit, data, true)) then
+                if ((auras.FilterAura or FilterAura)(auras, unit, data)) then
                     auras.activeBuffs[data.auraInstanceID] = true
                 end
             end
@@ -369,39 +387,34 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
 
         slots = {C_UnitAuras.GetAuraSlots(unit, debuffFilter)}
         for i = 2, #slots do
-            local data = processData(C_UnitAuras.GetAuraDataBySlot(unit, slots[i]), showImportant, false)
+            local data = processData(unit, C_UnitAuras.GetAuraDataBySlot(unit, slots[i]), debuffFilter, false)
             if data then
                 auras.allDebuffs[data.auraInstanceID] = data
 
-                if ((auras.FilterAura or FilterAura)(auras, unit, data, false)) then
+                if ((auras.FilterAura or FilterAura)(auras, unit, data)) then
                     auras.activeDebuffs[data.auraInstanceID] = true
                 end
             end
         end
     else
-        auras.allBuffs = auras.allBuffs or {}
-        auras.activeBuffs = auras.activeBuffs or {}
-        auras.allDebuffs = auras.allDebuffs or {}
-        auras.activeDebuffs = auras.activeDebuffs or {}
-
         if updateInfo.addedAuras then
             for _, data in next, updateInfo.addedAuras do
                 if(data.isHelpful and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, buffFilter)) then
-                    data = processData(data, false, true)
+                    data = processData(unit, data, buffFilter, true)
                     if data then
                         auras.allBuffs[data.auraInstanceID] = data
 
-                        if ((auras.FilterAura or FilterAura)(auras, unit, data, true)) then
+                        if ((auras.FilterAura or FilterAura)(auras, unit, data)) then
                             auras.activeBuffs[data.auraInstanceID] = true
                             buffsChanged = true
                         end
                     end
                 elseif(data.isHarmful and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, data.auraInstanceID, debuffFilter)) then
-                    data = processData(data, showImportant, false)
+                    data = processData(unit, data, debuffFilter, false)
                     if data then
                         auras.allDebuffs[data.auraInstanceID] = data
 
-                        if ((auras.FilterAura or FilterAura)(auras, unit, data, false)) then
+                        if ((auras.FilterAura or FilterAura)(auras, unit, data)) then
                             auras.activeDebuffs[data.auraInstanceID] = true
                             debuffsChanged = true
                         end
@@ -413,7 +426,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
         if updateInfo.updatedAuraInstanceIDs then
             for _, auraInstanceID in next, updateInfo.updatedAuraInstanceIDs do
                 if(auras.allBuffs[auraInstanceID]) then
-                    auras.allBuffs[auraInstanceID] = processData(C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID), false, false)
+                    auras.allBuffs[auraInstanceID] = processData(unit, C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID), buffFilter, false)
 
                     -- only update if it's actually active
                     if(auras.activeBuffs[auraInstanceID]) then
@@ -421,7 +434,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
                         buffsChanged = true
                     end
                 elseif(auras.allDebuffs[auraInstanceID]) then
-                    auras.allDebuffs[auraInstanceID] = processData(C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID), showImportant, false)
+                    auras.allDebuffs[auraInstanceID] = processData(unit, C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID), debuffFilter, false)
 
                     if(auras.activeDebuffs[auraInstanceID]) then
                         auras.activeDebuffs[auraInstanceID] = true
@@ -469,7 +482,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
             numVisible = math.min(numBuffs, numTotal, #auras.sortedBuffs)
 
             for i = 1, numVisible do
-                updateAura(auras, unit, auras.sortedBuffs[i], i, true)
+                updateAura(auras, unit, auras.sortedBuffs[i], i)
             end
         else
             numVisible = math.min(numBuffs, numTotal, #auras.sortedBuffs)
@@ -490,7 +503,7 @@ local function UpdateBuffLayout(self, event, unit, updateInfo)
 
         -- any changes to buffs will affect debuffs, so just redraw them even if nothing changed
         for i = 1, numDebuffs do
-            updateAura(auras, unit, auras.sortedDebuffs[i], numVisible + i, false)
+            updateAura(auras, unit, auras.sortedDebuffs[i], numVisible + i)
         end
 
         numVisible = numVisible + numDebuffs
@@ -535,6 +548,7 @@ local function LoadAuras(self)
     self.auras.anchoredButtons = 0
     self.auras.ForceUpdate = ForceUpdate
     self.auras.__owner = self
+    self.auras.needFullUpdate = true
 
     self.auras.maxWidth = self.auras:GetWidth()
 end

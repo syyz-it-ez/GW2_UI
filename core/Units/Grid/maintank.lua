@@ -46,6 +46,7 @@ local function UpdateGridMaintankFrame(frame)
     frame.raidShowImportantInstanceDebuffs = GW.settings.RAID_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF_TANK
     frame.showDebuffs = GW.settings.RAID_SHOW_DEBUFFS_TANK
     frame.showOnlyDispelDebuffs = GW.settings.RAID_ONLY_DISPELL_DEBUFFS_TANK
+    frame.showBuffs = GW.settings.RAID_SHOW_BUFFS_TANK
     frame.showAuraTooltipInCombat = GW.settings.RAID_AURA_TOOLTIP_INCOMBAT_TANK
     frame.ignoredAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_IGNORED:trim():gsub("%s*,%s*", ","))))
     --frame.missingAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_MISSING:trim():gsub("%s*,%s*", ","))))
@@ -63,6 +64,9 @@ local function UpdateGridMaintankFrame(frame)
     frame.showRoleIcon = GW.settings.RAID_SHOW_ROLE_ICON_TANK
     frame.showTankIcon = GW.settings.RAID_SHOW_TANK_ICON_TANK
     frame.showLeaderAssistIcon = GW.settings.RAID_SHOW_LEADER_ICON_TANK
+
+    frame.debuffFilters = GW.settings.RAID_MAINTANK_DEBUFF_FILTER
+    frame.buffFilters = GW.settings.RAID_MAINTANK_BUFF_FILTER
 
     if not InCombatLockdown() then
         frame:SetSize(frame.unitWidth, frame.unitHeight)

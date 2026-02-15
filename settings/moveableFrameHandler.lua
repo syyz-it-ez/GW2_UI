@@ -61,7 +61,7 @@ local function lockHudObjects(_, _, inCombatLockdown)
     GW.InMoveHudMode = false
 end
 GW.lockHudObjects = lockHudObjects
-GW.AddForProfiling("settings", "lockHudObjects", lockHudObjects)
+
 
 local function toggleHudPlaceholders()
     local show = not moveable_window_placeholders_visible
@@ -298,7 +298,7 @@ local function smallSettings_resetToDefault(self, _,  moverFrame)
     GwSmallSettingsContainer.layoutManager:SetAttribute("inMoveHudMode", true)
 end
 GW.ResetMoverFrameToDefaultValues = smallSettings_resetToDefault
-GW.AddForProfiling("index", "smallSettings_resetToDefault", smallSettings_resetToDefault)
+
 
 local function lockFrame_OnEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
@@ -306,13 +306,13 @@ local function lockFrame_OnEnter(self)
     GameTooltip:SetText(SYSTEM_DEFAULT, 1, 1, 1)
     GameTooltip:Show()
 end
-GW.AddForProfiling("index", "lockFrame_OnEnter", lockFrame_OnEnter)
+
 
 local function mover_OnDragStart(self)
     self.IsMoving = true
     self:StartMoving()
 end
-GW.AddForProfiling("index", "mover_OnDragStart", mover_OnDragStart)
+
 
 local function CheckForDefaultPosition(frame, point, relativePoint, xOfs, yOfs, newPoint)
     if frame.defaultPoint.point == point and frame.defaultPoint.relativePoint == relativePoint and frame.defaultPoint.xOfs == xOfs and frame.defaultPoint.yOfs == yOfs then
@@ -359,7 +359,7 @@ local function mover_OnDragStop(self)
     end
     self.IsMoving = false
 end
-GW.AddForProfiling("index", "mover_OnDragStop", mover_OnDragStop)
+
 
 local function showExtraOptions(self)
     GW.MoveHudScaleableFrame.moverSettingsFrame.child = self
@@ -410,7 +410,7 @@ end
 local function sliderValueChange(self)
     local roundValue = GW.RoundDec(self:GetValue(), 2)
     local moverFrame = self:GetParent():GetParent():GetParent().child
-    moverFrame.parent:SetScale(roundValue)
+    moverFrame.parent:SetScale(roundValue, true)
     self:GetParent().input:SetText(roundValue)
     GW.settings[moverFrame.setting .."_scale"] = roundValue
 
@@ -482,7 +482,43 @@ local function moverframe_OnLeave(self)
     end
 end
 
-local function CreateMoverFrame(parent, displayName, settingsName, size, frameOptions, mhf, postdrag, tags)
+local function ParentOnSizeChanged(self, width, height)
+    if self.gwMover.ignoreSize == true then return end
+    if InCombatLockdown() then
+        GW.CombatQueue_Queue(self.gwMover:GetName() .. "Size", ParentOnSizeChanged, {self, width, height})
+        return
+    end
+    self.gwMover:SetSize(width, height)
+end
+
+local function ParentOnHeightChanged(self, height)
+    if self.gwMover.ignoreSize == true then return end
+    if InCombatLockdown() then
+        GW.CombatQueue_Queue(self.gwMover:GetName() .. "Height", ParentOnHeightChanged, {self, height})
+        return
+    end
+    self.gwMover:SetHeight(height)
+end
+
+local function ParentOnWidthChanged(self, width)
+    if self.gwMover.ignoreSize == true then return end
+    if InCombatLockdown() then
+        GW.CombatQueue_Queue(self.gwMover:GetName() .. "Width", ParentOnWidthChanged, {self, width})
+        return
+    end
+    self.gwMover:SetWidth(width)
+end
+
+local function ParentOnScaleChanged(self, scale, override)
+    if not override and self.gwMover.ignoreSize == true then return end
+    if InCombatLockdown() then
+        GW.CombatQueue_Queue(self.gwMover:GetName() .. "Scale", ParentOnScaleChanged, {self, scale})
+        return
+    end
+    self.gwMover:SetScale(scale)
+end
+
+local function CreateMoverFrame(parent, displayName, settingsName, size, frameOptions, mhf, postdrag, tags, ignoreParentSize)
     local mf = CreateFrame("Button", "Gw_" .. settingsName, UIParent, "SecureHandlerStateTemplate")
     mf:SetClampedToScreen(true)
     mf:SetMovable(true)
@@ -492,6 +528,7 @@ local function CreateMoverFrame(parent, displayName, settingsName, size, frameOp
     mf:SetFrameStrata("DIALOG")
     mf:GwCreateBackdrop("Transparent White")
     mf:SetScale(parent:GetScale())
+    mf.ignoreSize = ignoreParentSize
     parent.gwMover = mf
 
     if size then
@@ -500,21 +537,10 @@ local function CreateMoverFrame(parent, displayName, settingsName, size, frameOp
     else
         mf:SetSize(parent:GetSize())
     end
-    hooksecurefunc(parent, "SetScale", function(self, scale)
-        mf:SetScale(scale)
-    end)
-    hooksecurefunc(parent, "SetWidth", function(self, width)
-        if self.gwMover.ignoreSize == true then return end
-        mf:SetWidth(width)
-    end)
-    hooksecurefunc(parent, "SetHeight", function(self, height)
-        if self.gwMover.ignoreSize == true then return end
-        mf:SetHeight(height)
-    end)
-    hooksecurefunc(parent, "SetSize", function(self, width, height)
-        if self.gwMover.ignoreSize == true then return end
-        mf:SetSize(width, height)
-    end)
+    hooksecurefunc(parent, "SetScale", ParentOnScaleChanged)
+    hooksecurefunc(parent, "SetHeight", ParentOnHeightChanged)
+    hooksecurefunc(parent, "SetWidth", ParentOnWidthChanged)
+    hooksecurefunc(parent, "SetSize", ParentOnSizeChanged)
 
     mf:Hide()
 
@@ -591,8 +617,8 @@ local function CreateMoverFrame(parent, displayName, settingsName, size, frameOp
     return mf
 end
 
-local function RegisterMovableFrame(frame, displayName, settingsName, tags, size, frameOptions, mhf, postdrag)
-    local moveframe = CreateMoverFrame(frame, displayName, settingsName, size, frameOptions, mhf, postdrag, tags)
+local function RegisterMovableFrame(frame, displayName, settingsName, tags, size, frameOptions, mhf, postdrag, ignoreParentSize)
+    local moveframe = CreateMoverFrame(frame, displayName, settingsName, size, frameOptions, mhf, postdrag, tags, ignoreParentSize)
 
     moveframe:ClearAllPoints()
     if not moveframe.savedPoint.point or not moveframe.savedPoint.relativePoint or not moveframe.savedPoint.xOfs or not moveframe.savedPoint.yOfs then

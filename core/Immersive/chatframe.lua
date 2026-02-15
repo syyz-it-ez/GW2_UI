@@ -506,7 +506,7 @@ local function setChatBackgroundColor(chatFrame)
         end
     end
 end
-GW.AddForProfiling("chatframe", "setChatBackgroundColor", setChatBackgroundColor)
+
 
 local function handleChatFrameFadeIn(chatFrame, force)
     if not GW.settings.CHATFRAME_FADE and not force then
@@ -557,7 +557,7 @@ local function handleChatFrameFadeIn(chatFrame, force)
     UIFrameFadeIn(chatTab, 0.5, chatTab:GetAlpha(), 1)
     UIFrameFadeIn(chatFrame.buttonFrame, 0.5, chatFrame.buttonFrame:GetAlpha(), 1)
 end
-GW.AddForProfiling("chatframe", "handleChatFrameFadeIn", handleChatFrameFadeIn)
+
 
 local function handleChatFrameFadeOut(chatFrame, force)
     if not GW.settings.CHATFRAME_FADE and not force then
@@ -622,7 +622,7 @@ local function handleChatFrameFadeOut(chatFrame, force)
         end
     end
 end
-GW.AddForProfiling("chatframe", "handleChatFrameFadeOut", handleChatFrameFadeOut)
+
 
 local function chatBackgroundOnResize(self)
     local w, h = self:GetSize()
@@ -632,7 +632,7 @@ local function chatBackgroundOnResize(self)
 
     self.texture:SetTexCoord(0, w, 1 - h, 1)
 end
-GW.AddForProfiling("chatframe", "chatBackgroundOnResize", chatBackgroundOnResize)
+
 
 local function SetChatEditBoxMessage(message)
     local ChatFrameEditBox = ChatEdit_ChooseBoxForSend()
@@ -826,7 +826,7 @@ local function CheckKeyword(message, author)
                     local classColoredName = classColorTable and classColorTable:WrapTextInColorCode(tempWord)
                     if classColoredName then
                         local tempstr = gsub(tempWord, "%-", "%%-")
-						word = gsub(word, tempstr, classColoredName)
+                        word = gsub(word, tempstr, classColoredName)
                     end
                 end
             end
@@ -1142,7 +1142,7 @@ local function ChatFrame_CheckAddChannel(chatFrame, eventType, channelID)
     end
 
     -- Only add if the user is joining a channel
-    if eventType ~= "YOU_CHANGED" then
+    if GW.NotSecretValue(eventType) and eventType ~= "YOU_CHANGED" then
         return false;
     end
 
@@ -1321,6 +1321,7 @@ local function MessageFormatter(frame, info, chatType, chatGroup, chatTarget, ch
             arg1 = gsub(arg1, "(%d%s?%%)([^%%%a])", "%1%%%2") -- escape percentages that need it [broken since SL?]
             arg1 = gsub(arg1, "(%d%s?%%)$", "%1%%") -- escape percentages on the end
             arg1 = gsub(arg1, "^%%o", "%%s") -- replace %o to %s [broken in cata classic?]: "%o gular zila amanare rukadare." from "Cabal Zealot"
+            arg1 = gsub(arg1, "^%%bur", "%%s") -- "%bur uden agol mod ru se ruftos lo nevren algos!" from "Gan'arg Sapper"
         end
     elseif not isProtected then
         arg1 = gsub(arg1, "%%", "%%%%") -- escape any % characters, as it may otherwise cause an 'invalid option in format' error
@@ -1439,6 +1440,10 @@ local function MessageFormatter(frame, info, chatType, chatGroup, chatTarget, ch
     return body
 end
 
+local function ChatFrame_GetZoneChannel(frame, index)
+    return frame.zoneChannelList[index]
+end
+
 local function ChatFrame_MessageEventHandler(frame, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, isHistory, historyTime, historyName, historyBTag)
     local notChatHistory, historySavedName
     if isHistory == "GW2UI_ChatHistory" then
@@ -1505,14 +1510,18 @@ local function ChatFrame_MessageEventHandler(frame, event, arg1, arg2, arg3, arg
             local found = false
             for index, value in pairs(frame.channelList) do
                 if channelLength > strlen(value) then
-                    -- arg9 is the channel name without the number in front...
-                    if (arg7 > 0 and frame.zoneChannelList[index] == arg7) or (strupper(value) == strupper(arg9)) then
+                    local match = strupper(value) == strupper(arg9)
+                    if not match then -- arg9 is the channel name without the number in front
+                        local success, zoneChannel = pcall(ChatFrame_GetZoneChannel, frame, index)
+                        match = success and arg7 > 0 and arg7 == zoneChannel
+                    end
+                    if match then
                         found = true
 
                         infoType = "CHANNEL"..arg8
                         info = ChatTypeInfo[infoType]
 
-                        if chatType == "CHANNEL_NOTICE" and GW.NotSecretValue(arg1) and arg1 == "YOU_LEFT" then
+                        if chatType == "CHANNEL_NOTICE" and GW.NotSecretValue(arg1) and arg1 == "YOU_LEFT" and GW.NotSecretTable(frame.zoneChannelList) then
                             frame.channelList[index] = nil
                             frame.zoneChannelList[index] = nil
                         end
@@ -1622,23 +1631,37 @@ local function ChatFrame_MessageEventHandler(frame, event, arg1, arg2, arg3, arg
             local accessID = GW.ChatFunctions:GetAccessID(chatGroup, arg8)
             local typeID = GW.ChatFunctions:GetAccessID(infoType, arg8, arg12)
 
-            if GW.Retail and arg1 == "YOU_CHANGED" and C_ChatInfo.GetChannelRuleset(arg8) == Enum.ChatChannelRuleset.Mentor then
+            if GW.Retail and GW.NotSecretValue(arg1) and arg1 == "YOU_CHANGED" and C_ChatInfo.GetChannelRuleset(arg8) == Enum.ChatChannelRuleset.Mentor then
                 frame:UpdateDefaultChatTarget()
                 frame.editBox:UpdateNewcomerEditBoxHint()
             else
-                if GW.Retail and arg1 == "YOU_LEFT" then
+                if GW.Retail and GW.NotSecretValue(arg1) and arg1 == "YOU_LEFT" then
                     frame.editBox:UpdateNewcomerEditBoxHint(arg8)
                 end
 
                 local globalstring
-                if arg1 == "TRIAL_RESTRICTED" then
+                if GW.NotSecretValue(arg1)and arg1 == "TRIAL_RESTRICTED" then
                     globalstring = CHAT_TRIAL_RESTRICTED_NOTICE_TRIAL
                 else
-                    globalstring = _G["CHAT_"..arg1.."_NOTICE_BN"]
+                    if GW.IsSecretValue(arg1) then
+                        globalstring = C_StringUtil.WrapString(arg1, "CHAT_", "_NOTICE_BN")
+                    else
+                        globalstring = _G["CHAT_"..arg1.."_NOTICE_BN"]
+                    end
+
                     if not globalstring then
-                        globalstring = _G["CHAT_"..arg1.."_NOTICE"]
+                        if GW.IsSecretValue(arg1) then
+                            globalstring = C_StringUtil.WrapString(arg1, "CHAT_", "_NOTICE")
+                        else
+                            globalstring = _G["CHAT_"..arg1.."_NOTICE"]
+                        end
                         if not globalstring then
-                            GMError(("Missing global string for %q"):format("CHAT_"..arg1.."_NOTICE"))
+                            if GW.IsSecretValue(arg1) then
+                                globalstring = C_StringUtil.WrapString(arg1, "CHAT_", "_NOTICE")
+                            else
+                                globalstring = _G["CHAT_"..arg1.."_NOTICE"]
+                            end
+                            GMError(("Missing global string for %q"):format(globalstring))
                             return
                         end
                     end
@@ -2435,6 +2458,8 @@ end
 GW.CollectLfgRolesForChatIcons = CollectLfgRolesForChatIcons
 
 local function SocialQueueIsLeader(playerName, leaderName)
+    if GW.IsSecretValue(leaderName) then return end
+
     if leaderName == playerName then
         return true
     end
@@ -2466,7 +2491,7 @@ local function RecentSocialQueue(currentTime, msg)
         for guid, tbl in pairs(socialQueueCache) do
             if currentTime and (difftime(currentTime, tbl[1]) >= 180) then
                 socialQueueCache[guid] = nil
-            elseif msg and (msg == tbl[2]) then
+            elseif GW.NotSecretValue(msg) and (msg == tbl[2]) then
                 previousMessage = true
             end
         end
@@ -2483,7 +2508,7 @@ local function SocialQueueMessage(guid, message)
 
     PlaySound(SOUNDKIT.UI_71_SOCIAL_QUEUEING_TOAST)
 
-    GW.Notice(format("|Hsqu:%s|h%s|h", guid, strtrim(message)))
+    GW.Notice(format("|Hsqu:%s|h%s|h", guid, message))
 end
 
 local function SocialQueueEvent(...)
@@ -2517,7 +2542,8 @@ local function SocialQueueEvent(...)
         if firstQueue.queueData.lfgListID then
             local searchResultInfo = C_LFGList.GetSearchResultInfo(firstQueue.queueData.lfgListID)
             if searchResultInfo then
-                activityID, name, leaderName = searchResultInfo.activityID, searchResultInfo.name, searchResultInfo.leaderName
+                activityID = GW.NotSecretTable(searchResultInfo.activityIDs) and searchResultInfo.activityIDs[1]
+                name, leaderName = searchResultInfo.name, searchResultInfo.leaderName
                 isLeader = SocialQueueIsLeader(playerName, leaderName)
             end
         end
@@ -2526,13 +2552,9 @@ local function SocialQueueEvent(...)
             activityInfo = C_LFGList.GetActivityInfoTable(activityID or firstQueue.queueData.activityID)
         end
 
-        if name then
-            SocialQueueMessage(guid, format("%s %s: |cffFFFF00[%s: %s]|r", coloredName, (isLeader and L["is looking for members"]) or L["joined a group"], (activityInfo and activityInfo.fullName) or UNKNOWN, name))
-        else
-            SocialQueueMessage(guid, format("%s %s: |cffFFFF00[%s]|r", coloredName, (isLeader and L["is looking for members"]) or L["joined a group"], (activityInfo and activityInfo.fullName) or UNKNOWN))
-        end
+        SocialQueueMessage(guid, format(name and "%s %s: |cffFFFF00[%s:%s]|r" or "%s %s: |cffFFFF00[%s]|r", coloredName, (isLeader and L["is looking for members"]) or L["joined a group"], activityInfo and activityInfo.fullName or UNKNOWN, name))
     elseif firstQueue then
-        local output, outputCount, queueCount = "", "", 0
+            local output, outputCount, queueCount = "", "", 0
         for _, queue in pairs(queues) do
             if type(queue) == "table" and queue.eligible then
                 local queueName = (queue.queueData and SocialQueueUtil_GetQueueName(queue.queueData)) or ""

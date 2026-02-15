@@ -31,11 +31,24 @@ local PlayerAuraSettings = {
 }
 
 local GridAuraFilter = {
-    playerDebuff = true,
-    raidDebuff = true,
-    playerBuff = true,
-    raidBuff = false,
-    defensiveBuff = true,
+    isAuraPlayer = false,
+    isAuraRaid = false,
+    isAuraRaidPlayer = false,
+    isAuraRaidPlayerDispellable = false,
+    isAuraExternalDefensive = false,
+    isAuraExternalDefensivePlayer = false,
+    isAuraImportant = false,
+    isAuraImportantPlayer = false,
+    isAuraCrowdControl = false,
+    isAuraCrowdControlPlayer = false,
+    isAuraBigDefensive = false,
+    isAuraBigDefensivePlayer = false,
+    isAuraRaidInCombat = false,
+    isAuraRaidInCombatPlayer = false,
+    isAuraCancelable = false,
+    isAuraCancelablePlayer = false,
+    notAuraCancelable = false,
+    notAuraCancelablePlayer = false,
 }
 
 --private
@@ -350,12 +363,10 @@ GW.globalDefault = {
         target_TARGET_SHOW_ABSORB_BAR = true,
         target_SHOW_CASTBAR= true,
         target_SHOW_ABSORB_BAR = true,
-        target_DEBUFFS= true,
-        target_DEBUFFS_FILTER= true,
-        target_BUFFS= true,
-        target_BUFFS_FILTER= true,
-        target_BUFFS_FILTER_ALL= false,
-        target_BUFFS_FILTER_IMPORTANT= false,
+        target_Buff_Filter = "all",
+        target_Buff_Filter_advanced = CopyTable(GridAuraFilter),
+        target_Debuff_Filter = "player",
+        target_Debuff_Filter_advanced = CopyTable(GridAuraFilter),
         target_THREAT_VALUE_ENABLED= false,
         target_HOOK_COMBOPOINTS= false,
         target_HEALTH_VALUE_ENABLED= false,
@@ -380,9 +391,10 @@ GW.globalDefault = {
         focus_DEBUFFS_FILTER= true,
         focus_BUFFS= true,
         focus_AURAS_ON_TOP= false,
-        focus_BUFFS_FILTER= true,
-        focus_BUFFS_FILTER_ALL= false,
-        focus_BUFFS_FILTER_IMPORTANT= false,
+        focus_Buff_Filter = "all",
+        focus_Buff_Filter_advanced = CopyTable(GridAuraFilter),
+        focus_Debuff_Filter = "player",
+        focus_Debuff_Filter_advanced = CopyTable(GridAuraFilter),
         focus_ILVL = "PVP_LEVEL",
         focus_HEALTH_VALUE_ENABLED= false,
         focus_HEALTH_VALUE_TYPE= false,
@@ -861,7 +873,9 @@ GW.globalDefault = {
         RAID_SHOW_LEADER_ICON_TANK= true,
         RAID_SHORT_HEALTH_VALUES_TANK = false,
         RAID_SHOW_ABSORB_BAR_TANK = true,
-        RAID_MAINTANK_AURAS = CopyTable(GridAuraFilter),
+        RAID_MAINTANK_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_MAINTANK_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_SHOW_BUFFS_TANK = false,
         maintank_show_powerbar = "NONE", -- always
         raidMaintank_pos= {
             point= "TOPLEFT",
@@ -887,6 +901,8 @@ GW.globalDefault = {
         grid40FrameFader = CopyTable(UnitFrameFader),
         gridPartyFrameFaderRange = true,
         gridPartyFrameFader = CopyTable(UnitFrameFader),
+        gridPartyPetFrameFaderRange = true,
+        gridPartyPetFrameFader = CopyTable(UnitFrameFader),
         gridPetFrameFaderRange = true,
         gridPetFrameFader = CopyTable(UnitFrameFader),
         gridTankFrameFaderRange = true,
@@ -920,10 +936,54 @@ GW.globalDefault = {
         RAID_SHOW_LEADER_ICON_PET= false, -- always
         RAID_SHORT_HEALTH_VALUES_PET = false,
         RAID_SHOW_ABSORB_BAR_PET = true,
-        RAID_PET_AURAS = CopyTable(GridAuraFilter),
+        RAID_PET_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_PET_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_PET_SHOW_BUFFS = false,
         pet_show_powerbar = "NONE", -- always
 
         raid_pet_pos= {
+            point= "TOPLEFT",
+            relativePoint= "TOPLEFT",
+            xOfs= 315,
+            yOfs= -60,
+            hasMoved= false,
+        },
+
+        -- Party Pet
+        PARTY_PET_FRAMES_ENABLED = false,
+        PARTY_CLASS_COLOR_PET = true, -- always
+        PARTY_HIDE_CLASS_ICON_PET = false, -- always
+        PARTY_UNIT_FLAGS_PET= "NONE", -- always
+        PARTY_UNIT_MARKERS_PET= false,
+        PARTY_WIDTH_PET= 50,
+        PARTY_HEIGHT_PET= 25,
+        PARTY_GROUPS_PER_COLUMN_PET= 1, -- fixed
+        PARTY_GROW_PET= "DOWN+RIGHT",
+        PARTY_SHOW_DEBUFFS_PET= true,
+        PARTY_ONLY_DISPELL_DEBUFFS_PET= false,
+        PARTY_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF_PET= true,
+        PARTY_AURA_TOOLTIP_INCOMBAT_PET= "IN_COMBAT",
+        PARTY_UNIT_HEALTH_PET= "NONE",
+        PARTY_PET_UNITFRAME_ANCHOR_FROM_CENTER= false,
+        PARTY_WIDE_SORTING_PET= true,
+        PARTY_GROUP_BY_PET= "ROLE",
+        PARTY_SORT_DIRECTION_PET= "ASC",
+        PARTY_RAID_SORT_METHOD_PET= "NAME",
+        PARTY_UNITS_HORIZONTAL_SPACING_PET= 2,
+        PARTY_UNITS_VERTICAL_SPACING_PET= 2,
+        PARTY_UNITS_GROUP_SPACING_PET= 0,
+        PARTY_SHOW_ROLE_ICON_PET= false, -- always
+        PARTY_SHOW_TANK_ICON_PET= false, -- always
+        PARTY_SHOW_LEADER_ICON_PET= false, -- always
+        PARTY_SHORT_HEALTH_VALUES_PET = false,
+        PARTY_SHOW_ABSORB_BAR_PET = true,
+        PARTY_PET_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        PARTY_PET_BUFF_FILTER = CopyTable(GridAuraFilter),
+        PARTY_PET_SHOW_BUFFS = false,
+        -- defaults
+        party_pet_show_powerbar = "NONE", -- always
+
+        party_pet_pos= {
             point= "TOPLEFT",
             relativePoint= "TOPLEFT",
             xOfs= 315,
@@ -958,7 +1018,9 @@ GW.globalDefault = {
         RAID_SHOW_LEADER_ICON= true,
         RAID_SHORT_HEALTH_VALUES = false,
         RAID_SHOW_ABSORB_BAR = true,
-        RAID_AURAS = CopyTable(GridAuraFilter),
+        RAID_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_SHOW_BUFFS = false,
         raid40_show_powerbar = "ALL",
 
         raid_pos= {
@@ -997,7 +1059,9 @@ GW.globalDefault = {
         RAID_SHOW_LEADER_ICON_RAID25= true,
         RAID_SHORT_HEALTH_VALUES_RAID25 = false,
         RAID_SHOW_ABSORB_BAR_RAID25 = true,
-        RAID_25_AURAS = CopyTable(GridAuraFilter),
+        RAID_25_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_25_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_25_SHOW_BUFFS = false,
         raid25_show_powerbar = "ALL",
 
         raid25_pos= {
@@ -1036,7 +1100,9 @@ GW.globalDefault = {
         RAID_SHOW_LEADER_ICON_RAID10= true,
         RAID_SHORT_HEALTH_VALUES_RAID10 = false,
         RAID_SHOW_ABSORB_BAR_RAID10 = true,
-        RAID_10_AURAS = CopyTable(GridAuraFilter),
+        RAID_10_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_10_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_10_SHOW_BUFFS = false,
         raid10_show_powerbar = "ALL",
 
         raid10_pos= {
@@ -1075,7 +1141,9 @@ GW.globalDefault = {
         RAID_SHORT_HEALTH_VALUES_PARTY = false,
         RAID_SHOW_PLAYER_PARTY = true, -- only for party grid
         RAID_SHOW_ABSORB_BAR_PARTY = true,
-        RAID_PARTY_AURAS = CopyTable(GridAuraFilter),
+        RAID_PARTY_DEBUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_PARTY_BUFF_FILTER = CopyTable(GridAuraFilter),
+        RAID_PARTY_SHOW_BUFFS = false,
         party_grid_show_powerbar = "ALL",
 
         raid_party_pos= {
@@ -1504,3 +1572,28 @@ GW.globalDefault = {
         }
     }
 }
+
+-- aura filter defaults:
+GW.globalDefault.profile.RAID_PARTY_BUFF_FILTER.isAuraBigDefensive = true
+GW.globalDefault.profile.RAID_PARTY_BUFF_FILTER.isAuraRaidInCombatPlayer = true
+GW.globalDefault.profile.RAID_PARTY_DEBUFF_FILTER.isAuraImportant = true
+GW.globalDefault.profile.RAID_PARTY_DEBUFF_FILTER.isAuraImportantPlayer = true
+GW.globalDefault.profile.RAID_PARTY_DEBUFF_FILTER.isAuraRaidPlayerDispellable = true
+
+GW.globalDefault.profile.RAID_BUFF_FILTER.isAuraBigDefensive = true
+GW.globalDefault.profile.RAID_BUFF_FILTER.isAuraRaidInCombatPlayer = true
+GW.globalDefault.profile.RAID_DEBUFF_FILTER.isAuraImportant = true
+GW.globalDefault.profile.RAID_DEBUFF_FILTER.isAuraImportantPlayer = true
+GW.globalDefault.profile.RAID_DEBUFF_FILTER.isAuraRaidPlayerDispellable = true
+
+GW.globalDefault.profile.RAID_25_BUFF_FILTER.isAuraBigDefensive = true
+GW.globalDefault.profile.RAID_25_BUFF_FILTER.isAuraRaidInCombatPlayer = true
+GW.globalDefault.profile.RAID_25_DEBUFF_FILTER.isAuraImportant = true
+GW.globalDefault.profile.RAID_25_DEBUFF_FILTER.isAuraImportantPlayer = true
+GW.globalDefault.profile.RAID_25_DEBUFF_FILTER.isAuraRaidPlayerDispellable = true
+
+GW.globalDefault.profile.RAID_10_BUFF_FILTER.isAuraBigDefensive = true
+GW.globalDefault.profile.RAID_10_BUFF_FILTER.isAuraRaidInCombatPlayer = true
+GW.globalDefault.profile.RAID_10_DEBUFF_FILTER.isAuraImportant = true
+GW.globalDefault.profile.RAID_10_DEBUFF_FILTER.isAuraImportantPlayer = true
+GW.globalDefault.profile.RAID_10_DEBUFF_FILTER.isAuraRaidPlayerDispellable = true

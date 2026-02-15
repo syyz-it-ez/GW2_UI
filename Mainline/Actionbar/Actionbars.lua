@@ -4,7 +4,6 @@ local Wait = GW.Wait
 local Self_Hide = GW.Self_Hide
 local CountTable = GW.CountTable
 local AddUpdateCB = GW.AddUpdateCB
-local AFP = GW.AddProfiling
 
 local MAIN_MENU_BAR_BUTTON_SIZE = 48
 
@@ -90,7 +89,7 @@ local function hideBlizzardsActionbars()
 
     MainActionBar:EnableMouse(false)
 end
-AFP("hideBlizzardsActionbars", hideBlizzardsActionbars)
+
 
 -- other things can register callbacks for when actionbar visibility/fade changes
 local callback = {}
@@ -106,7 +105,7 @@ local function stateChanged()
         v()
     end
 end
-AFP("stateChanged", stateChanged)
+
 
 hooksecurefunc("ValidateActionBarTransition", stateChanged)
 
@@ -121,7 +120,7 @@ local function changeVertexColorActionbars(btn)
         end
     end
 end
-AFP("changeVertexColorActionbars", changeVertexColorActionbars)
+
 
 local function setButtonBackgroundAlpha(btn, alpha)
     btn.gwBackdrop.bg:SetAlpha(alpha)
@@ -185,7 +184,7 @@ local function changeFlyoutStyle(self)
         btn = _G["SpellFlyoutPopupButton" .. i]
     end
 end
-AFP("changeFlyoutStyle", changeFlyoutStyle)
+
 
 local function FlyoutDirection(actionbar)
     if InCombatLockdown() then return end
@@ -212,7 +211,7 @@ local function FlyoutDirection(actionbar)
         end
     end
 end
-AFP("FlyoutDirection", FlyoutDirection)
+
 
 -- fader logic
 local fadeTime = 0.1
@@ -227,7 +226,7 @@ local function fadeIn_OnFinished(self)
     end
     bar:SetAlpha(1.0)
 end
-AFP("fadeIn_OnFinished", fadeIn_OnFinished)
+
 
 local function actionBarFrameShow(f, instant)
     f.fadeOut:Stop()
@@ -247,7 +246,7 @@ local function actionBarFrameShow(f, instant)
         f.fadeIn:Play()
     end
 end
-AFP("actionBarFrameShow", actionBarFrameShow)
+
 
 local function fadeOut_OnFinished(self)
     local bar = self:GetParent()
@@ -256,7 +255,7 @@ local function fadeOut_OnFinished(self)
     end
     bar:SetAlpha(0.0)
 end
-AFP("fadeOut_OnFinished", fadeOut_OnFinished)
+
 
 local function actionBarFrameHide(f, instant)
     f.fadeOut:Stop()
@@ -276,7 +275,7 @@ local function actionBarFrameHide(f, instant)
         f.fadeOut:Play()
     end
 end
-AFP("actionBarFrameHide", actionBarFrameHide)
+
 
 -- gw_DirtySetting - set on load and by trackBarChanges; indicates we are pending changes; handled out of combat and then reset
 -- bar.gw_IsEnabled - set by trackBarChanges; directly tracks if bars are enabled or not; disabled bars never show
@@ -343,7 +342,7 @@ local function fadeCheck(self, forceCombat)
         end
     end
 end
-AFP("fadeCheck", fadeCheck)
+
 
 local function createFaderAnim(self, state)
     self.fadeOut = self:CreateAnimationGroup("fadeOut")
@@ -369,7 +368,7 @@ local function createFaderAnim(self, state)
     bar.elapsedTimer = -1
     bar.fadeTimer = -1
 end
-AFP("createFaderAnim", createFaderAnim)
+
 
 local function updateHotkey(self)
     local hotkey = self.HotKey
@@ -726,7 +725,7 @@ local function main_OnEvent(_, event, ...)
         end
     end
 end
-AFP("main_OnEvent", main_OnEvent)
+
 
 local function skinMainBar()
     local bar = MainActionBar
@@ -783,7 +782,7 @@ local function skinMainBar()
 
     return bar
 end
-AFP("skinMainBar", skinMainBar)
+
 
 local function updateMainBar()
     local fmActionbar = MainActionBar
@@ -901,7 +900,7 @@ local function updateMainBar()
 
     return fmActionbar
 end
-AFP("updateMainBar", updateMainBar)
+
 
 local function trackBarChanges()
     local fmActionbar = MainActionBar
@@ -936,7 +935,7 @@ local function trackBarChanges()
 
     fmActionbar.gw_IsEnabled = true
 end
-AFP("trackBarChanges", trackBarChanges)
+
 
 local function skinMultiBar(barName, buttonName)
     local bar = _G[barName]
@@ -970,7 +969,7 @@ local function skinMultiBar(barName, buttonName)
 
     return bar
 end
-AFP("skinMultiBar", skinMultiBar)
+
 
 local function updateMultiBar(lm, barName, buttonName, actionPage, state)
     local multibar = _G[barName]
@@ -1140,7 +1139,7 @@ local function updateMultiBar(lm, barName, buttonName, actionPage, state)
 
     return fmMultibar
 end
-AFP("updateMultiBar", updateMultiBar)
+
 
 local function UpdateMultibarButtons()
     local tonum = tonumber
@@ -1240,7 +1239,7 @@ local function setLeaveVehicleButton()
         end
     end)
 end
-AFP("setLeaveVehicleButton", setLeaveVehicleButton)
+
 
 actionBarEquipUpdate = function()
     local bars = {
@@ -1273,7 +1272,7 @@ actionBarEquipUpdate = function()
         end
     end
 end
-AFP("actionBarEquipUpdate", actionBarEquipUpdate)
+
 
 local function actionButtonFlashing(btn, elapsed)
     local flashtime = btn.flashtime
@@ -1296,7 +1295,7 @@ local function actionButtonFlashing(btn, elapsed)
 
     btn.flashtime = flashtime
 end
-AFP("actionButtonFlashing", actionButtonFlashing)
+
 
 local function actionButtons_OnUpdate(self, elapsed)
     for i = 1, 12 do
@@ -1307,7 +1306,7 @@ local function actionButtons_OnUpdate(self, elapsed)
         end
     end
 end
-AFP("actionButtons_OnUpdate", actionButtons_OnUpdate)
+
 
 local function multiButtons_OnUpdate(self, elapsed)
     for i = 1, 12 do
@@ -1318,7 +1317,7 @@ local function multiButtons_OnUpdate(self, elapsed)
         end
     end
 end
-AFP("multiButtons_OnUpdate", multiButtons_OnUpdate)
+
 
 local updateCap = 1 / 60 -- cap updates to 60 FPS
 actionBar_OnUpdate = function(self, elapsed)
@@ -1374,7 +1373,7 @@ actionBar_OnUpdate = function(self, elapsed)
         multiButtons_OnUpdate(self.gw_Bar7, elapsedToProcess)
     end
 end
-AFP("actionBar_OnUpdate", actionBar_OnUpdate)
+
 
 local function UpdateMainBarHot()
     local tonum = tonumber

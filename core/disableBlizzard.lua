@@ -128,6 +128,10 @@ local function DisableBlizzardFrames()
 			for _, frame in next, CompactArenaFrame.memberUnitFrames do
 				HandleFrame(frame, true)
 			end
+
+            for _, frame in ipairs(ArenaEnemyMatchFramesContainer.UnitFrames) do
+                HandleFrame(frame, true)
+            end
         end
     end
 
@@ -176,9 +180,9 @@ local function DisableBlizzardFrames()
     end
 
     if ourCastBar then
-        HandleFrame(PlayerCastingBarFrame)
-        HandleFrame(CastingBarFrame)
-        HandleFrame(PetCastingBarFrame)
+        HandleFrame(PlayerCastingBarFrame, 1)
+        HandleFrame(CastingBarFrame, 1)
+        HandleFrame(PetCastingBarFrame, 1)
 
         -- disbale blizzard castingbar mover
         if GW.Retail or GW.TBC then

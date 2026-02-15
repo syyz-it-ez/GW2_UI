@@ -48,6 +48,7 @@ local function UpdateGridPartyFrame(frame)
     frame.raidShowImportantInstanceDebuffs = GW.settings.RAID_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF_PARTY
     frame.showDebuffs = GW.settings.RAID_SHOW_DEBUFFS_PARTY
     frame.showOnlyDispelDebuffs = GW.settings.RAID_ONLY_DISPELL_DEBUFFS_PARTY
+    frame.showBuffs = GW.settings.RAID_PARTY_SHOW_BUFFS
     frame.showAuraTooltipInCombat = GW.settings.RAID_AURA_TOOLTIP_INCOMBAT_PARTY
     frame.ignoredAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_IGNORED:trim():gsub("%s*,%s*", ","))))
     frame.missingAuras = GW.FillTable({}, true, strsplit(",", (GW.settings.AURAS_MISSING:trim():gsub("%s*,%s*", ","))))
@@ -67,11 +68,8 @@ local function UpdateGridPartyFrame(frame)
     frame.showLeaderAssistIcon = GW.settings.RAID_SHOW_LEADER_ICON_PARTY
 
     -- retail filtering
-    frame.showPlayerDebuffs = GW.settings.RAID_PARTY_AURAS.playerDebuff
-    frame.showRaidDebuffs = GW.settings.RAID_PARTY_AURAS.raidDebuff
-    frame.showPlayerBuffs = GW.settings.RAID_PARTY_AURAS.playerBuff
-    frame.showRaidBuffs = GW.settings.RAID_PARTY_AURAS.raidBuff
-    frame.showDefensiveBuffs  = GW.settings.RAID_PARTY_AURAS.defensiveBuff
+    frame.debuffFilters = GW.settings.RAID_PARTY_DEBUFF_FILTER
+    frame.buffFilters = GW.settings.RAID_PARTY_BUFF_FILTER
 
     if not InCombatLockdown() then
         frame:SetSize(frame.unitWidth, frame.unitHeight)

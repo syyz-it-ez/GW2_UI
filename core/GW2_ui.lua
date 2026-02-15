@@ -2,7 +2,6 @@ local addonName, GW = ...
 local L = GW.L
 local IsFrameModified = GW.IsFrameModified
 local Debug = GW.Debug
-local AFP = GW.AddProfiling
 
 local sin = math.sin
 local pi = math.pi
@@ -234,7 +233,7 @@ local function gw_OnUpdate(_, elapsed)
         PetActionBarFrame:Hide()
     end
 end
-AFP("gw_OnUpdate", gw_OnUpdate)
+
 
 local function getBestPixelScale()
     return max(0.4, min(1.15, 768 / GW.screenHeight))
@@ -416,18 +415,18 @@ local function evAddonLoaded(self, loadedAddonName)
     end
 
 end
-AFP("evAddonLoaded", evAddonLoaded)
+
 
 local function evNeutralFactionSelectResult()
     GW.myfaction, GW.myLocalizedFaction = UnitFactionGroup("player")
     Debug("OK~EVENT~New faction:", GW.myfaction, GW.myLocalizedFaction)
 end
-AFP("evNeutralFactionSelectResult", evNeutralFactionSelectResult)
+
 
 local function evPlayerSpecializationChanged()
     GW.CheckRole()
 end
-AFP("evPlayerSpecializationChanged", evPlayerSpecializationChanged)
+
 
 local function evUiScaleChanged()
     if not GetCVarBool("useUiScale") then
@@ -439,18 +438,18 @@ local function evUiScaleChanged()
     GW.resolution = format("%dx%d", GW.screenwidth, GW.screenheight)
     GW.border = ((1 / GW.scale) - ((1 - (768 / GW.screenHeight)) / GW.scale)) * 2
 end
-AFP("evUiScaleChanged", evUiScaleChanged)
+
 
 local function evPlayerLevelUp(_, newLevel)
     GW.mylevel = newLevel
     Debug("OK~EVENT~New level:", newLevel)
 end
-AFP("evPlayerLevelUp", evPlayerLevelUp)
+
 
 local function evPlayerLeavingWorld()
     GW.inWorld = false
 end
-AFP("evPlayerLeavingWorld", evPlayerLeavingWorld)
+
 
 local function commonEntering()
     GW.inWorld = true
@@ -480,12 +479,12 @@ local function evPlayerEnteringWorld()
 
     C_Timer.After(1, function() collectgarbage("collect") end)
 end
-AFP("evPlayerEnteringWorld", evPlayerEnteringWorld)
+
 
 local function evPlayerEnteringBattleground()
     commonEntering()
 end
-AFP("evPlayerEnteringBattleground", evPlayerEnteringBattleground)
+
 
 local function evPlayerLogin(self)
     Debug("OK~EVENT~PLAYER_LOGIN; loaded:", loaded)
@@ -609,7 +608,6 @@ local function evPlayerLogin(self)
         GW.LoadGenericTraitFrameSkin()
         GW.LoadCooldownManagerSkin()
         GW.LoadImmersionAddonSkin()
-        GW.WidgetUISetup()
         GW.LoadAuctionatorAddonSkin()
         GW.LoadTSMAddonSkin()
     else
@@ -625,6 +623,10 @@ local function evPlayerLogin(self)
 
     if GW.Mists then
         GW.SetUpVehicleFrameMover()
+    end
+
+    if GW.Mists or GW.Retail or GW.TBC then
+        GW.WidgetUISetup()
     end
 
     -- make sure to load the objetives tracker before we load the altert system prevent some errors with other addons
@@ -883,7 +885,7 @@ local function evPlayerLogin(self)
         GW.HandleBlizzardEditMode()
     end
 end
-AFP("evPlayerLogin", evPlayerLogin)
+
 
 -- generic event router
 local function gw_OnEvent(self, event, ...)
@@ -907,7 +909,7 @@ local function gw_OnEvent(self, event, ...)
         evAddonLoaded(self, ...)
     end
 end
-AFP("gw_OnEvent", gw_OnEvent)
+
 l:SetScript("OnEvent", gw_OnEvent)
 l:RegisterEvent("PLAYER_LOGIN")
 l:RegisterEvent("PLAYER_LEAVING_WORLD")
@@ -952,7 +954,7 @@ local function wait_OnUpdate(_, elapse)
         end
     end
 end
-AFP("wait_OnUpdate", wait_OnUpdate)
+
 
 local function Wait(delay, func, ...)
     if type(delay) ~= "number" or type(func) ~= "function" then

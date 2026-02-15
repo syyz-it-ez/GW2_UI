@@ -69,6 +69,29 @@ local function LoadTargetPanel(sWindow)
     pTargetOfFocus.breadcrumb:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
     pTargetOfFocus.breadcrumb:SetText(L["Focus target"])
 
+    local party = CreateFrame("Frame", nil, p, "GwSettingsPanelPreviewTmpl")
+    party.panelId = "party_general"
+    party.header:SetFont(DAMAGE_TEXT_FONT, 20)
+    party.header:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
+    party.header:SetText(UNITFRAME_LABEL)
+    party.header:SetWidth(party.header:GetStringWidth())
+    party.sub:SetFont(UNIT_NAME_FONT, 12)
+    party.sub:SetTextColor(181 / 255, 160 / 255, 128 / 255)
+    party.sub:SetText(L["Edit the party and raid options to suit your needs."])
+    party.breadcrumb:SetFont(DAMAGE_TEXT_FONT, 12)
+    party.breadcrumb:SetTextColor(GW.TextColors.LIGHT_HEADER.r,GW.TextColors.LIGHT_HEADER.g,GW.TextColors.LIGHT_HEADER.b)
+    party.breadcrumb:SetText(CHAT_MSG_PARTY)
+    party.preview:SetWidth(party.preview:GetFontString():GetStringWidth() + 5)
+    party.preview:SetScript("OnClick", GW.TogglePartyPreview)
+    party.preview:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", 28, 0)
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine(L["Preview Party Frames"], 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    party.preview:SetScript("OnLeave", GameTooltip_Hide)
+    party.preview:SetEnabled(GW.settings.PARTY_FRAMES and not GW.settings.RAID_STYLE_PARTY)
+
     local panels = {
         {name = PET, frame = pPlayerPet},
         {name = TARGET, frame = p_target},
@@ -78,6 +101,52 @@ local function LoadTargetPanel(sWindow)
     if not GW.Classic then
         panels[#panels+1] = {name = FOCUS, frame = p_focus}
         panels[#panels+1] = {name = L["Focus target"], frame = pTargetOfFocus}
+    end
+
+     table.insert(panels, {name = CHAT_MSG_PARTY, frame = party})
+
+    local playerTag = " |cFF888888(" .. PLAYER .. ")|r"
+    local otherTag = " |cFF888888(" .. OTHER .. ")|r"
+    local buffOptions = {"all", "advanced", "none"}
+    local buffOptionNames = {ALL, L["Advanced Filtering"], NONE}
+    local debuffOptions = {"all", "player", "advanced", "none"}
+    local debuffOptionNames = {ALL, PLAYER, L["Advanced Filtering"], NONE}
+
+    local advancedAuraOptions = {"isAuraPlayer", "isAuraRaidPlayerDispellable", "HEADER", "isAuraRaidPlayer", "isAuraCancelablePlayer", "notAuraCancelablePlayer"}
+    local advancedAuraOptionsNames = {PLAYER,  L["Dispellable"], PLAYER, RAID .. playerTag, L["Is Cancelable"] .. playerTag, L["Not Cancelable"] .. playerTag}
+    local advancedAuraOptionsOther = {"HEADER", "isAuraRaid", "isAuraCancelable", "notAuraCancelable"}
+    local advancedAuraOptionsNamesOther = {OTHER, RAID .. otherTag, L["Is Cancelable"] .. otherTag, L["Not Cancelable"] .. otherTag}
+
+    if GW.Retail then
+        tinsert(advancedAuraOptions, "isAuraExternalDefensivePlayer")
+        tinsert(advancedAuraOptionsNames, L["External Defensives"] .. playerTag)
+        tinsert(advancedAuraOptions, "isAuraImportantPlayer")
+        tinsert(advancedAuraOptionsNames, L["Important"] .. playerTag)
+        tinsert(advancedAuraOptions, "isAuraCrowdControlPlayer")
+        tinsert(advancedAuraOptionsNames, L["Crowd Control"] .. playerTag)
+        tinsert(advancedAuraOptions, "isAuraBigDefensivePlayer")
+        tinsert(advancedAuraOptionsNames, L["Big Defensive"] .. playerTag)
+        tinsert(advancedAuraOptions, "isAuraRaidInCombatPlayer")
+        tinsert(advancedAuraOptionsNames, RAID_FRAMES_LABEL)
+
+        tinsert(advancedAuraOptionsOther, "isAuraExternalDefensive")
+        tinsert(advancedAuraOptionsNamesOther, L["External Defensives"] .. otherTag)
+        tinsert(advancedAuraOptionsOther, "isAuraImportant")
+        tinsert(advancedAuraOptionsNamesOther, L["Important"] .. otherTag)
+        tinsert(advancedAuraOptionsOther, "isAuraCrowdControl")
+        tinsert(advancedAuraOptionsNamesOther, L["Crowd Control"] .. otherTag)
+        tinsert(advancedAuraOptionsOther, "isAuraBigDefensive")
+        tinsert(advancedAuraOptionsNamesOther, L["Big Defensive"] .. otherTag)
+        tinsert(advancedAuraOptionsOther, "isAuraRaidInCombat")
+        tinsert(advancedAuraOptionsNamesOther, RAID_FRAMES_LABEL .. otherTag)
+    else
+        tinsert(debuffOptions, 2, "importent")
+        tinsert(debuffOptionNames, 2, L["Dungeon & Raid Debuffs"])
+    end
+
+    for i = 1, #advancedAuraOptionsOther do
+        tinsert(advancedAuraOptions, advancedAuraOptionsOther[i])
+        tinsert(advancedAuraOptionsNames, advancedAuraOptionsNamesOther[i])
     end
 
     --PET
@@ -104,14 +173,9 @@ local function LoadTargetPanel(sWindow)
     p_target:AddOption(RAID_HEALTH_TEXT_PERC, L["Display health as a percentage. Can be used as well as, or instead of Health Value."], {getterSetter = "target_HEALTH_VALUE_TYPE", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Shorten health values"], nil, {getterSetter = "target_SHORT_VALUES", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}, hidden = not GW.Retail})
     p_target:AddOption(CLASS_COLORS, L["Display the class color as the health bar."], {getterSetter = "target_CLASS_COLOR", callback = function() GwTargetUnitFrame:ToggleSettings(); GwTargetTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
-    p_target:AddOption(SHOW_DEBUFFS, L["Display the target's debuffs that you have inflicted."], {getterSetter = "target_DEBUFFS", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
-    p_target:AddOption(L["Dungeon & Raid Debuffs"], L["Show important Dungeon & Raid debuffs"], {getterSetter = "target_BUFFS_FILTER_IMPORTANT", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true, ["target_DEBUFFS"] = true}, hidden = GW.Retail})
-    p_target:AddOption(SHOW_ALL_ENEMY_DEBUFFS_TEXT, L["Display all of the target's debuffs."], {getterSetter = "target_BUFFS_FILTER_ALL", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true, ["target_DEBUFFS"] = true, ["target_BUFFS_FILTER_IMPORTANT"] = false}})
-    p_target:AddOption(SHOW_BUFFS, L["Display the target's buffs."], {getterSetter = "target_BUFFS", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Show Threat"], L["Show Threat"], {getterSetter = "target_THREAT_VALUE_ENABLED", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Show Combo Points on Target"], L["Show combo points on target, below the health bar."], {getterSetter = "target_HOOK_COMBOPOINTS", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Advanced Casting Bar"], L["Enable or disable the advanced casting bar."], {getterSetter = "target_CASTINGBAR_DATA", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
-    p_target:AddOption(BUFFS_ON_TOP, nil, {getterSetter = "target_AURAS_ON_TOP", callback = function() GwTargetUnitFrame:ToggleSettings() end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Invert target frame"], nil, {getterSetter = "target_FRAME_INVERT", callback = function() GW.ShowRlPopup = true end, dependence = {["TARGET_ENABLED"] = true}})
     p_target:AddOption(L["Invert castbar with frame"], nil, {getterSetter = "target_CASTBAR_INVERT", callback = function() GW.ShowRlPopup = true end, dependence = {["TARGET_ENABLED"] = true, ["target_FRAME_INVERT"] = true}})
     p_target:AddOption(L["Display Portrait Damage"], L["Display Portrait Damage on this frame"], {getterSetter = "target_FLOATING_COMBAT_TEXT", callback = function() GwTargetUnitFrame:ToggleTargetFrameCombatFeedback() end, dependence = {["TARGET_ENABLED"] = true}})
@@ -121,6 +185,28 @@ local function LoadTargetPanel(sWindow)
 
 
     p_target:AddOptionDropdown(L["Display additional information (ilvl, pvp level)"], L["Display the average item level, prestige level for friendly units or disable it."], { getterSetter = "target_ILVL", callback = function() GwTargetUnitFrame:ToggleSettings() end, optionsList = {"ITEM_LEVEL", "PVP_LEVEL", "NONE"}, optionNames = {STAT_AVERAGE_ITEM_LEVEL, L["PvP Level"], NONE}, dependence = {["TARGET_ENABLED"] = true}, hidden = GW.Classic})
+
+    p_target:AddGroupHeader(AURAS)
+    p_target:AddOption(BUFFS_ON_TOP, nil, {getterSetter = "target_AURAS_ON_TOP", callback = function() GwTargetUnitFrame:ToggleSettings() end, groupHeaderName = AURAS, dependence = {["TARGET_ENABLED"] = true}})
+    p_target:AddOptionDropdown(L["Buffs"], L["Display the target's buffs."], { getterSetter = "target_Buff_Filter", callback = function() GwTargetUnitFrame:ToggleSettings() end, optionsList = buffOptions, optionNames = buffOptionNames, dependence = {["TARGET_ENABLED"] = true}, groupHeaderName = AURAS})
+    p_target:AddOptionDropdown(L["Buffs: Advanced Filtering"], nil, { getterSetter = "target_Buff_Filter_advanced",
+        callback = function() GwTargetUnitFrame:ToggleSettings() end,
+        optionsList = advancedAuraOptions,
+        optionNames = advancedAuraOptionsNames,
+        dependence = {["TARGET_ENABLED"] = true, ["target_Buff_Filter"] = {"advanced"}},
+        checkbox = true,
+        groupHeaderName = AURAS}
+    )
+
+    p_target:AddOptionDropdown(L["Debuffs"], L["Display the target's debuffs."], { getterSetter = "target_Debuff_Filter", callback = function() GwTargetUnitFrame:ToggleSettings() end, optionsList = debuffOptions, optionNames = debuffOptionNames, dependence = {["TARGET_ENABLED"] = true}, groupHeaderName = AURAS})
+    p_target:AddOptionDropdown(L["Debuffs: Advanced Filtering"], nil, { getterSetter = "target_Debuff_Filter_advanced",
+        callback = function() GwTargetUnitFrame:ToggleSettings() end,
+        optionsList = advancedAuraOptions,
+        optionNames = advancedAuraOptionsNames,
+        dependence = {["TARGET_ENABLED"] = true, ["target_Debuff_Filter"] = {"advanced"}},
+        checkbox = true,
+        groupHeaderName = AURAS}
+    )
 
     p_target:AddGroupHeader(L["Fader"])
     p_target:AddOptionDropdown(L["Fader"], nil, { getterSetter = "targetFrameFader", callback = function() GwTargetUnitFrame:ToggleSettings() end, optionsList = {"casting", "combat", "hover", "dynamicflight", "vehicle", "unittarget", "playertarget"}, optionNames = {L["Casting"], COMBAT, L["Hover"], DYNAMIC_FLIGHT, L["Vehicle"], L["Unit Target"], L["Player Target"]}, dependence = {["TARGET_ENABLED"] = true}, checkbox = true, groupHeaderName = L["Fader"]})
@@ -161,19 +247,35 @@ local function LoadTargetPanel(sWindow)
     p_focus:AddOption(RAID_HEALTH_TEXT_PERC, L["Display health as a percentage. Can be used as well as, or instead of Health Value."], {getterSetter = "focus_HEALTH_VALUE_TYPE", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Shorten health values"], nil, {getterSetter = "focus_SHORT_VALUES", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(CLASS_COLORS, L["Display the class color as the health bar."], {getterSetter = "focus_CLASS_COLOR", callback = function() GwFocusUnitFrame:ToggleSettings(); GwFocusTargetUnitFrame:ToggleUnitFrame() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
-    p_focus:AddOption(SHOW_DEBUFFS, L["Display the target's debuffs that you have inflicted."], {getterSetter = "focus_DEBUFFS", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
-    p_focus:AddOption(L["Dungeon & Raid Debuffs"], L["Show important Dungeon & Raid debuffs"], {getterSetter = "focus_BUFFS_FILTER_IMPORTANT", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true, ["focus_DEBUFFS"] = true}, hidden = GW.Classic or GW.Retail})
-    p_focus:AddOption(SHOW_ALL_ENEMY_DEBUFFS_TEXT, L["Display all of the target's debuffs."], {getterSetter = "focus_BUFFS_FILTER_ALL", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true, ["focus_DEBUFFS"] = true, ["focus_BUFFS_FILTER_IMPORTANT"] = false}, hidden = GW.Classic})
-    p_focus:AddOption(SHOW_BUFFS, L["Display the target's buffs."], {getterSetter = "focus_BUFFS", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
-    p_focus:AddOption(BUFFS_ON_TOP, nil, {getterSetter = "focus_AURAS_ON_TOP", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Invert focus frame"], nil, {getterSetter = "focus_FRAME_INVERT", callback = function() GW.ShowRlPopup = true end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Invert castbar with frame"], nil, {getterSetter = "focus_CASTBAR_INVERT", callback = function() GW.ShowRlPopup = true end, dependence = {["FOCUS_ENABLED"] = true, ["focus_FRAME_INVERT"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Show alternative background texture"], nil, {getterSetter = "focus_FRAME_ALT_BACKGROUND", callback = function() GwFocusUnitFrame:ToggleSettings(); GwFocusTargetUnitFrame:ToggleUnitFrame() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Advanced Casting Bar"], L["Enable or disable the advanced casting bar."], {getterSetter = "focus_CASTINGBAR_DATA", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     p_focus:AddOption(L["Show absorb bar"], nil, {getterSetter = "focus_SHOW_ABSORB_BAR", callback = function() GwFocusUnitFrame:ToggleSettings(); GwFocusTargetUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic or GW.TBC})
     p_focus:AddOption(L["Show Portrait"], L["Display the character portrait on the unit frame."], {getterSetter = "focus_SHOW_PORTRAIT", callback = function() GwFocusUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
-
     p_focus:AddOptionDropdown(L["Display additional information (ilvl, pvp level)"], L["Display the average item level, prestige level for friendly units or disable it."], { getterSetter = "focus_ILVL", callback = function() GwFocusUnitFrame:ToggleSettings() end, optionsList = {"ITEM_LEVEL", "PVP_LEVEL", "NONE"}, optionNames = {STAT_AVERAGE_ITEM_LEVEL, L["PvP Level"], NONE}, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic })
+
+    p_focus:AddGroupHeader(AURAS)
+    p_focus:AddOption(BUFFS_ON_TOP, nil, {getterSetter = "focus_AURAS_ON_TOP", callback = function() GwFocusUnitFrame:ToggleSettings() end, groupHeaderName = AURAS, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
+    p_focus:AddOptionDropdown(L["Buffs"], L["Display the focus's buffs."], { getterSetter = "focus_Buff_Filter", callback = function() GwFocusUnitFrame:ToggleSettings() end, optionsList = buffOptions, optionNames = buffOptionNames, dependence = {["FOCUS_ENABLED"] = true}, groupHeaderName = AURAS})
+    p_focus:AddOptionDropdown(L["Buffs: Advanced Filtering"], nil, { getterSetter = "focus_Buff_Filter_advanced",
+        callback = function() GwFocusUnitFrame:ToggleSettings() end,
+        optionsList = advancedAuraOptions,
+        optionNames = advancedAuraOptionsNames,
+        dependence = {["FOCUS_ENABLED"] = true, ["focus_Buff_Filter"] = {"advanced"}},
+        checkbox = true,
+        groupHeaderName = AURAS}
+    )
+
+    p_focus:AddOptionDropdown(L["Debuffs"], L["Display the focus's debuffs."], { getterSetter = "focus_Debuff_Filter", callback = function() GwFocusUnitFrame:ToggleSettings() end, optionsList = debuffOptions, optionNames = debuffOptionNames, dependence = {["FOCUS_ENABLED"] = true}, groupHeaderName = AURAS})
+    p_focus:AddOptionDropdown(L["Debuffs: Advanced Filtering"], nil, { getterSetter = "focus_Debuff_Filter_advanced",
+        callback = function() GwFocusUnitFrame:ToggleSettings() end,
+        optionsList = advancedAuraOptions,
+        optionNames = advancedAuraOptionsNames,
+        dependence = {["FOCUS_ENABLED"] = true, ["focus_Debuff_Filter"] = {"advanced"}},
+        checkbox = true,
+        groupHeaderName = AURAS}
+    )
 
     p_focus:AddGroupHeader(L["Fader"], {hidden = GW.Classic})
     p_focus:AddOptionDropdown(L["Fader"], nil, { getterSetter = "focusFrameFader", callback = function() GwFocusUnitFrame:ToggleSettings() end, optionsList = {"casting", "combat", "hover", "dynamicflight", "vehicle", "unittarget", "playertarget"}, optionNames = {L["Casting"], COMBAT, L["Hover"], DYNAMIC_FLIGHT, L["Vehicle"], L["Unit Target"], L["Player Target"]}, dependence = {["FOCUS_ENABLED"] = true}, checkbox = true, groupHeaderName = L["Fader"], hidden = GW.Classic})
@@ -188,6 +290,7 @@ local function LoadTargetPanel(sWindow)
     p_focus:AddOptionSlider(GW.NewSign .. L["Healthbar Text X-Offset"], nil, { getterSetter = "focusFrameHealthBarTextOffset.x", callback = function() GwFocusUnitFrame:ToggleSettings() end, min = -100, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true}})
     p_focus:AddOptionSlider(GW.NewSign .. L["Healthbar Text Y-Offset"], nil, { getterSetter = "focusFrameHealthBarTextOffset.y", callback = function() GwFocusUnitFrame:ToggleSettings() end, min = -100, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true}})
     p_focus:AddOptionSlider(GW.NewSign .. L["Powerbar Height"], nil, { getterSetter = "focusFramePowerBarSize.height", callback = function() GwFocusUnitFrame:ToggleSettings() end, min = 1, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true}})
+
     --TARGET OF FOCUS
     pTargetOfFocus:AddOption(MINIMAP_TRACKING_FOCUS, L["Display the focus target frame."], {getterSetter = "focus_TARGET_ENABLED", callback = function() GwFocusTargetUnitFrame:ToggleUnitFrame() end, dependence = {["FOCUS_ENABLED"] = true}, hidden = GW.Classic})
     pTargetOfFocus:AddOption(SHOW_ENEMY_CAST, nil, {getterSetter = "focus_TARGET_SHOW_CASTBAR", callback = function() GwFocusTargetUnitFrame:ToggleSettings() end, dependence = {["FOCUS_ENABLED"] = true, ["focus_TARGET_ENABLED"] = true}, hidden = GW.Classic})
@@ -204,6 +307,18 @@ local function LoadTargetPanel(sWindow)
     pTargetOfFocus:AddOptionSlider(GW.NewSign .. L["Bar Width"], nil, { getterSetter = "focustargetFrameHealthBarSize.width", callback = function() GwFocusTargetUnitFrame:ToggleSettings() end, min = 50, max = 500, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true, ["focus_TARGET_ENABLED"] = true}})
     pTargetOfFocus:AddOptionSlider(GW.NewSign .. L["Healthbar Height"], nil, { getterSetter = "focustargetFrameHealthBarSize.height", callback = function() GwFocusTargetUnitFrame:ToggleSettings() end, min = 5, max = 150, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true, ["focus_TARGET_ENABLED"] = true}})
     pTargetOfFocus:AddOptionSlider(GW.NewSign .. L["Powerbar Height"], nil, { getterSetter = "focustargetFramePowerBarSize.height", callback = function() GwFocusTargetUnitFrame:ToggleSettings() end, min = 1, max = 100, decimalNumbers = 0, step = 1, groupHeaderName = L["Size"], dependence = {["FOCUS_ENABLED"] = true, ["focus_TARGET_ENABLED"] = true}})
+
+    -- Party
+    party:AddOption(L["Show both party frames and party grid"], format(L["If enabled, this will show both the stylised party frames as well as the grid frame. This setting has no effect if '%s' is enabled."], USE_RAID_STYLE_PARTY_FRAMES), {getterSetter = "RAID_STYLE_PARTY_AND_FRAMES", callback = function() GW.UpdateGridSettings("PARTY", true) end, dependence = {["PARTY_FRAMES"] = true, ["RAID_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOption(SHOW_BUFFS, nil, {getterSetter = "PARTY_SHOW_BUFFS", callback = GW.UpdatePartyFrames, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOption(SHOW_DEBUFFS, OPTION_TOOLTIP_SHOW_ALL_ENEMY_DEBUFFS, {getterSetter = "PARTY_SHOW_DEBUFFS", callback = GW.UpdatePartyFrames, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOption(DISPLAY_ONLY_DISPELLABLE_DEBUFFS, L["Only displays the debuffs that you are able to dispell."], {getterSetter = "PARTY_ONLY_DISPELL_DEBUFFS", callback = GW.UpdatePartyFrames, dependence = {["PARTY_FRAMES"] = true, ["PARTY_SHOW_DEBUFFS"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOption(L["Dungeon & Raid Debuffs"], L["Show important Dungeon & Raid debuffs"], {getterSetter = "PARTY_SHOW_IMPORTEND_RAID_INSTANCE_DEBUFF", callback = GW.UpdatePartyFrames, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}, hidden = GW.Retail})
+    party:AddOption(L["Player frame in group"], L["Show your player frame as part of the group"], {getterSetter = "PARTY_PLAYER_FRAME", callback = function() GW.UpdatePlayerInPartySetting() end, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOption(COMPACT_UNIT_FRAME_PROFILE_DISPLAYPETS, nil, {getterSetter = "PARTY_SHOW_PETS", callback = function() GW.UpdatePartyPetVisibility() end, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}});
+    party:AddOption(L["Shorten health values"], nil, {getterSetter = "PARTY_UNIT_HEALTH_SHORT_VALUES", callback = GW.UpdatePartyFrames, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}});
+    party:AddOptionDropdown(COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT, nil, { getterSetter = "PARTY_UNIT_HEALTH", callback = GW.UpdatePartyFrames, optionsList = {"NONE", "PREC", "HEALTH", "LOSTHEALTH"}, optionNames = {COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_NONE, COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_PERC, COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_HEALTH, COMPACT_UNIT_FRAME_PROFILE_HEALTHTEXT_LOSTHEALTH}, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
+    party:AddOptionSlider(L["Aura size"], nil, { getterSetter = "PARTY_SHOW_AURA_ICON_SIZE", callback = GW.UpdatePartyFrames, min = 10, max = 40, decimalNumbers = 0, step = 2, dependence = {["PARTY_FRAMES"] = true, ["RAID_STYLE_PARTY"] = false}})
 
     sWindow:AddSettingsPanel(p, UNITFRAME_LABEL, L["Modify the player pet frame settings."], panels)
 end

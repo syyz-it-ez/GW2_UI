@@ -40,28 +40,41 @@ local function PostUpdateButton(self, button, unit, data, position)
     local parent = self:GetParent()
 
     if GW.Retail then
-        if button.isHarmfulAura then
-            local color = C_UnitAuras.GetAuraDispelTypeColor("player", self.auraInstanceID, button.dispelColorCurve)
+        if data.isHarmfulAura then
+            local color = C_UnitAuras.GetAuraDispelTypeColor(unit, data.auraInstanceID, self.dispelColorCurve)
+            if not color then
+                color = GW.FallbackColor
+            end
             button.background:SetVertexColor(color:GetRGBA())
             button.background:Show()
             button.backdrop:Hide()
+
+            local isDispellable = data.isAuraRaidPlayerDispellable
+            local isImportant = data.isAuraImportant
+            local size = 16
+            if isImportant and isDispellable then
+                size = size * GW.GetDebuffScaleBasedOnPrio()
+            elseif isImportant then
+                size = size * tonumber(parent.raidDebuffScale)
+            elseif isDispellable then
+                size = size * tonumber(parent.raidDispelDebuffScale)
+            end
+            button:SetSize(size, size)
         else
             button.background:Hide()
             button.backdrop:Show()
         end
     else
-        if button.isHarmful then
+        if data.isHarmfulAura then
             local size = 16
             local isDispellable = data.dispelName and GW.Libs.Dispel:IsDispellableByMe(data.dispelName) or false
             local isImportant = (parent.raidShowImportantInstanceDebuffs and GW.ImportantRaidDebuff[data.spellId]) or false
-            if isImportant or isDispellable then
-                if isImportant and isDispellable then
-                    size = size * GW.GetDebuffScaleBasedOnPrio() -- not on retail (removed)
-                elseif isImportant then
-                    size = size * tonumber(parent.raidDebuffScale)
-                elseif isDispellable then
-                    size = size * tonumber(parent.raidDispelDebuffScale)
-                end
+            if isImportant and isDispellable then
+                size = size * GW.GetDebuffScaleBasedOnPrio()
+            elseif isImportant then
+                size = size * tonumber(parent.raidDebuffScale)
+            elseif isDispellable then
+                size = size * tonumber(parent.raidDispelDebuffScale)
             end
 
             if data.dispelName and DebuffColors[data.dispelName] then
@@ -94,26 +107,58 @@ local function PostUpdateButton(self, button, unit, data, position)
     end
 end
 
+local function CheckFilter(data, filters)
+    if not filters or filters.noFilter then return true end
+
+    local player, cancel = data.isAuraPlayer, data.isAuraCancelable
+    local other, perma = not player, not cancel
+
+    if GW.Retail then
+        return (filters.isAuraPlayer and player)
+            or (filters.isAuraRaidPlayerDispellable and data.isAuraRaidPlayerDispellable)
+            or (filters.isAuraImportant and data.isAuraImportant and other)
+            or (filters.isAuraImportantPlayer and data.isAuraImportant and player)
+            or (filters.isAuraCrowdControl and data.isAuraCrowdControl and other)
+            or (filters.isAuraCrowdControlPlayer and data.isAuraCrowdControl and player)
+            or (filters.isAuraBigDefensive and data.isAuraBigDefensive and other)
+            or (filters.isAuraBigDefensivePlayer and data.isAuraBigDefensive and player)
+            or (filters.isAuraRaidInCombat and data.isAuraRaidInCombat and other)
+            or (filters.isAuraRaidInCombatPlayer and data.isAuraRaidInCombat and player)
+            or (filters.isAuraExternalDefensive and data.isAuraExternalDefensive and other)
+            or (filters.isAuraExternalDefensivePlayer and data.isAuraExternalDefensive and player)
+            or (filters.isAuraCancelable and cancel and other)
+            or (filters.isAuraCancelablePlayer and cancel and player)
+            or (filters.notAuraCancelable and perma and other)
+            or (filters.notAuraCancelablePlayer and perma and player)
+            or (filters.isAuraRaid and data.isAuraRaid and other)
+            or (filters.isAuraRaidPlayer and data.isAuraRaid and player)
+    else
+        return (filters.isAuraPlayer and player)
+            or (filters.isAuraCancelable and cancel and other)
+            or (filters.isAuraCancelablePlayer and cancel and player)
+            or (filters.notAuraCancelable and perma and other)
+            or (filters.notAuraCancelablePlayer and perma and player)
+            or (filters.isAuraRaid and data.isAuraRaid and other)
+            or (filters.isAuraRaidPlayer and data.isAuraRaid and player)
+    end
+end
+
 local function FilterAura(self, unit, data)
     local parent = self:GetParent()
     local shouldDisplay = false
     local isImportant, isDispellable
 
     if GW.Retail then
-        if data.isHarmfulAura then
-            if not parent.showDebuffs then
-                return false
-            else
-                shouldDisplay = (parent.showPlayerDebuffs and data.isPlayerAura) or (parent.showRaidDebuffs and data.isRaidAura)
-            end
-        else
-            shouldDisplay = (parent.showPlayerBuffs and data.isPlayerAura) or (parent.showRaidBuffs and data.isRaidAura) or (parent.showDefensiveBuffs and data.isDefensiveAura)
+        local isDebuff = data.isHarmfulAura
+        local show = isDebuff and parent.showDebuffs or parent.showBuffs
+        if not show then
+            return false
         end
-
-        return shouldDisplay
+        local filters = isDebuff and parent.debuffFilters or parent.buffFilters
+        return CheckFilter(data, filters)
     end
 
-    if data.isHelpful then
+    if data.isHelpfulAura then
         local isPlayerBuff = data.sourceUnit == "player" or data.sourceUnit == "pet" or data.sourceUnit == "vehicle"
         -- missing buffs: needs a custom plugin
 
@@ -121,7 +166,7 @@ local function FilterAura(self, unit, data)
         if hasCustom then
             shouldDisplay = showForMySpec or (alwaysShowMine and (data.sourceUnit == "player" or data.sourceUnit == "pet" or data.sourceUnit == "vehicle"))
         else
-            shouldDisplay = (data.sourceUnit == "player" or data.sourceUnit == "pet" or data.sourceUnit == "vehicle") and (data.canApplyAura or data.isPlayerAura) and not SpellIsSelfBuff(data.spellId)
+            shouldDisplay = (data.sourceUnit == "player" or data.sourceUnit == "pet" or data.sourceUnit == "vehicle") and (data.canApplyAura or data.isAuraPlayer) and not SpellIsSelfBuff(data.spellId)
         end
 
         if shouldDisplay and parent.ignoredAuras then
@@ -335,6 +380,37 @@ local function Construct_Auras(frame)
 end
 GW.Construct_Auras = Construct_Auras
 
+local function UpdateFilters(frame)
+    for i = 1, 2 do
+        local db = i == 1 and frame.buffFilters or frame.debuffFilters
+        local isPlayer = db.isAuraPlayer
+        local isRaidPlayerDispellable = db.isAuraRaidPlayerDispellable
+        local isImportant = db.isAuraImportant
+        local isImportantPlayer = db.isAuraImportantPlayer
+        local isCrowdControl = db.isAuraCrowdControl
+        local isCrowdControlPlayer = db.isAuraCrowdControlPlayer
+        local isBigDefensive = db.isAuraBigDefensive
+        local isBigDefensivePlayer = db.isAuraBigDefensivePlayer
+        local isRaidInCombat = db.isAuraRaidInCombat
+        local isRaidInCombatPlayer = db.isAuraRaidInCombatPlayer
+        local isExternalDefensive = db.isAuraExternalDefensive
+        local isExternalDefensivePlayer = db.isAuraExternalDefensivePlayer
+        local isCancelable = db and db.isAuraCancelable
+        local isCancelablePlayer = db and db.isAuraCancelablePlayer
+        local notCancelable = db and db.notAuraCancelable
+        local notCancelablePlayer = db and db.notAuraCancelablePlayer
+        local isRaid = db and db.isAuraRaid
+        local isRaidPlayer = db and db.isAuraRaidPlayer
+
+        local shared = isPlayer or isCancelable or isCancelablePlayer or notCancelable or notCancelablePlayer or isRaid or isRaidPlayer
+        if GW.Retail then
+            db.noFilter = not (shared or isRaidPlayerDispellable or isImportant or isImportantPlayer or isCrowdControl or isCrowdControlPlayer or isBigDefensive or isBigDefensivePlayer or isRaidInCombat or isRaidInCombatPlayer or isExternalDefensive or isExternalDefensivePlayer)
+        else
+            db.noFilter = not shared
+        end
+    end
+end
+
 local function UpdateAurasSettings(frame)
     frame.Auras:ClearAllPoints()
     frame.Auras:SetPoint('TOPLEFT', frame, 'TOPLEFT')
@@ -349,11 +425,7 @@ local function UpdateAurasSettings(frame)
 
     -- filtering only over filter options
     if GW.Retail then
-        local debuffFilterString = "HARMFUL"
-        if frame.showOnlyDispelDebuffs then
-            debuffFilterString = debuffFilterString .. "|RAID"
-        end
-        frame.Auras.debuffFilter = debuffFilterString
+        UpdateFilters(frame)
     end
 
     frame.Auras:ForceUpdate()

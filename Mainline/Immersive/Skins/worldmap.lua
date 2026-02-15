@@ -1,5 +1,4 @@
 local _, GW = ...
-local AFP = GW.AddProfiling
 
 local function SkinHeaders(header)
     if header.IsSkinned then
@@ -17,7 +16,7 @@ local function SkinHeaders(header)
 
     header.IsSkinned = true
 end
-AFP("SkinHeaders", SkinHeaders)
+
 
 local sessionCommandToButtonAtlas = {
     [_G.Enum.QuestSessionCommand.Start] = "QuestSharing-DialogIcon",
@@ -32,7 +31,7 @@ local function UpdateExecuteCommandAtlases(frame, command)
         frame.ExecuteSessionCommand.normalIcon:SetAtlas(atlas)
     end
 end
-AFP("UpdateExecuteCommandAtlases", UpdateExecuteCommandAtlases)
+
 
 local function hook_NotifyDialogShow(_, dialog)
     if not dialog.isSkinned then
@@ -51,7 +50,7 @@ local function hook_NotifyDialogShow(_, dialog)
         dialog.isSkinned = true
     end
 end
-AFP("hook_NotifyDialogShow", hook_NotifyDialogShow)
+
 
 local function updateCollapse(self, collapsed)
     if collapsed then
@@ -117,17 +116,17 @@ local function hook_QuestLogQuests_Update()
         end
     end
 end
-AFP("hook_QuestLogQuests_Update", hook_QuestLogQuests_Update)
+
 
 local function mover_OnDragStart(self)
     self:GetParent():StartMoving()
 end
-AFP("mover_OnDragStart", mover_OnDragStart)
+
 
 local function mover_OnDragStop(self)
     self:GetParent():StopMovingOrSizing()
 end
-AFP("mover_OnDragStop", mover_OnDragStop)
+
 
 local EventsFrameHookedElements = {}
 local function EventsFrameHighlightTexture(element)
@@ -206,7 +205,12 @@ local function worldMapSkin()
     WorldMapFrame.NavBar:GwStripTextures()
     WorldMapFrame.NavBar.overlay:GwStripTextures()
     WorldMapFrame.NavBar:SetPoint("TOPLEFT", 1, -47)
-    WorldMapFrame.NavBar.SetPoint = GW.NoOp
+    hooksecurefunc(WorldMapFrame.NavBar, "SetPoint", function(self)
+        local point, relTo, _, x, y = self:GetPoint()
+        if point ~= "TOPLEFT" or x ~= 1 or y ~= -47 then
+            self:SetPoint("TOPLEFT", relTo, "TOPLEFT", 1, -47)
+        end
+    end)
 
     local navBarTex = WorldMapFrame.NavBar:CreateTexture(nil, "BACKGROUND", nil, 0)
     navBarTex:SetPoint("TOPLEFT", WorldMapFrame.NavBar, "TOPLEFT", 0,20)
@@ -242,6 +246,8 @@ local function worldMapSkin()
     WorldMapFrame.BorderFrame.CloseButton:SetPoint("TOPRIGHT",-10,-2)
 
     WorldMapFrame.BorderFrame.MaximizeMinimizeFrame:GwHandleMaxMinFrame()
+
+    
 
     local QuestMapFrame = _G.QuestMapFrame
     QuestMapFrame.VerticalSeparator:Hide()
@@ -441,7 +447,6 @@ local function worldMapSkin()
 
     ScrollUtil.AddAcquiredFrameCallback(QuestMapFrame.EventsFrame.ScrollBox, EventsFrameCallback, QuestMapFrame.EventsFrame, true)
 end
-AFP("worldMapSkin", worldMapSkin)
 
 local function LoadWorldMapSkin()
     if not GW.settings.WORLDMAP_SKIN_ENABLED then return end
