@@ -65,6 +65,9 @@ end
 GW.DeletePrivateLayoutByLayoutName = DeletePrivateLayoutByLayoutName
 
 local function SetOverrideIncompatibleAddons(setting, value)
+    if not GW.settings.IncompatibleAddons[setting] then
+        GW.settings.IncompatibleAddons[setting] = { Override = false, Addons = {} }
+    end
     GW.settings.IncompatibleAddons[setting].Override = value
     GW.Notice(GW.L["Incompatible Addons behavior Overridden. Needs a reload to take effect."])
 end
