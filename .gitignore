@@ -50,3 +50,16 @@ Temporary Items
 # =========================
 
 .vscode
+
+# =========================
+# Custom / Fork-specific
+# =========================
+
+# ALAO backup files
+*.alao-bak
+
+# Backup archives
+*.zip
+
+# Agent workflows
+.agents/
