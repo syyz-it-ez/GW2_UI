@@ -2091,6 +2091,7 @@ local function selectType(f)
     end
 
     f.shouldShowBar = showBar
+    f.shouldShow = showBar
 
     UpdateVisibility(f, InCombatLockdown())
 end
